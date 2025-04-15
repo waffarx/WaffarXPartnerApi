@@ -12,6 +12,8 @@ public static class AppSettings
     {
         public static string MongoConnection { get;  set; }
         public static string SQlConnection { get;  set; }
+        public static string MongoDatabaseName { get;  set; }
+        public static string WaffarXConnection { get;  set; }
     }
 
     public static class Logging
@@ -78,6 +80,8 @@ public static class AppSettings
         // Connection Strings
         ConnectionStrings.SQlConnection = configuration["ConnectionStrings:SQlConnection"];
         ConnectionStrings.MongoConnection = configuration["ConnectionStrings:MongoConnection"];
+        ConnectionStrings.WaffarXConnection = configuration["ConnectionStrings:WaffarXConnection"];
+        ConnectionStrings.MongoDatabaseName = configuration["ConnectionStrings:MongoDatabaseName"];
         //ConnectionStrings.Redis = configuration["ConnectionStrings:Redis"];
 
         // Logging

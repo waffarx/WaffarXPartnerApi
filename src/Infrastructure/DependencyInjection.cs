@@ -1,7 +1,4 @@
-﻿using WaffarXPartnerApi.Application.Common.Interfaces;
-using WaffarXPartnerApi.Domain.Constants;
-using WaffarXPartnerApi.Infrastructure.Data;
-using Microsoft.AspNetCore.Identity;
+﻿using WaffarXPartnerApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
@@ -17,8 +14,6 @@ public static class DependencyInjection
 
         Guard.Against.Null(connectionString, message: "Connection string 'SQlConnection' not found.");
 
-        //services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
-        //services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
 
         services.AddDbContext<WaffarXPartnerDbContext>((sp, options) =>
         {
@@ -26,14 +21,27 @@ public static class DependencyInjection
 
             options.UseSqlServer(connectionString);
         });
+        var waffarxconnectionString = configuration.GetConnectionString("WaffarXConnection").Replace("{con}", Environment.GetEnvironmentVariable("condb"));
+
+        Guard.Against.Null(connectionString, message: "Connection string 'WaffarXConnection' not found.");
+        services.AddDbContext<WaffarXContext>((sp, options) =>
+        {
+            options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
+
+            options.UseSqlServer(connectionString);
+        });
         services.AddMongoDb(configuration);
 
-       // services.AddScoped<ApplicationDbContextInitialiser>();
+        services.AddSingleton(TimeProvider.System);
 
-        services.AddAuthentication()
-            .AddBearerToken(IdentityConstants.BearerScheme);
+        //services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
+        //services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
+        // services.AddScoped<ApplicationDbContextInitialiser>();
 
-        services.AddAuthorizationBuilder();
+        //services.AddAuthentication()
+        //    .AddBearerToken(IdentityConstants.BearerScheme);
+
+        //services.AddAuthorizationBuilder();
 
         //services
         //    //.AddIdentityCore<ApplicationUser>()
@@ -41,10 +49,9 @@ public static class DependencyInjection
         //    .AddEntityFrameworkStores<WaffarXPartnerDbContext>()
         //    .AddApiEndpoints();
 
-        services.AddSingleton(TimeProvider.System);
 
-        services.AddAuthorization(options =>
-            options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        //services.AddAuthorization(options =>
+        //    options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
 
         return services;
     }

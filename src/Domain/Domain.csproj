@@ -17,8 +17,4 @@
     <PackageReference Include="MongoDB.Driver.Core" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="Entities\SqlEntities\WaffarXEntities\" />
-  </ItemGroup>
-
 </Project>
