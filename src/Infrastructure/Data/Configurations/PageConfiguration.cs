@@ -7,7 +7,6 @@ public class PageConfiguration : IEntityTypeConfiguration<Page>
 {
     public void Configure(EntityTypeBuilder<Page> builder)
     {
-        builder.ToTable("Pages");
 
         builder.HasKey(p => p.Id);
 
@@ -29,6 +28,9 @@ public class PageConfiguration : IEntityTypeConfiguration<Page>
 
         builder.Property(p => p.CreatedAt)
             .HasDefaultValueSql("GETDATE()");
+
+        builder.Property(p => p.ClientApiId)
+               .IsRequired();
 
         builder.HasMany(p => p.PageActions)
                .WithOne(pa => pa.Page)

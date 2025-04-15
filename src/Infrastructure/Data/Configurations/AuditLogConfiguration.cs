@@ -36,14 +36,17 @@ public class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
         // Explicitly configure EntityId which was commented in the entity
         builder.Property(al => al.EntityId);
 
+        builder.Property(al => al.ClientApiId)
+            .IsRequired();
+
         builder.HasIndex(al => al.UserId)
             .HasDatabaseName("IX_AuditLogs_UserId");
 
         builder.HasIndex(al => al.CreatedAt)
             .HasDatabaseName("IX_AuditLogs_Timestamp");
 
-        builder.HasIndex(al => new { al.EntityType, al.EntityId })
-            .HasDatabaseName("IX_AuditLogs_EntityType_EntityId");
+        builder.HasIndex(al => new { al.EntityType })
+            .HasDatabaseName("IX_AuditLogs_EntityId");
 
         builder.HasOne(al => al.User)
             .WithMany(u => u.AuditLogs)

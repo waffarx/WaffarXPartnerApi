@@ -7,8 +7,6 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
 {
     public void Configure(EntityTypeBuilder<Team> builder)
     {
-        builder.ToTable("Teams");
-
         // Changed from TeamId to Id
         builder.HasKey(t => t.Id);
 
@@ -31,6 +29,8 @@ public class TeamConfiguration : IEntityTypeConfiguration<Team>
         builder.Property(t => t.UpdatedAt)
             .HasDefaultValueSql("GETDATE()");
 
+        builder.Property(p => p.ClientApiId)
+            .IsRequired();
         // Configure relationships
         builder.HasMany(t => t.TeamPageActions)
             .WithOne(tpa => tpa.Team)

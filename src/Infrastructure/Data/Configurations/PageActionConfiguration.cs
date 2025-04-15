@@ -39,8 +39,5 @@ public class PageActionConfiguration : IEntityTypeConfiguration<PageAction>
             .WithMany(p => p.PageActions)
             .HasForeignKey(pa => pa.PageId);
 
-        builder.HasIndex(pa => new { pa.PageId, pa.ActionName })
-            .HasDatabaseName("UQ_PageActions_PageId_ActionName")
-            .IsUnique();
     }
 }
