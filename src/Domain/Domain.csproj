@@ -1,0 +1,24 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>WaffarXPartnerApi.Domain</RootNamespace>
+    <AssemblyName>WaffarXPartnerApi.Domain</AssemblyName>
+    <Nullable>disable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="Common\BaseEntity.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Abstractions" />
+    <PackageReference Include="MongoDB.Bson" />
+    <PackageReference Include="MongoDB.Driver" />
+    <PackageReference Include="MongoDB.Driver.Core" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Entities\SqlEntities\WaffarXEntities\" />
+  </ItemGroup>
+
+</Project>
