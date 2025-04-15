@@ -37,6 +37,7 @@
     <PackageVersion Include="Microsoft.Extensions.Configuration.EnvironmentVariables" Version="8.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore" Version="8.0.8" />
     <PackageVersion Include="Microsoft.Extensions.Localization" Version="8.0.8" />
+    <PackageVersion Include="Microsoft.IdentityModel.Tokens" Version="8.8.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.0" />
     <PackageVersion Include="MongoDB.Bson" Version="3.3.0" />
     <PackageVersion Include="MongoDB.Driver" Version="3.3.0" />
@@ -56,6 +57,7 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="6.0.0" />
     <PackageVersion Include="StackExchange.Redis" Version="2.8.16" />
     <PackageVersion Include="StackExchange.Redis.Extensions.Core" Version="10.2.0" />
+    <PackageVersion Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
     <PackageVersion Include="System.Runtime.Caching" Version="8.0.1" />
     <PackageVersion Include="System.Text.Encodings.Web" Version="6.0.0" />
     <PackageVersion Include="Testcontainers.MsSql" Version="3.9.0" />

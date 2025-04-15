@@ -19,6 +19,7 @@ public class WaffarXPartnerDbContext : DbContext
     public DbSet<TeamPageAction> TeamPageActions { get; set; }
     public DbSet<UserTeam> UserTeams { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
