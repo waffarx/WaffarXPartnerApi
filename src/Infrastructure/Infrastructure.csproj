@@ -3,6 +3,7 @@
   <PropertyGroup>
     <RootNamespace>WaffarXPartnerApi.Infrastructure</RootNamespace>
     <AssemblyName>WaffarXPartnerApi.Infrastructure</AssemblyName>
+    <Nullable>disable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

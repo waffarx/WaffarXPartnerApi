@@ -1,0 +1,6 @@
+﻿using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+namespace WaffarXPartnerApi.Application.ServiceInterface;
+public interface IValuService
+{
+    Task<Guid> SearchProduct(ProductSearchDto productSearch);
+}

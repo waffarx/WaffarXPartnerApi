@@ -36,7 +36,9 @@ public partial class WaffarXContext : DbContext
 
             entity.Property(e => e.ClientId).HasColumnName("ClientID");
             entity.Property(e => e.ClientName).HasMaxLength(50);
-            entity.Property(e => e.Clientkey).HasMaxLength(450);
+            entity.Property(e => e.Clientkey)
+                .IsRequired()
+                .HasMaxLength(450);
             entity.Property(e => e.Email).HasMaxLength(50);
             entity.Property(e => e.ExpiresIn).HasColumnName("expires_in");
             entity.Property(e => e.FirstName)

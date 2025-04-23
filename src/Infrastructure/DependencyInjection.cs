@@ -2,6 +2,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository;
+using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceImplementation;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -23,35 +27,26 @@ public static class DependencyInjection
         });
         var waffarxconnectionString = configuration.GetConnectionString("WaffarXConnection").Replace("{con}", Environment.GetEnvironmentVariable("condb"));
 
-        Guard.Against.Null(connectionString, message: "Connection string 'WaffarXConnection' not found.");
+        Guard.Against.Null(waffarxconnectionString, message: "Connection string 'WaffarXConnection' not found.");
         services.AddDbContext<WaffarXContext>((sp, options) =>
         {
             options.AddInterceptors(sp.GetServices<ISaveChangesInterceptor>());
 
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(waffarxconnectionString);
         });
         services.AddMongoDb(configuration);
 
         services.AddSingleton(TimeProvider.System);
-
-        //services.AddScoped<ISaveChangesInterceptor, AuditableEntityInterceptor>();
-        //services.AddScoped<ISaveChangesInterceptor, DispatchDomainEventsInterceptor>();
-        // services.AddScoped<ApplicationDbContextInitialiser>();
-
-        //services.AddAuthentication()
-        //    .AddBearerToken(IdentityConstants.BearerScheme);
-
-        //services.AddAuthorizationBuilder();
-
-        //services
-        //    //.AddIdentityCore<ApplicationUser>()
-        //    //.AddRoles<IdentityRole>()
-        //    .AddEntityFrameworkStores<WaffarXPartnerDbContext>()
-        //    .AddApiEndpoints();
+        #region Repositories
+        services.AddScoped<IUserRepository, UserRepository>();
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IApiClientRepository, ApiClientRepository>();
+        #endregion
 
 
-        //services.AddAuthorization(options =>
-        //    options.AddPolicy(Policies.CanPurge, policy => policy.RequireRole(Roles.Administrator)));
+        //services.AddScoped<IClientService, ClientService>();
+        services.AddScoped<IValuService, ValuService>();
+
 
         return services;
     }

@@ -1,25 +1,60 @@
+using PartnerWebApi.Infrastructure;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
+using WaffarXPartnerApi.Application.ServiceImplementation;
+using WaffarXPartnerApi.Application.ServiceInterface;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
 
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddApplicationServices();
+builder.Services.AddInfrastructureServices(builder.Configuration);
+builder.Services.AddWebServices();
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
+builder.Services.AddControllers();
+
+builder.Services.AddScoped<IClientService, ClientService>();
 
 var app = builder.Build();
+AppSettings.Initialize(builder.Configuration);
 
+app.MapGet("/web", () => Results.Redirect("/swagger"));
+app.UseOpenApi();
+app.UseSwaggerUi(settings =>
+{
+    settings.Path = "/swagger";
+
+    settings.DocumentPath = "/swagger/v1/swagger.json";
+});
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-   // app.UseSwagger();
-    //app.UseSwaggerUI();
+    //await app.InitialiseDatabaseAsync();
+}
+else
+{
+    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseHsts();
 }
 
+app.UseHealthChecks("/health");
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
-app.UseAuthorization();
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller}/{action=Index}/{id?}");
 
-app.MapControllers();
+app.MapRazorPages();
+
+app.MapFallbackToFile("index.html");
+
+app.UseExceptionHandler(options => { });
+
+app.MapEndpoints();
+app.UseMiddleware<AuthenticationMiddleware>();
 
 app.Run();
+
+public partial class Program { }
