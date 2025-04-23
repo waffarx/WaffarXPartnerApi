@@ -1,4 +1,5 @@
-﻿using WaffarXPartnerApi.Application.ServiceInterface;
+﻿using WaffarXPartnerApi.Application.Helper;
+using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 
@@ -124,7 +125,7 @@ public class AuthService : IAuthService
         await _refreshTokenRepository.UpdateAsync(storedRefreshToken);
 
         // Get user
-        var user = await _userRepository.GetByIdAsync(storedRefreshToken.UserId, _userRepository.GetUserToGet());
+        var user = await _userRepository.GetByIdAsync(storedRefreshToken.UserId);
 
         if (user == null)
         {
@@ -180,7 +181,7 @@ public class AuthService : IAuthService
                 return new TokenValidationResult { Success = false, Message = "Invalid user ID in token" };
             }
 
-            var user = await _userRepository.GetByIdAsync(userGuid, _userRepository.GetUserToGet());
+            var user = await _userRepository.GetByIdAsync(userGuid);
 
             if (user == null)
             {
