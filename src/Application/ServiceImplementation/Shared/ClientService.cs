@@ -2,7 +2,7 @@
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 
-namespace WaffarXPartnerApi.Application.ServiceImplementation;
+namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 public class ClientService : IClientService
 {
     private readonly IApiClientRepository _apiClientRepository;
