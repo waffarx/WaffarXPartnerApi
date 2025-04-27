@@ -1,14 +1,16 @@
-﻿using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+﻿using Microsoft.AspNetCore.Http;
+using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
+using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
-public class ValuService : IValuService
+public class ValuService : BaseService, IValuService
 {
     private readonly IHttpService _httpService;
 
-    public ValuService(IHttpService httpService)
+    public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor):base(httpContextAccessor)
     {
         _httpService = httpService;
     }
@@ -19,7 +21,8 @@ public class ValuService : IValuService
         {
             ["Content-Type"] = "application/json"
         };
-
+        product.ClientApiId = ClientApiId;
+        product.IsEnglish = IsEnglish;
         // Make the POST request using our generic HTTP service
         var searchResults = await _httpService.PostAsync<GenericResponse<List<ProductSearchResponseModel>>>(
             AppSettings.ExternalApis.ValuUrl + "/GetFeaturedProducts",
