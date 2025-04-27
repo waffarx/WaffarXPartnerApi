@@ -77,6 +77,7 @@ public static class AppSettings
     public static class ExternalApis
     {
         public static string ValuUrl { get; set; }
+        public static string SharedApiUrl { get; set; }
     }
     public static void Initialize(IConfiguration configuration)
     {
@@ -95,6 +96,7 @@ public static class AppSettings
         // Allowed Hosts
         AllowedHosts = configuration["AllowedHosts"];
         ExternalApis.ValuUrl = configuration["ExternalApis:ValuUrl"];
+        ExternalApis.SharedApiUrl = configuration["ExternalApis:SharedApiUrl"];
 
         //// JWT Settings
         //JwtSettings.SecretKey = configuration["JwtSettings:SecretKey"];

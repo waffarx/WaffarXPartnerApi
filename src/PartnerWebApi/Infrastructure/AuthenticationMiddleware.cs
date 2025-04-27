@@ -182,8 +182,16 @@ public class ApiAuthenticator
             var serializedData = payload.Trim().ToLower();
             byte[] hashedPayload = SigningHelper.Sha256(serializedData);
             string hashedPayloadString = SigningHelper.ToHex(hashedPayload);
+            string stringToSign = "";
 
-            string stringToSign = SigningHelper.BuildStringToSign(client.Clientkey, datetime, hashedPayloadString, method.ToLower(), actionName.ToLower());
+            if (string.IsNullOrEmpty(hashedPayloadString))
+            {
+                stringToSign = SigningHelper.BuildStringToSignWithNoPayload(client.Clientkey, datetime, method.ToLower(), actionName.ToLower());
+            }
+            else
+            {
+               stringToSign = SigningHelper.BuildStringToSign(client.Clientkey, datetime, hashedPayloadString, method.ToLower(), actionName.ToLower());
+            }
 
             byte[] secretKey = Encoding.UTF8.GetBytes(client.Secret ?? "");
             byte[] payloadHmac = await Task.Run(() => SigningHelper.HmacSha256(stringToSign, secretKey));
@@ -233,7 +241,16 @@ public static class SigningHelper
         return String.Format(
                 format, Method, ActionName, ClientKey, dateString, hashedpayload);
     }
+    public static string BuildStringToSignWithNoPayload(string ClientKey, DateTime date, string Method, string ActionName)
+    {
 
+
+        var format = "{0}-{1}-{2}-{3}";
+        var dateString = date.ToString(ISO8601BasicDateTimeFormat);
+
+        return String.Format(
+                format, Method, ActionName, ClientKey, dateString);
+    }
     public static string ToHex(byte[] data)
     {
         var builder = new StringBuilder();
