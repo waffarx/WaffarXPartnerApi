@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using PartnerWebApi.Infrastructure;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation;
@@ -22,7 +23,10 @@ builder.Services.AddHttpClient<IHttpService, HttpService>(client =>
     client.DefaultRequestHeaders.Add("Accept", "application/json");
 });
 builder.Services.AddHttpContextAccessor();
-
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.AllowSynchronousIO = true;
+});
 var app = builder.Build();
 AppSettings.Initialize(builder.Configuration);
 

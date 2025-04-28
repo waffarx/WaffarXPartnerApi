@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PartnerWebApi.Infrastructure;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
@@ -16,7 +17,9 @@ public class ValuController : ControllerBase
     }
 
     [HttpPost("search")]
-    public async Task<IActionResult> Search(ProductSearchDto query)
+    [CompressResponse]  // Apply compression only to this endpoint
+
+    public async Task<IActionResult> Search(ProductSearchRequestDto query)
     {
         var result = await _valuService.SearchProduct(query);
         return Ok(result);
@@ -38,6 +41,12 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> GetStoreDetails(GetStoreDto query)
     {
         var result = await _valuService.GetStoreDetails(query);
+        return Ok(result);
+    }
+    [HttpGet("GetStores")]
+    public async Task<IActionResult> GetStores()
+    {
+        var result = await _valuService.GetStores();
         return Ok(result);
     }
 }

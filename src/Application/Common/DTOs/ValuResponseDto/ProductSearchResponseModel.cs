@@ -1,7 +1,6 @@
 ﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class ProductSearchResponseModel
 {
-    public string BsonId { get; set; }
     public string ASIN { get; set; }
     public string Id { get; set; }
     public int AdvertiserID { get; set; }
@@ -17,7 +16,7 @@ public class ProductSearchResponseModel
     public List<string> Categories { get; set; }
     public int ReviewsCount { get; set; }
     public string Description { get; set; }
-    public FeaturesDTO Features { get; set; }
+    public FeatureDTO Features { get; set; }
     public string Brand { get; set; }
     public string Currency { get; set; }
     public string SKU { get; set; }
@@ -49,13 +48,8 @@ public class ProductSearchResponseModel
     public List<PriceVariantDTO> price_variants { get; set; }
     public Object options { get; set; }
     public List<OffersDto> Offers { get; set; }
+    public StoreDto Store { get; set; }
 
-}
-public class FeaturesDTO
-{
-    public List<string> DisplayValues { get; set; }
-    public string Label { get; set; }
-    public string Locale { get; set; }
 }
 public class OffersDto
 {
