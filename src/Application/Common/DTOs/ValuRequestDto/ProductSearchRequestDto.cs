@@ -1,9 +1,9 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Shared;
 
 namespace WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
-public class ProductSearchDto : SearchBaseQueryDto
+public class ProductSearchRequestDto : SearchBaseQueryDto
 {
-    public Guid ApiClientId { get; set; }
+    public Guid? ClientApiId { get; set; }
     public FilterDto Filter { get; set; }
 }
 public class FilterDto

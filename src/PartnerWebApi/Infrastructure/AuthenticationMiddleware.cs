@@ -184,7 +184,7 @@ public class ApiAuthenticator
             string hashedPayloadString = SigningHelper.ToHex(hashedPayload);
             string stringToSign = "";
 
-            if (string.IsNullOrEmpty(hashedPayloadString))
+            if (string.IsNullOrEmpty(payload))
             {
                 stringToSign = SigningHelper.BuildStringToSignWithNoPayload(client.Clientkey, datetime, method.ToLower(), actionName.ToLower());
             }
