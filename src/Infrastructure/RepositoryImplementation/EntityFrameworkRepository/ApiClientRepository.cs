@@ -26,4 +26,18 @@ public class ApiClientRepository : IApiClientRepository
         }
 
     }
+
+    public async Task<long> GetUserIdByClient(string Id)
+    {
+        try
+        {
+            return await _context.AppUsersClients.Where(ac => ac.UserToken == Id ).Select(x => x.UserId).FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            // Log the exception
+            throw;
+        }
+
+    }
 }

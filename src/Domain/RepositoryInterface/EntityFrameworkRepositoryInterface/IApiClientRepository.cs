@@ -4,5 +4,6 @@ namespace WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepository
 public interface IApiClientRepository
 {
     Task<ApiClient> GetClientById(string Id);
+    Task<long> GetUserIdByClient(string Id);
 
 }
