@@ -177,12 +177,15 @@ public class ValuService : BaseService, IValuService
             };
             ProductSearchDto requestBody = new ProductSearchDto
             {
+                
                 Filter = new FilterDto
                 {
-                    Brands = productSearch.Filter.Brands,
-                    Stores = productSearch.Filter.Stores,
-                    MinPrice = productSearch.Filter.MinPrice,
-                    MaxPrice = productSearch.Filter.MaxPrice
+                    Brands = productSearch?.Filter?.Brands,
+                    Stores = productSearch?.Filter?.Stores,
+                    MinPrice = productSearch?.Filter?.MinPrice,
+                    MaxPrice = productSearch?.Filter?.MaxPrice,
+                    Offers = productSearch?.Filter?.Offers
+                    
                 },
                 ClientApiId = ClientApiId,
                 IsEnglish = IsEnglish,
@@ -277,13 +280,16 @@ public class ValuService : BaseService, IValuService
                     Position = o.Position,
                     Values = o.Values
                 }).ToList(),
-                Store = new StoreDto
+                Store = model.Store == null ? new StoreDto() :  
+                new StoreDto
                 {
-                    Id = model.Store.Id,
-                    Logo = model.Store.Logo,
-                    Name = model.Store.Name,
-                    LogoPng = model.Store.LogoPng,
+                    Id = (Guid)(model.Store?.Id),
+                    Logo = model?.Store?.Logo,
+                    Name = model?.Store?.Name,
+                    LogoPng = model?.Store?.LogoPng,
                 },
+                Offers = model?.Offers,
+                
             };
             return res;
 
