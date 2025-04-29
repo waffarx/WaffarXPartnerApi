@@ -52,7 +52,8 @@ public class ValuController : ControllerBase
     [HttpGet("ShoppingTrip/{section}/{storeId}/{productId?}")]
     public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "")
     {
-        return Ok(new object());
+        var result = await _valuService.CreateExitClick(section, storeId, productId);    
+        return Ok(result);
     }
 
 }
