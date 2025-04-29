@@ -2,6 +2,7 @@
 public class ProductSearchResultDto
 {
     public string Id { get; set; }
+    public string MerchantName { get; set; }
     public string Name { get; set; }
     public decimal Price { get; set; }
     public string PriceText { get; set; }
@@ -30,17 +31,13 @@ public class PriceVariantDto
 {
     public string VariantId { get; set; }
     public decimal OldPrice { get; set; }
-    public DateTime CreatedAt { get; set; }
     public int Position { get; set; }
     public string ShoppingURL { get; set; }
     public string ProductUrl { get; set; }
     public double Price { get; set; }
-    public string Productid { get; set; }
     public string Sku { get; set; }
     public bool Available { get; set; }
     public string Title { get; set; }
-    public DateTime UpdatedAt { get; set; }
-    public int InventoryQuantity { get; set; }
     public List<string> Options { get; set; }
 }
 public class OptionDto

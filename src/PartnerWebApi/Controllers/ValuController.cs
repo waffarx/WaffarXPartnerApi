@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using PartnerWebApi.Infrastructure;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
@@ -17,36 +16,38 @@ public class ValuController : ControllerBase
     }
 
     [HttpPost("search")]
-    [CompressResponse]  // Apply compression only to this endpoint
-
+    [CompressResponse]  
     public async Task<IActionResult> Search(ProductSearchRequestDto query)
     {
         var result = await _valuService.SearchProduct(query);
         return Ok(result);
     }
 
-    [HttpPost("product")]
-    public async Task<IActionResult> GetProductDetails(ProductById query)
-    {
-        var result = await _valuService.GetProductDetails(query);
-        return Ok(result);
-    }
     [HttpPost("GetFeaturedProducts")]
     public async Task<IActionResult> GetFeaturedProducts(GetFeaturedProductDto query)
     {
         var result = await _valuService.GetFeaturedProducts(query);
         return Ok(result);
     }
-    [HttpPost("GetStoreDetails")]
-    public async Task<IActionResult> GetStoreDetails(GetStoreDto query)
+
+    [HttpPost("GetStores")]
+    public async Task<IActionResult> GetStores(GetStoresRequestDto model)
     {
-        var result = await _valuService.GetStoreDetails(query);
+        var result = await _valuService.GetStores(model);
         return Ok(result);
     }
-    [HttpGet("GetStores")]
-    public async Task<IActionResult> GetStores()
+
+    [HttpGet("product/id")]
+    public async Task<IActionResult> GetProductDetails(string id)
     {
-        var result = await _valuService.GetStores();
+        var result = await _valuService.GetProductDetails(id);
         return Ok(result);
     }
+    [HttpGet("GetStoreDetails/id")]
+    public async Task<IActionResult> GetStoreDetails(Guid id)
+    {
+        var result = await _valuService.GetStoreDetails(id);
+        return Ok(result);
+    }
+
 }

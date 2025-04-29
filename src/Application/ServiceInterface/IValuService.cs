@@ -1,11 +1,12 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 namespace WaffarXPartnerApi.Application.ServiceInterface;
 public interface IValuService
 {
-    Task<List<ProductSearchResultDto>> SearchProduct(ProductSearchRequestDto productSearch);
-    Task<ProductSearchResultDto> GetProductDetails(ProductById product);
-    Task<Guid> GetFeaturedProducts(GetFeaturedProductDto product);
-    Task<Guid> GetStoreDetails(GetStoreDto store);
-    Task<Guid> GetStores();
+    Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch);
+    Task<GenericResponse<ProductSearchResultDto>> GetProductDetails(string id);
+    Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
+    Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
+    Task<GenericResponse<List<StoreDto>>> GetStores(GetStoresRequestDto model);
 }
