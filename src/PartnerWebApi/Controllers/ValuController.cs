@@ -37,16 +37,22 @@ public class ValuController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("product/id")]
+    [HttpGet("product/{id}")]
     public async Task<IActionResult> GetProductDetails(string id)
     {
         var result = await _valuService.GetProductDetails(id);
         return Ok(result);
     }
-    [HttpGet("GetStoreDetails/id")]
+    [HttpGet("GetStoreDetails/{id}")]
     public async Task<IActionResult> GetStoreDetails(Guid id)
     {
         var result = await _valuService.GetStoreDetails(id);
+        return Ok(result);
+    }
+    [HttpGet("ShoppingTrip/{section}/{storeId}/{productId?}")]
+    public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "")
+    {
+        var result = await _valuService.CreateExitClick(section, storeId, productId);    
         return Ok(result);
     }
 

@@ -12,9 +12,7 @@ namespace WaffarXPartnerApi.Application.Common.Models.SharedModels
         public string Status { get; set; }
         public T Data { get; set; }
         public int? TotalCount { get; set; }
-        public string Message{ get; set; }
+        public string Message { get; set; }
         public List<string> Errors { get; set; }
-        public bool FromCache { get; set; }
-        public string Code { get; set; }
     }
 }
