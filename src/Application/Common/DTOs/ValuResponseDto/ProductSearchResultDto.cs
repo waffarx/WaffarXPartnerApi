@@ -25,6 +25,7 @@ public class ProductSearchResultDto
     public FeatureDTO Feature { get; set; }
     public List<PriceVariantDto> PriceVariants { get; set; }
     public List<OptionDto> Options { get; set; }
+    public List<OffersDto> Offers { get; set; }
 }
 
 public class PriceVariantDto
