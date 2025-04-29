@@ -1,11 +1,14 @@
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using PartnerWebApi.Infrastructure;
+using Serilog;
+using Serilog.Exceptions;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
 var builder = WebApplication.CreateBuilder(args);
+AppSettings.Initialize(builder.Configuration);
 
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
@@ -27,8 +30,17 @@ builder.Services.Configure<KestrelServerOptions>(options =>
 {
     options.AllowSynchronousIO = true;
 });
+// Configure Serilog with Seq for exception-only logging
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Error() // Only log errors and fatal events
+    .Enrich.FromLogContext()
+    .Enrich.WithMachineName()
+    .Enrich.WithExceptionDetails() // Adds detailed exception information
+    .WriteTo.Seq("https://seq.waffarx.com/") // Seq server URL - adjust as needed
+    .CreateLogger();
+builder.Host.UseSerilog();
+
 var app = builder.Build();
-AppSettings.Initialize(builder.Configuration);
 
 app.MapGet("/web", () => Results.Redirect("/swagger"));
 app.UseOpenApi();
@@ -65,6 +77,7 @@ app.UseExceptionHandler(options => { });
 
 app.MapEndpoints();
 app.UseMiddleware<AuthenticationMiddleware>();
+app.UseExceptionHandlingMiddleware();
 
 app.Run();
 

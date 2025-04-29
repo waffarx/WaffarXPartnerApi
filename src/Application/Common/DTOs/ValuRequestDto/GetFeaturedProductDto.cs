@@ -1,8 +1,13 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Shared;
+
+namespace WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 public class GetFeaturedProductDto
 {
-    public Guid? ClientApiId { get; set; }
-    public bool IsEnglish { get; set; } = true;
+    public int? PageNumber { get; set; } = 0;
+    public int? Count { get; set; } = 50;
+}
+public class GetFeaturedProductRequestDto : BaseSharedDto
+{
     public int? PageNumber { get; set; } = 0;
     public int? Count { get; set; } = 50;
 }

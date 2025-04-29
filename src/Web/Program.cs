@@ -1,3 +1,6 @@
+using WaffarXPartnerApi.Application.ServiceImplementation;
+using WaffarXPartnerApi.Application.ServiceInterface;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

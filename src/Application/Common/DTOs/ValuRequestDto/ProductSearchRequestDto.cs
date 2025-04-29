@@ -3,7 +3,6 @@
 namespace WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 public class ProductSearchRequestDto : SearchBaseQueryDto
 {
-    public Guid? ClientApiId { get; set; }
     public FilterDto Filter { get; set; }
 }
 public class FilterDto
@@ -12,4 +11,11 @@ public class FilterDto
     public string Brands { get; set; }
     public double? MinPrice { get; set; }
     public double? MaxPrice { get; set; }
+}
+
+public class ProductSearchDto : SearchBaseQueryDto 
+{
+    public bool IsEnglish { get; set; } = true;
+    public Guid? ClientApiId { get; set; }
+    public FilterDto Filter { get; set; }
 }
