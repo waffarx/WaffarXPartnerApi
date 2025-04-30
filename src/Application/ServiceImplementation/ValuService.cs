@@ -308,15 +308,17 @@ public class ValuService : BaseService, IValuService
       
     }
 
-    public async Task<GenericResponse<int>> CreateExitClick(string section, Guid storeId, string productId = "")
+    public async Task<string> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
+        , string shoppingTripIdentifier = "", string variant = "")
     {
         try
         {
             // Get All Data Needed
-            long UserId = await _apiClientRepository.GetUserIdByClient(ClientApiId.ToString());
+            long userId = await _apiClientRepository.GetUserIdByClient(ClientApiId.ToString());
+            int clientId = await _apiClientRepository.GetClientIdByGuid(ClientApiId.ToString());
             // Create ExitClick Request Data
-            CreateExitClickRequestDto requestBody = RequestDataHelper.CreateExitClickRequestData((int)UserId
-                , (int)ExitClickSourcesEnum.Valu, IsEnglish, section, storeId, productId);
+            CreateExitClickRequestDto requestBody = RequestDataHelper.CreateExitClickRequestData((int)userId
+                , (int)ExitClickSourcesEnum.Valu, IsEnglish, section, storeId, productId, userIdentifier, shoppingTripIdentifier, variant, clientId);
 
             var headers = new Dictionary<string, string>
             {
@@ -324,24 +326,16 @@ public class ValuService : BaseService, IValuService
             };
             
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponse<int>>(
+            var searchResults = await _httpService.PostAsync<GenericResponse<ExitClickResponseDto>>(
                 AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
                 requestBody,
                 headers);
-            if (searchResults.Status == StaticValues.Success && searchResults.Data > 0)
+            if(searchResults.Status == StaticValues.Success 
+                && searchResults.Data != null && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
             {
-                return new GenericResponse<int>
-                {
-                    Status = StaticValues.Success,
-                    Data = searchResults.Data,
-                    TotalCount = searchResults.TotalCount,
-                };
+                return searchResults.Data.RedirectUrl;
             }
-            return new GenericResponse<int>()
-            {
-                Status = StaticValues.Success,
-                Data =  1,  
-            };
+            return "";
         }
         catch (Exception)
         {
