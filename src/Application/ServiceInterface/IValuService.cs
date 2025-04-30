@@ -10,4 +10,5 @@ public interface IValuService
     Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
     Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
     Task<GenericResponseWithCount<List<StoreDto>>> GetStores(GetStoresRequestDto model);
+    Task<GenericResponse<int>> CreateExitClick(string section, Guid storeId, string productId = "");
 }

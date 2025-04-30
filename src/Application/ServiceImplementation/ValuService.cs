@@ -1,20 +1,27 @@
 ﻿using Microsoft.AspNetCore.Http;
+using WaffarXPartnerApi.Application.Common.DTOs.Helper;
+using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 public class ValuService : BaseService, IValuService
 {
     private readonly IHttpService _httpService;
+    private readonly IApiClientRepository _apiClientRepository;
 
-    public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor):base(httpContextAccessor)
+    public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor
+        , IApiClientRepository apiClientRepository) :base(httpContextAccessor)
     {
         _httpService = httpService;
+        _apiClientRepository = apiClientRepository;
     }
 
     public async Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
@@ -311,4 +318,46 @@ public class ValuService : BaseService, IValuService
         }
       
     }
+
+    public async Task<GenericResponse<int>> CreateExitClick(string section, Guid storeId, string productId = "")
+    {
+        try
+        {
+            // Get All Data Needed
+            long UserId = await _apiClientRepository.GetUserIdByClient(ClientApiId.ToString());
+            // Create ExitClick Request Data
+            CreateExitClickRequestDto requestBody = RequestDataHelper.CreateExitClickRequestData((int)UserId
+                , (int)ExitClickSourcesEnum.Valu, IsEnglish, section, storeId, productId);
+
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponse<int>>(
+                AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
+                requestBody,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data > 0)
+            {
+                return new GenericResponse<int>
+                {
+                    Status = StaticValues.Success,
+                    Data = searchResults.Data,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponse<int>()
+            {
+                Status = StaticValues.Success,
+                Data =  1,  
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
 }
