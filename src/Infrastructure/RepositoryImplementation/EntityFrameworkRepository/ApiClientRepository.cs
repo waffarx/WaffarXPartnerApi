@@ -40,4 +40,18 @@ public class ApiClientRepository : IApiClientRepository
         }
 
     }
+
+    public async Task<int> GetClientIdByGuid(string Id)
+    {
+        try
+        {
+            return await _context.ApiClients.Where(ac => ac.Id == Id && ac.IsActive == true).Select(c =>c.ClientId).FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            // Log the exception
+            throw;
+        }
+
+    }
 }

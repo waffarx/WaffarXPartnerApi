@@ -5,5 +5,6 @@ public interface IApiClientRepository
 {
     Task<ApiClient> GetClientById(string Id);
     Task<long> GetUserIdByClient(string Id);
+    Task<int> GetClientIdByGuid(string Id);
 
 }

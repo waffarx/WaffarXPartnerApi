@@ -3,11 +3,13 @@
 namespace WaffarXPartnerApi.Application.Common.DTOs.Helper;
 public static class RequestDataHelper
 {
-    public static CreateExitClickRequestDto CreateExitClickRequestData(int userId, int callSource, bool isEnglish , string section, Guid storeId, string productId = "")
+    public static CreateExitClickRequestDto CreateExitClickRequestData(int userId,int callSource, bool isEnglish , string section, Guid storeId, string productId = "", string userIdentifier = ""
+        , string shoppingTripIdentifier = "", string variant = "", int clientApiId = 0)
     {
         return new CreateExitClickRequestDto
         {
             UserId = userId,
+            ClientApiId = clientApiId,
             CallSource = callSource,
             Section = section,
             AdvertiserGuid = storeId,
@@ -20,7 +22,11 @@ public static class RequestDataHelper
             LinkId = 0,
             MobileType = "",
             TrackParamKeys = new Dictionary<string, object>() ,
-            XClid = "",  
+            XClid = "", 
+            partnerUserIdentifier = userIdentifier,
+            subId1 = shoppingTripIdentifier,   
+            subId2 = "",
+            variant = variant   
         };
     }
 }

@@ -50,10 +50,11 @@ public class ValuController : ControllerBase
         return Ok(result);
     }
     [HttpGet("shoppingtrip/{section}/{storeId}/{productId?}")]
-    public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "")
+    public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "", string UId = ""
+        ,string subId = "", string variant = "")
     {
-        var result = await _valuService.CreateExitClick(section, storeId, productId);    
-        return Ok(result);
+        var result = await _valuService.CreateExitClick(section, storeId, productId, UId, subId, variant);
+        return RedirectPermanent(result);
     }
 
 }
