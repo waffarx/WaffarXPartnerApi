@@ -18,48 +18,62 @@ public class ValuService : BaseService, IValuService
     private readonly IApiClientRepository _apiClientRepository;
 
     public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor
-        , IApiClientRepository apiClientRepository) :base(httpContextAccessor)
+        , IApiClientRepository apiClientRepository) : base(httpContextAccessor)
     {
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
     }
 
-    public async Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
+    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
     {
-        var headers = new Dictionary<string, string>
+        try
         {
-            ["Content-Type"] = "application/json"
-        };
-        GetFeaturedProductRequestDto requestObj = new GetFeaturedProductRequestDto 
-        {
-            ClientApiId = ClientApiId,
-            PageSize = product.PageSize,
-            PageNumber = product.PageNumber,
-            IsEnglish = IsEnglish,
-        };
-        // Make the POST request using our generic HTTP service
-        var searchResults = await _httpService.PostAsync<GenericResponse<List<ProductSearchResponseModel>>>(
-            AppSettings.ExternalApis.ValuUrl + "GetFeaturedProducts",
-            requestObj,
-            headers);
-        if (searchResults.Status == StaticValues.Success && searchResults.Data.Any()) 
-        {
-            List<ProductSearchResultDto> products = new List<ProductSearchResultDto>();
-            foreach (var item in searchResults.Data)
+            var headers = new Dictionary<string, string>
             {
-                products.Add(MapToProduct(item));
-            }
+                ["Content-Type"] = "application/json"
+            };
+            GetFeaturedProductRequestDto requestObj = new GetFeaturedProductRequestDto
+            {
+                ClientApiId = ClientApiId,
+                PageSize = product.PageSize,
+                PageNumber = product.PageNumber,
+                IsEnglish = IsEnglish,
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetFeaturedProducts",
+                requestObj,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    products.Add(MapToBaseProduct(item));
+                }
 
-            return new GenericResponse<List<ProductSearchResultDto>>
+                return new GenericResponseWithCount<List<BaseProductSearchResultDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = products,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
             {
+                Data = new List<BaseProductSearchResultDto>(),
                 Status = StaticValues.Success,
-                Data =  products 
+                TotalCount = 0,
             };
         }
-        return new GenericResponse<List<ProductSearchResultDto>>();
+        catch(Exception)
+        {
+            throw;
+        }
+        
     }
 
-    public async Task<GenericResponse<ProductSearchResultDto>> GetProductDetails(string id)
+    public async Task<GenericResponse<DetailedProductSearchResultDto>> GetProductDetails(string id)
     {
         try
         {
@@ -81,16 +95,20 @@ public class ValuService : BaseService, IValuService
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
             {
-                return new GenericResponse<ProductSearchResultDto>
+                return new GenericResponse<DetailedProductSearchResultDto>
                 {
-                    Data = MapToProduct(searchResults.Data),
+                    Data = MapToDetailProduct(searchResults.Data),
                     Status = StaticValues.Success
                 };
             }
-          
-            return new GenericResponse<ProductSearchResultDto>();
+
+            return new GenericResponse<DetailedProductSearchResultDto>()
+            {
+                Data = new DetailedProductSearchResultDto(),
+                Status = StaticValues.Success,
+            };
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
@@ -98,78 +116,113 @@ public class ValuService : BaseService, IValuService
 
     public async Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid storeId)
     {
-        var headers = new Dictionary<string, string>
+        try
         {
-            ["Content-Type"] = "application/json"
-        };
-
-        GetStoreDto store = new GetStoreDto
-        {
-            ClientApiId = ClientApiId,
-            IsEnglish = IsEnglish,
-            StoreId = storeId
-        };
-
-        // Make the POST request using our generic HTTP service
-        var searchResults = await _httpService.PostAsync<GenericResponse<StoreDetailModel>>(
-            AppSettings.ExternalApis.ValuUrl + "GetStoreDetails",
-            store,
-            headers);
-        if (searchResults.Status == StaticValues.Success && searchResults.Data != null) 
-        {
-            List<ProductSearchResultDto> products = new List<ProductSearchResultDto>();
-            foreach (var item in searchResults.Data.StoreFeaturedProducts)
+            var headers = new Dictionary<string, string>
             {
-                products.Add(MapToProduct(item));
-            }
-            return new GenericResponse<StoreDetailDto>
+                ["Content-Type"] = "application/json"
+            };
+
+            GetStoreDto store = new GetStoreDto
             {
-                Status = StaticValues.Success,
-                Data = new StoreDetailDto
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                StoreId = storeId
+            };
+
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponse<StoreDetailModel>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoreDetails",
+                store,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+                foreach (var item in searchResults.Data.StoreFeaturedProducts)
                 {
-                    StoreFeaturedProducts = products,
-                    Store = new StoreDto
-                    {
-                        Id = (Guid)(searchResults.Data?.Store.Id),
-                        Logo = searchResults.Data?.Store.Logo,
-                        Name = searchResults.Data?.Store.Name,
-                        LogoPng = searchResults.Data?.Store.LogoPng,
-                    }
+                    products.Add(MapToBaseProduct(item));
                 }
+                return new GenericResponse<StoreDetailDto>
+                {
+                    Status = StaticValues.Success,
+                    Data = new StoreDetailDto
+                    {
+                        StoreFeaturedProducts = products,
+                        Store = new StoreResponseDto
+                        {
+                            Id = (Guid)(searchResults.Data?.Store.Id),
+                            Logo = searchResults.Data?.Store.Logo,
+                            Name = searchResults.Data?.Store.Name,
+                            LogoPng = searchResults.Data?.Store.LogoPng,
+                            ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + searchResults.Data.Store.Id + "/0",
+                        }
+                    }
+                };
+            }
+            return new GenericResponse<StoreDetailDto>()
+            {
+                Data = new StoreDetailDto(),
+                Status = StaticValues.Success,
             };
         }
-        return new GenericResponse<StoreDetailDto>();
+        catch(Exception)
+        { throw; }
+     
     }
 
-    public async Task<GenericResponseWithCount<List<StoreDto>>> GetStores(GetStoresRequestDto model)
+    public async Task<GenericResponseWithCount<List<StoreResponseDto>>> GetStores(GetStoresRequestDto model)
     {
-        var headers = new Dictionary<string, string>
+        try
         {
-            ["Content-Type"] = "application/json"
-        };
-        GetStoresDto requestBody = new GetStoresDto  
-        {
-            ClientApiId = ClientApiId,
-            IsEnglish = IsEnglish,
-            ItemCount = model.PageSize,
-            PageNumber = model.PageNumber,
-            
-        };
-        // Make the POST request using our generic HTTP service
-        var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDto>>>(
-            AppSettings.ExternalApis.ValuUrl + "GetStores",
-            requestBody,
-            headers);
-        if(searchResults.Status == StaticValues.Success && searchResults.Data != null)
-        {
-            return new GenericResponseWithCount<List<StoreDto>>
+            var headers = new Dictionary<string, string>
             {
+                ["Content-Type"] = "application/json"
+            };
+            GetStoresDto requestBody = new GetStoresDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                ItemCount = model.PageSize,
+                PageNumber = model.PageNumber,
+
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDto>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStores",
+                requestBody,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+            {
+                List<StoreResponseDto> stores = new List<StoreResponseDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    stores.Add(new StoreResponseDto
+                    {
+                        Id = (Guid)item.Id,
+                        Logo = item.Logo,
+                        LogoPng = item.LogoPng,
+                        Name = item.Name,
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + item.Id + "/0"
+                    });
+                }
+                return new GenericResponseWithCount<List<StoreResponseDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = stores,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<StoreResponseDto>>
+            {
+                Data = new List<StoreResponseDto>(),
                 Status = StaticValues.Success,
-                Data = searchResults.Data,
-                TotalCount = searchResults.TotalCount,
             };
         }
-        return new GenericResponseWithCount<List<StoreDto>>();
+        catch(Exception)
+        {
+            throw;
+        }
+      
     }
 
     public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch)
@@ -183,10 +236,10 @@ public class ValuService : BaseService, IValuService
             {
                 ["Content-Type"] = "application/json"
             };
-            SearchFilterModel filterModel = null; 
+            SearchFilterModel filterModel = null;
             if (productSearch.Filter != null)
             {
-                filterModel = new SearchFilterModel 
+                filterModel = new SearchFilterModel
                 {
                     Brands = productSearch?.Filter?.Brands,
                     Stores = productSearch?.Filter?.Stores,
@@ -194,7 +247,7 @@ public class ValuService : BaseService, IValuService
                     MaxPrice = productSearch?.Filter?.MaxPrice ?? 0,
                     OfferId = productSearch?.Filter?.OfferId
                 };
-                
+
             }
             ProductSearchDto requestBody = new ProductSearchDto
             {
@@ -215,11 +268,11 @@ public class ValuService : BaseService, IValuService
                 headers);
             if (searchResults.Data != null && searchResults.Data.Products.Any())
             {
-                List<ProductSearchResultDto> products = new List<ProductSearchResultDto>();
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
                 SearchFilterDto filter = new SearchFilterDto();
                 foreach (var product in searchResults.Data.Products)
                 {
-                    products.Add(MapToProduct(product));
+                    products.Add(MapToBaseProduct(product));
                 }
 
                 return new GenericResponse<ProductSearchResultWithFiltersDto>
@@ -252,73 +305,6 @@ public class ValuService : BaseService, IValuService
         }
     }
 
-    private ProductSearchResultDto MapToProduct(ProductSearchResponseModel model)
-    {
-        try
-        {
-
-            if (model == null)
-                return null;
-            ProductSearchResultDto res = new ProductSearchResultDto 
-            {
-                Id = model.Id,
-                Name = model.Name,
-                MerchantName = model.AdvertiserName,
-                Price = model.Price,
-                Description = model.Description,
-                Brand = model.Brand,
-                Currency = model.Currency,
-                PrimaryImg = model.PrimaryImg,
-                VariantsImgs = model.VariantsImgs,
-                Category = model.Category,
-                Discounted = model.Discounted,
-                DiscountedText = model.DiscountedText,
-                ErrorImg = model.ErrorImg,
-                Feature = model.Features,
-                OldPrice = model.OldPrice,
-                OldPriceText = model.OldPriceText,
-                PriceText = model.PriceText,
-                SKU = model.SKU,
-                Warranty = model.Warranty,
-                Specification = model.Specification?.ToDictionary(k => k.Key, v => (object)v),
-                PriceVariants = model.price_variants?.Select(v => new PriceVariantDto
-                {
-                    VariantId = v.variant_id,
-                    Price = v.price,
-                    Sku = v.sku,
-                    Title = v.title,
-                    Available = v.available,
-                    Options = v.options
-                }).ToList(),
-                Options = (model.options as IEnumerable<OptionDto>)?.Select(o => new OptionDto
-                {
-                    Name = o.Name,
-                    Id = o.Id,
-                    ProductId = o.ProductId,
-                    Position = o.Position,
-                    Values = o.Values
-                }).ToList(),
-                Store = model.Store == null ? new StoreDto() :  
-                new StoreDto
-                {
-                    Id = (Guid)(model.Store?.Id),
-                    Logo = model?.Store?.Logo,
-                    Name = model?.Store?.Name,
-                    LogoPng = model?.Store?.LogoPng,
-                },
-                Offers = model?.Offers,
-                
-            };
-            return res;
-
-        }
-        catch(Exception)
-        {
-            throw;
-        }
-      
-    }
-
     public async Task<GenericResponse<int>> CreateExitClick(string section, Guid storeId, string productId = "")
     {
         try
@@ -333,7 +319,7 @@ public class ValuService : BaseService, IValuService
             {
                 ["Content-Type"] = "application/json"
             };
-            
+
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponse<int>>(
                 AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
@@ -351,8 +337,116 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<int>()
             {
                 Status = StaticValues.Success,
-                Data =  1,  
+                Data = 1,
             };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    private BaseProductSearchResultDto MapToBaseProduct(ProductSearchResponseModel model)
+    {
+        try
+        {
+
+            if (model == null)
+                return null;
+            BaseProductSearchResultDto res = new BaseProductSearchResultDto
+            {
+                Id = model.Id,
+                Name = model.Name,
+                MerchantName = model.AdvertiserName,
+                Price = model.Price,
+                Brand = model.Brand,
+                Currency = model.Currency,
+                PrimaryImg = model.PrimaryImg,
+                VariantsImgs = model.VariantsImgs,
+                Category = model.Category,
+                ErrorImg = model.ErrorImg,
+                OldPrice = model.OldPrice,
+                OldPriceText = model.OldPriceText,
+                PriceText = model.PriceText,
+                Store = model.Store == null ? new StoreResponseDto() :
+                new StoreResponseDto
+                {
+                    Id = (Guid)(model.Store?.Id),
+                    Logo = model?.Store?.Logo,
+                    Name = model?.Store?.Name,
+                    LogoPng = model?.Store?.LogoPng,
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + model.Store.Id + "/0"
+                },
+                Offers = model?.Offers,
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id
+            };
+            return res;
+
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    private DetailedProductSearchResultDto MapToDetailProduct(ProductSearchResponseModel model)
+    {
+        try
+        {
+            if (model == null)
+                return null;
+            DetailedProductSearchResultDto res = new DetailedProductSearchResultDto
+            {
+                Id = model.Id,
+                Name = model.Name,
+                MerchantName = model.AdvertiserName,
+                Price = model.Price,
+                Brand = model.Brand,
+                Currency = model.Currency,
+                PrimaryImg = model.PrimaryImg,
+                VariantsImgs = model.VariantsImgs,
+                Category = model.Category,
+                ErrorImg = model.ErrorImg,
+                OldPrice = model.OldPrice,
+                OldPriceText = model.OldPriceText,
+                PriceText = model.PriceText,
+                Store = model.Store == null ? new StoreResponseDto() :
+                new StoreResponseDto
+                {
+                    Id = (Guid)(model.Store?.Id),
+                    Logo = model?.Store?.Logo,
+                    Name = model?.Store?.Name,
+                    LogoPng = model?.Store?.LogoPng,
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + model.Store.Id + "/0"
+
+                },
+                Offers = model?.Offers,
+                Description = model.Description,
+                DiscountedText = model.DiscountedText,
+                Discounted = model.Discounted,
+                Feature = model.Features,
+                SKU = model.SKU,
+                Warranty = model.Warranty,
+                Specification = model.Specification?.ToDictionary(k => k.Key, v => (object)v),
+                Options = (model.options as IEnumerable<OptionDto>)?.Select(o => new OptionDto
+                {
+                    Name = o.Name,
+                    Id = o.Id,
+                    ProductId = o.ProductId,
+                    Position = o.Position,
+                    Values = o.Values
+                }).ToList(),
+                PriceVariants = model.price_variants?.Select(v => new PriceVariantDto
+                {
+                    Price = v.price,
+                    Title = v.title,
+                    Available = v.available,
+                    Options = v.options,
+                    ShoppingURL = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id,
+                }).ToList(),
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id
+
+            };
+            return res;
         }
         catch (Exception)
         {

@@ -149,7 +149,7 @@ public class AuthenticationMiddleware
                 {
                     Data.ClientId = valueList.FirstOrDefault();
                 }
-                if (key.ToLower() == "authorization")
+                if (key.ToLower() == "wxc-auth")
                 {
                     Data.Signature = valueList.FirstOrDefault();
                 }

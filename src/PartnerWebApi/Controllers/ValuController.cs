@@ -23,35 +23,33 @@ public class ValuController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("GetFeaturedProducts")]
+    [HttpPost("getfeaturedproducts")]
     public async Task<IActionResult> GetFeaturedProducts(GetFeaturedProductDto query)
     {
         var result = await _valuService.GetFeaturedProducts(query);
         return Ok(result);
     }
 
-    [HttpPost("GetStores")]
+    [HttpPost("getstores")]
     public async Task<IActionResult> GetStores(GetStoresRequestDto model)
     {
         var result = await _valuService.GetStores(model);
         return Ok(result);
     }
 
-    [HttpGet("product")]
     [HttpGet("product/{id}")]
     public async Task<IActionResult> GetProductDetails(string id)
     {
         var result = await _valuService.GetProductDetails(id);
         return Ok(result);
     }
-    [HttpGet("GetStoreDetails")]
-    [HttpGet("GetStoreDetails/{id}")]
+    [HttpGet("getstoredetails/{id}")]
     public async Task<IActionResult> GetStoreDetails(Guid id)
     {
         var result = await _valuService.GetStoreDetails(id);
         return Ok(result);
     }
-    [HttpGet("ShoppingTrip/{section}/{storeId}/{productId?}")]
+    [HttpGet("shoppingtrip/{section}/{storeId}/{productId?}")]
     public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "")
     {
         var result = await _valuService.CreateExitClick(section, storeId, productId);    
