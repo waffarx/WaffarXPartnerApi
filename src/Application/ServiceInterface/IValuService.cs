@@ -1,4 +1,5 @@
-﻿using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 namespace WaffarXPartnerApi.Application.ServiceInterface;
@@ -8,5 +9,5 @@ public interface IValuService
     Task<GenericResponse<ProductSearchResultDto>> GetProductDetails(string id);
     Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
     Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
-    Task<GenericResponse<List<StoreDto>>> GetStores(GetStoresRequestDto model);
+    Task<GenericResponseWithCount<List<StoreDto>>> GetStores(GetStoresRequestDto model);
 }

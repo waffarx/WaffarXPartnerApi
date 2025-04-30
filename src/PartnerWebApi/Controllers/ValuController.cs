@@ -37,13 +37,13 @@ public class ValuController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("product/id")]
+    [HttpGet("product")]
     public async Task<IActionResult> GetProductDetails(string id)
     {
         var result = await _valuService.GetProductDetails(id);
         return Ok(result);
     }
-    [HttpGet("GetStoreDetails/id")]
+    [HttpGet("GetStoreDetails")]
     public async Task<IActionResult> GetStoreDetails(Guid id)
     {
         var result = await _valuService.GetStoreDetails(id);
