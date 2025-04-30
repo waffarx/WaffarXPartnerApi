@@ -1,4 +1,6 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+
+namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class StoreDetailDto
 {
     public StoreDto Store { get; set; }

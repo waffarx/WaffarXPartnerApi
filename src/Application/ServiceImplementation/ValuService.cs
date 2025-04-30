@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
 using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -32,7 +33,7 @@ public class ValuService : BaseService, IValuService
         GetFeaturedProductRequestDto requestObj = new GetFeaturedProductRequestDto 
         {
             ClientApiId = ClientApiId,
-            Count = product.Count,
+            PageSize = product.PageSize,
             PageNumber = product.PageNumber,
             IsEnglish = IsEnglish,
         };
@@ -44,7 +45,6 @@ public class ValuService : BaseService, IValuService
         if (searchResults.Status == StaticValues.Success && searchResults.Data.Any()) 
         {
             List<ProductSearchResultDto> products = new List<ProductSearchResultDto>();
-            SearchFilterDto filter = new SearchFilterDto();
             foreach (var item in searchResults.Data)
             {
                 products.Add(MapToProduct(item));
@@ -70,19 +70,20 @@ public class ValuService : BaseService, IValuService
             ProductById product = new ProductById
             {
                 IsEnglish = IsEnglish,
-                ProductId = id
+                ProductId = id,
+                ClientApiId = ClientApiId,
             };
 
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<ProductSearchResponseModel>(
+            var searchResults = await _httpService.PostAsync<GenericResponse<ProductSearchResponseModel>>(
                 AppSettings.ExternalApis.ValuUrl + "product",
                 product,
                 headers);
-            if (searchResults != null)
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
             {
                 return new GenericResponse<ProductSearchResultDto>
                 {
-                    Data = MapToProduct(searchResults),
+                    Data = MapToProduct(searchResults.Data),
                     Status = StaticValues.Success
                 };
             }
@@ -129,10 +130,10 @@ public class ValuService : BaseService, IValuService
                     StoreFeaturedProducts = products,
                     Store = new StoreDto
                     {
-                        Id = searchResults.Data.Store.Id,
-                        Logo = searchResults.Data.Store.Logo,
-                        Name = searchResults.Data.Store.Name,
-                        LogoPng = searchResults.Data.Store.LogoPng,
+                        Id = (Guid)(searchResults.Data?.Store.Id),
+                        Logo = searchResults.Data?.Store.Logo,
+                        Name = searchResults.Data?.Store.Name,
+                        LogoPng = searchResults.Data?.Store.LogoPng,
                     }
                 }
             };
@@ -140,7 +141,7 @@ public class ValuService : BaseService, IValuService
         return new GenericResponse<StoreDetailDto>();
     }
 
-    public async Task<GenericResponse<List<StoreDto>>> GetStores(GetStoresRequestDto model)
+    public async Task<GenericResponseWithCount<List<StoreDto>>> GetStores(GetStoresRequestDto model)
     {
         var headers = new Dictionary<string, string>
         {
@@ -150,25 +151,25 @@ public class ValuService : BaseService, IValuService
         {
             ClientApiId = ClientApiId,
             IsEnglish = IsEnglish,
-            ItemCount = model.ItemCount,
+            ItemCount = model.PageSize,
             PageNumber = model.PageNumber,
             
         };
         // Make the POST request using our generic HTTP service
-        var searchResults = await _httpService.PostAsync<GenericResponse<List<StoreDto>>>(
+        var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDto>>>(
             AppSettings.ExternalApis.ValuUrl + "GetStores",
             requestBody,
             headers);
         if(searchResults.Status == StaticValues.Success && searchResults.Data != null)
         {
-            return new GenericResponse<List<StoreDto>>
+            return new GenericResponseWithCount<List<StoreDto>>
             {
                 Status = StaticValues.Success,
                 Data = searchResults.Data,
                 TotalCount = searchResults.TotalCount,
             };
         }
-        return new GenericResponse<List<StoreDto>>();
+        return new GenericResponseWithCount<List<StoreDto>>();
     }
 
     public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch)
@@ -182,23 +183,28 @@ public class ValuService : BaseService, IValuService
             {
                 ["Content-Type"] = "application/json"
             };
-            ProductSearchDto requestBody = new ProductSearchDto
+            SearchFilterModel filterModel = null; 
+            if (productSearch.Filter != null)
             {
-                
-                Filter = new FilterDto
+                filterModel = new SearchFilterModel 
                 {
                     Brands = productSearch?.Filter?.Brands,
                     Stores = productSearch?.Filter?.Stores,
-                    MinPrice = productSearch?.Filter?.MinPrice,
-                    MaxPrice = productSearch?.Filter?.MaxPrice,
-                    Offers = productSearch?.Filter?.Offers
-                    
-                },
+                    MinPrice = productSearch?.Filter?.MinPrice ?? 0,
+                    MaxPrice = productSearch?.Filter?.MaxPrice ?? 0,
+                    OfferId = productSearch?.Filter?.OfferId
+                };
+                
+            }
+            ProductSearchDto requestBody = new ProductSearchDto
+            {
+
                 ClientApiId = ClientApiId,
                 IsEnglish = IsEnglish,
                 PageNumber = productSearch.PageNumber,
-                ItemCount = productSearch.ItemCount,
+                ItemCount = productSearch.PageSize,
                 SearchText = productSearch.SearchText,
+                Filter = filterModel
 
             };
 
@@ -234,7 +240,11 @@ public class ValuService : BaseService, IValuService
                 };
 
             }
-            return new GenericResponse<ProductSearchResultWithFiltersDto>();
+            return new GenericResponse<ProductSearchResultWithFiltersDto>
+            {
+                Data = new ProductSearchResultWithFiltersDto(),
+                Status = StaticValues.Success
+            };
         }
         catch (Exception)
         {
@@ -253,6 +263,7 @@ public class ValuService : BaseService, IValuService
             {
                 Id = model.Id,
                 Name = model.Name,
+                MerchantName = model.AdvertiserName,
                 Price = model.Price,
                 Description = model.Description,
                 Brand = model.Brand,
@@ -334,7 +345,7 @@ public class ValuService : BaseService, IValuService
                 {
                     Status = StaticValues.Success,
                     Data = searchResults.Data,
-                    TotalCount = searchResults.TotalCount,
+                    //TotalCount = searchResults.TotalCount,
                 };
             }
             return new GenericResponse<int>()

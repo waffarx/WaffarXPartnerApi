@@ -1,4 +1,6 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+
+namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class ProductSearchResultDto
 {
     public string Id { get; set; }
@@ -25,7 +27,7 @@ public class ProductSearchResultDto
     public FeatureDTO Feature { get; set; }
     public List<PriceVariantDto> PriceVariants { get; set; }
     public List<OptionDto> Options { get; set; }
-    public List<OffersDto> Offers { get; set; }
+    public List<OfferDto> Offers { get; set; }
 }
 
 public class PriceVariantDto
