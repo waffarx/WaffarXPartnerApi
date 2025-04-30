@@ -345,7 +345,7 @@ public class ValuService : BaseService, IValuService
                 {
                     Status = StaticValues.Success,
                     Data = searchResults.Data,
-                    TotalCount = searchResults.TotalCount,
+                    //TotalCount = searchResults.TotalCount,
                 };
             }
             return new GenericResponse<int>()
