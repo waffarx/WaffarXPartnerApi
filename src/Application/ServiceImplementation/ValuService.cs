@@ -154,7 +154,7 @@ public class ValuService : BaseService, IValuService
                             Logo = searchResults.Data?.Store.Logo,
                             Name = searchResults.Data?.Store.Name,
                             LogoPng = searchResults.Data?.Store.LogoPng,
-                            ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + searchResults.Data.Store.Id + "/0",
+                            ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + searchResults.Data.Store.Id,
                         }
                     }
                 };
@@ -202,7 +202,7 @@ public class ValuService : BaseService, IValuService
                         Logo = item.Logo,
                         LogoPng = item.LogoPng,
                         Name = item.Name,
-                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + item.Id + "/0"
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id
                     });
                 }
                 return new GenericResponseWithCount<List<StoreResponseDto>>
@@ -368,10 +368,10 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + model.Store.Id + "/0"
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id
                 },
                 Offers = model?.Offers,
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
             };
             return res;
 
@@ -410,7 +410,7 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Store + model.Store.Id + "/0"
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id 
 
                 },
                 Offers = model?.Offers,
@@ -435,9 +435,14 @@ public class ValuService : BaseService, IValuService
                     Title = v.title,
                     Available = v.available,
                     Options = v.options,
-                    ShoppingURL = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id,
+                    PriceText = v.PriceText,
+                    DiscountedText = v.DiscountedText,
+                    Discounted = v.Discounted,
+                    OldPrice = v.old_price,
+                    OldPriceText = v.OldPriceText,    
+                    ShoppingURL = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id,
                 }).ToList(),
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
 
             };
             return res;
