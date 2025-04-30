@@ -3,7 +3,7 @@
 namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class PriceVariantDto
 {
-    public decimal OldPrice { get; set; }
+    public double OldPrice { get; set; }
     public string ShoppingURL { get; set; }
     public double Price { get; set; }
     public bool Available { get; set; }
@@ -11,6 +11,8 @@ public class PriceVariantDto
     public bool Discounted { get; set; }
     public string DiscountedText { get; set; }
     public List<string> Options { get; set; }
+    public string PriceText { get; set; }
+    public string OldPriceText { get; set; }
 }
 public class OptionDto
 {

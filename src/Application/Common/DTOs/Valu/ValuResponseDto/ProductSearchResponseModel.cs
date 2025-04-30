@@ -68,4 +68,8 @@ public class PriceVariantDTO
     public DateTime updated_at { get; set; }
     public int inventory_quantity { get; set; }
     public List<string> options { get; set; }
+    public bool Discounted { get; set; }
+    public string DiscountedText { get; set; }
+    public string PriceText { get; set; }
+    public string OldPriceText { get; set; }
 }
