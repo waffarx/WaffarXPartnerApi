@@ -2,4 +2,6 @@
 public class SearchFilterDto : FilterBase
 {
     public List<OfferDto> Offers { get; set; }
+    public List<StoreResponseDto> Stores { get; set; }
+
 }

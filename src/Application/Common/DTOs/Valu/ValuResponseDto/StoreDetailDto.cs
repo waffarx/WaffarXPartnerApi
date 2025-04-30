@@ -3,6 +3,6 @@
 namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class StoreDetailDto
 {
-    public StoreDto Store { get; set; }
-    public List<ProductSearchResultDto> StoreFeaturedProducts { get; set; }
+    public StoreResponseDto Store { get; set; }
+    public List<BaseProductSearchResultDto> StoreFeaturedProducts { get; set; }
 }

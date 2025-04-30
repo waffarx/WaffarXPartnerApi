@@ -6,9 +6,9 @@ namespace WaffarXPartnerApi.Application.ServiceInterface;
 public interface IValuService
 {
     Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch);
-    Task<GenericResponse<ProductSearchResultDto>> GetProductDetails(string id);
-    Task<GenericResponse<List<ProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
+    Task<GenericResponse<DetailedProductSearchResultDto>> GetProductDetails(string id);
+    Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
     Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
-    Task<GenericResponseWithCount<List<StoreDto>>> GetStores(GetStoresRequestDto model);
+    Task<GenericResponseWithCount<List<StoreResponseDto>>> GetStores(GetStoresRequestDto model);
     Task<GenericResponse<int>> CreateExitClick(string section, Guid storeId, string productId = "");
 }
