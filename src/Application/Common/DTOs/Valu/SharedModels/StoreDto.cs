@@ -1,4 +1,4 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
+﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 public class StoreDto
 {
     public Guid Id { get; set; }

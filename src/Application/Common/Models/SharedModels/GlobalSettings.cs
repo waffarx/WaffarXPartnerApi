@@ -24,6 +24,8 @@ public static class AppSettings
             public static string Microsoft { get;  set; }
             public static string MicrosoftHostingLifetime { get;  set; }
         }
+        public static string SeqServerUrl { get; set; }
+
     }
 
     public static string AllowedHosts { get;  set; }
@@ -57,27 +59,12 @@ public static class AppSettings
         public static string Application { get;  set; }
     }
 
-    public static class WaffarXSettings
-    {
-        public static string BaseImgUrl { get;  set; }
-        public static string ExitClickBaseUrl { get;  set; }
-        public static string MobExitClickBaseUrl { get;  set; }
-        public static string ECBaseUrl { get;  set; }
-        public static string InStoreBackgroundImage { get;  set; }
-        public static string ErrorPage { get;  set; }
-        public static string Environment { get;  set; }
-        public static string FlagLink { get;  set; }
-        public static string ProductsError { get;  set; }
-        public static string ZenDeskUrl { get;  set; }
-        public static string ZenDeskToken { get; set; }
-        public static List<string> StorePageSections { get;  set; }
-        public static string RecaptchaPrivateKey { get; set; }
-        public static string RecaptchaBaseUrl { get; set; }
-    }
     public static class ExternalApis
     {
         public static string ValuUrl { get; set; }
         public static string SharedApiUrl { get; set; }
+        public static string ExitClickBaseUrl {get; set; }
+
     }
     public static void Initialize(IConfiguration configuration)
     {
@@ -86,50 +73,17 @@ public static class AppSettings
         ConnectionStrings.MongoConnection = configuration["ConnectionStrings:MongoConnection"];
         ConnectionStrings.WaffarXConnection = configuration["ConnectionStrings:WaffarXConnection"];
         ConnectionStrings.MongoDatabaseName = configuration["ConnectionStrings:MongoDatabaseName"];
-        //ConnectionStrings.Redis = configuration["ConnectionStrings:Redis"];
 
         // Logging
         Logging.LogLevel.Default = configuration["Logging:LogLevel:Default"];
         Logging.LogLevel.Microsoft = configuration["Logging:LogLevel:Microsoft"];
         Logging.LogLevel.MicrosoftHostingLifetime = configuration["Logging:LogLevel:Microsoft.Hosting.Lifetime"];
-
+        Logging.SeqServerUrl = configuration["Logging:SeqServerUrl"];
         // Allowed Hosts
         AllowedHosts = configuration["AllowedHosts"];
         ExternalApis.ValuUrl = configuration["ExternalApis:ValuUrl"];
         ExternalApis.SharedApiUrl = configuration["ExternalApis:SharedApiUrl"];
-
-        //// JWT Settings
-        //JwtSettings.SecretKey = configuration["JwtSettings:SecretKey"];
-        //JwtSettings.Issuer = configuration["JwtSettings:Issuer"];
-        //JwtSettings.Audience = configuration["JwtSettings:Audience"];
-        //JwtSettings.ExpiryInMinutes = int.Parse(configuration["JwtSettings:ExpiryInMinutes"]);
-
-        //// Serilog Settings
-        //Serilog.Using = configuration.GetSection("Serilog:Using").ToString().Split(',');
-        //Serilog.MinimumLevel.Default = configuration["Serilog:MinimumLevel:Default"];
-        //Serilog.MinimumLevel.OverrideMicrosoft = configuration["Serilog:MinimumLevel:Override:Microsoft"];
-        //Serilog.MinimumLevel.OverrideSystem = configuration["Serilog:MinimumLevel:Override:System"];
-        //Serilog.WriteTo.FilePath = configuration["Serilog:WriteTo:1:Args:path"];
-        //Serilog.WriteTo.FileRollingInterval = configuration["Serilog:WriteTo:1:Args:rollingInterval"];
-        //Serilog.Enrich = configuration.GetSection("Serilog:Enrich").ToString().Split(',');
-        //Serilog.Application = configuration["Serilog:Properties:Application"];
-
-        //// WaffarX Settings
-        //WaffarXSettings.BaseImgUrl = configuration["WaffarXSettings:BaseImgUrl"];
-        //WaffarXSettings.ExitClickBaseUrl = configuration["WaffarXSettings:ExitClickBaseUrl"];
-        //WaffarXSettings.MobExitClickBaseUrl = configuration["WaffarXSettings:MobExitClickBaseUrl"];
-        //WaffarXSettings.ECBaseUrl = configuration["WaffarXSettings:ECBaseUrl"];
-        //WaffarXSettings.InStoreBackgroundImage = configuration["WaffarXSettings:InStoreBackgroundImage"];
-        //WaffarXSettings.ErrorPage = configuration["WaffarXSettings:ErrorPage"];
-        //WaffarXSettings.Environment = configuration["WaffarXSettings:Environment"];
-        //WaffarXSettings.FlagLink = configuration["WaffarXSettings:FlagLink"];
-        //WaffarXSettings.ProductsError = configuration["WaffarXSettings:ProductsError"];
-        //WaffarXSettings.ZenDeskUrl = configuration["WaffarXSettings:ZenDeskUrl"];
-        //WaffarXSettings.ZenDeskToken = configuration["WaffarXSettings:ZenDeskToken"];
-        //WaffarXSettings.StorePageSections = configuration.GetSection("WaffarXSettings:StorePageSections").GetChildren().Select(s => s.Value).ToList();
-        //WaffarXSettings.RecaptchaPrivateKey = configuration["WaffarXSettings:RecaptchaPrivateKey"];
-        //WaffarXSettings.RecaptchaBaseUrl = configuration["WaffarXSettings:RecaptchaBaseUrl"];
-
+        ExternalApis.ExitClickBaseUrl = configuration["ExternalApis:ExitClickBaseUrl"];
 
     }
 }

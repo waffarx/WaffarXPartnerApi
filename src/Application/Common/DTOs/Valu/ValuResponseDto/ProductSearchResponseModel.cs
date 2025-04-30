@@ -1,4 +1,6 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+
+namespace WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 public class ProductSearchResponseModel
 {
     public string ASIN { get; set; }
@@ -47,14 +49,9 @@ public class ProductSearchResponseModel
     public int RelevanceScoreFuzzy { get; set; }
     public List<PriceVariantDTO> price_variants { get; set; }
     public Object options { get; set; }
-    public List<OffersDto> Offers { get; set; }
+    public List<OfferDto> Offers { get; set; }
     public StoreDto Store { get; set; }
 
-}
-public class OffersDto
-{
-    public string OfferId { get; set; }
-    public string Name { get; set; }
 }
 public class PriceVariantDTO
 {

@@ -36,7 +36,7 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.FromLogContext()
     .Enrich.WithMachineName()
     .Enrich.WithExceptionDetails() // Adds detailed exception information
-    .WriteTo.Seq("https://seq.waffarx.com/") // Seq server URL - adjust as needed
+    .WriteTo.Seq(AppSettings.Logging.SeqServerUrl)
     .CreateLogger();
 builder.Host.UseSerilog();
 

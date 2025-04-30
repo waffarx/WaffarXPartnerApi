@@ -4,7 +4,7 @@ namespace WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 public class GetStoresRequestDto
 {
     public int PageNumber { get; set; }
-    public int ItemCount { get; set; }
+    public int PageSize { get; set; }
 }
 public class GetStoresDto : BaseSharedDto
 {

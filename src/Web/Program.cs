@@ -1,3 +1,4 @@
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
@@ -9,7 +10,11 @@ builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
-
+builder.Services.AddHttpClient<IHttpService, HttpService>(client =>
+{
+    client.BaseAddress = new Uri(AppSettings.ExternalApis.SharedApiUrl);
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
