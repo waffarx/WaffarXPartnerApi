@@ -2,5 +2,6 @@
 public class StoreResponseDto : StoreDto
 {
     public string ShoppingUrl { get; set; }
+    public string ShoppingUrlBase { get; set; }
 
 }

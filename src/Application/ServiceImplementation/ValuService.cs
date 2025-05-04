@@ -317,9 +317,10 @@ public class ValuService : BaseService, IValuService
         }
     }
 
-    public async Task<string> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
+    public async Task<GenericResponse<string>> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
         , string shoppingTripIdentifier = "", string variant = "")
     {
+        GenericResponse<string> response = new GenericResponse<string>();
         try
         {
             // Get All Data Needed
@@ -339,12 +340,18 @@ public class ValuService : BaseService, IValuService
                 AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
                 requestBody,
                 headers);
-            if (searchResults.Status == StaticValues.Success
-                && searchResults.Data != null && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
+            if (searchResults != null  && searchResults.Data != null && searchResults.Status == StaticValues.Success
+                 && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
             {
-                return searchResults.Data.RedirectUrl;
+                response.Status = StaticValues.Success; 
+                response.Data =  searchResults.Data.RedirectUrl;
+                return response;
             }
-            return "";
+
+            response.Status = StaticValues.Error;
+            response.Data = "";
+            response.Errors = new List<string>();   
+            return response;
         }
         catch (Exception)
         {
@@ -379,10 +386,12 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id,
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id,
                 },
                 Offers = model?.Offers,
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id,
+                ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
             };
             return res;
 
@@ -421,7 +430,8 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id 
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id, 
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id 
 
                 },
                 Offers = model?.Offers,
@@ -452,8 +462,10 @@ public class ValuService : BaseService, IValuService
                     OldPrice = v.old_price,
                     OldPriceText = v.OldPriceText,    
                     ShoppingURL = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id,
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id
                 }).ToList(),
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id,
+                ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
 
             };
             return res;

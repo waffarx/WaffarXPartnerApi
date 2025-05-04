@@ -58,7 +58,7 @@ public class ValuController : ControllerBase
         ,string subId = "", string variant = "")
     {
         var result = await _valuService.CreateExitClick(section, storeId, productId, UId, subId, variant);
-        return RedirectPermanent(result);
+        return Ok(result);
     }
 
 }
