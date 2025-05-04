@@ -1,3 +1,5 @@
+using FluentValidation.AspNetCore;
+using FluentValidation;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using PartnerWebApi.Infrastructure;
 using Serilog;
@@ -10,16 +12,22 @@ using WaffarXPartnerApi.Application.ServiceInterface;
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);
 
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
+builder.Services.AddFluentValidationAutoValidation();
+
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
-
 builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers();
 
 builder.Services.AddScoped<IClientService, ClientService>();
+
 builder.Services.AddHttpClient<IHttpService, HttpService>(client =>
 {
     client.BaseAddress = new Uri(AppSettings.ExternalApis.SharedApiUrl);
@@ -38,22 +46,23 @@ Log.Logger = new LoggerConfiguration()
     .Enrich.WithExceptionDetails() // Adds detailed exception information
     .WriteTo.Seq(AppSettings.Logging.SeqServerUrl)
     .CreateLogger();
+
 builder.Host.UseSerilog();
 
 var app = builder.Build();
 
 app.MapGet("/web", () => Results.Redirect("/swagger"));
 app.UseOpenApi();
-app.UseSwaggerUi(settings =>
-{
-    settings.Path = "/swagger";
 
-    settings.DocumentPath = "/swagger/v1/swagger.json";
-});
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //await app.InitialiseDatabaseAsync();
+    app.UseSwaggerUi(settings =>
+    {
+        settings.Path = "/swagger";
+
+        settings.DocumentPath = "/swagger/v1/swagger.json";
+    });
 }
 else
 {
@@ -76,7 +85,7 @@ app.MapFallbackToFile("index.html");
 app.UseExceptionHandler(options => { });
 
 app.MapEndpoints();
-app.UseMiddleware<AuthenticationMiddleware>();
+//app.UseMiddleware<AuthenticationMiddleware>();
 app.UseExceptionHandlingMiddleware();
 
 app.Run();

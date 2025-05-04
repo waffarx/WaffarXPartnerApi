@@ -1,5 +1,7 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
-using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 namespace WaffarXPartnerApi.Application.ServiceInterface;

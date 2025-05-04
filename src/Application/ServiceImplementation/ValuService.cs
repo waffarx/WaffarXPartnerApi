@@ -2,6 +2,9 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
 using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -10,18 +13,21 @@ using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 public class ValuService : BaseService, IValuService
 {
     private readonly IHttpService _httpService;
     private readonly IApiClientRepository _apiClientRepository;
+    private readonly IAdvertiserRepository _advertiserRepository;
 
     public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor
-        , IApiClientRepository apiClientRepository) : base(httpContextAccessor)
+        , IApiClientRepository apiClientRepository, IAdvertiserRepository advertiserRepository) : base(httpContextAccessor)
     {
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
+        _advertiserRepository = advertiserRepository;   
     }
 
     public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
@@ -62,7 +68,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
             {
                 Data = new List<BaseProductSearchResultDto>(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
                 TotalCount = 0,
             };
         }
@@ -105,7 +111,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<DetailedProductSearchResultDto>()
             {
                 Data = new DetailedProductSearchResultDto(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch (Exception)
@@ -162,7 +168,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<StoreDetailDto>()
             {
                 Data = new StoreDetailDto(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch(Exception)
@@ -215,7 +221,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponseWithCount<List<StoreResponseDto>>
             {
                 Data = new List<StoreResponseDto>(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch(Exception)
@@ -239,10 +245,16 @@ public class ValuService : BaseService, IValuService
             SearchFilterModel filterModel = null;
             if (productSearch.Filter != null)
             {
+                List<int> storeIds = new List<int>();
+                if (productSearch.Filter.Stores?.Count > 0)
+                {
+                    List<Guid> guids = productSearch.Filter.Stores.Select(sg => new Guid(sg)).ToList();
+                    storeIds = await _advertiserRepository.GetStoreIds(guids);
+                }
                 filterModel = new SearchFilterModel
                 {
-                    Brands = productSearch?.Filter?.Brands,
-                    Stores = productSearch?.Filter?.Stores,
+                    Brands = productSearch?.Filter?.Brand,
+                    Stores = storeIds,
                     MinPrice = productSearch?.Filter?.MinPrice ?? 0,
                     MaxPrice = productSearch?.Filter?.MaxPrice ?? 0,
                     OfferId = productSearch?.Filter?.OfferId
@@ -252,7 +264,7 @@ public class ValuService : BaseService, IValuService
             ProductSearchDto requestBody = new ProductSearchDto
             {
 
-                ClientApiId = ClientApiId,
+                ClientApiId = ClientApiId.Value,
                 IsEnglish = IsEnglish,
                 PageNumber = productSearch.PageNumber,
                 ItemCount = productSearch.PageSize,
@@ -296,7 +308,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<ProductSearchResultWithFiltersDto>
             {
                 Data = new ProductSearchResultWithFiltersDto(),
-                Status = StaticValues.Success
+                Status = StaticValues.Error
             };
         }
         catch (Exception)
@@ -343,7 +355,6 @@ public class ValuService : BaseService, IValuService
     {
         try
         {
-
             if (model == null)
                 return null;
             BaseProductSearchResultDto res = new BaseProductSearchResultDto

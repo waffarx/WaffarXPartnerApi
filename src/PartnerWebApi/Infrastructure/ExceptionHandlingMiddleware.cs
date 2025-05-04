@@ -2,6 +2,8 @@
 using System.Text;
 using System.Text.Json;
 using Microsoft.IO;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
+using WaffarXPartnerApi.Domain.Models.SharedModels;
 
 public class ExceptionHandlingMiddleware
 {
@@ -72,18 +74,20 @@ public class ExceptionHandlingMiddleware
             ArgumentException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             KeyNotFoundException => StatusCodes.Status404NotFound,
-            _ => StatusCodes.Status500InternalServerError
+            _ => StatusCodes.Status404NotFound
         };
 
         var environment = context.RequestServices.GetService<IWebHostEnvironment>();
         var isDevelopment = environment?.IsDevelopment() ?? false;
 
-        var errorResponse = new
-        {
-            message = exception.Message,
-            statusCode = context.Response.StatusCode,
-            detailedError = isDevelopment ? exception.StackTrace : null
-        };
+        var errorResponse = new GenericResponse<object>() { Status = StaticValues.Error, Errors = new List<string>() };
+
+        //var errorResponse = new
+        //{
+        //    message = exception.Message,
+        //    statusCode = context.Response.StatusCode,
+        //    detailedError = isDevelopment ? exception.StackTrace : null
+        //};
 
         return context.Response.WriteAsync(JsonSerializer.Serialize(errorResponse));
     }
