@@ -85,7 +85,7 @@ app.MapFallbackToFile("index.html");
 app.UseExceptionHandler(options => { });
 
 app.MapEndpoints();
-//app.UseMiddleware<AuthenticationMiddleware>();
+app.UseMiddleware<AuthenticationMiddleware>();
 app.UseExceptionHandlingMiddleware();
 
 app.Run();

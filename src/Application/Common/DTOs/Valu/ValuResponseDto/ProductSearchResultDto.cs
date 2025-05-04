@@ -5,6 +5,7 @@ public class PriceVariantDto
 {
     public double OldPrice { get; set; }
     public string ShoppingURL { get; set; }
+    public string ShoppingUrlBase { get; set; }
     public double Price { get; set; }
     public bool Available { get; set; }
     public string Title { get; set; }
@@ -38,6 +39,7 @@ public class BaseProductSearchResultDto
     public string PrimaryImg { get; set; }
     public string ErrorImg { get; set; }
     public string ShoppingUrl { get; set; }
+    public string ShoppingUrlBase { get; set; }
     public List<string> VariantsImgs { get; set; }
     public StoreResponseDto Store { get; set; }
     public List<OfferDto> Offers { get; set; }
