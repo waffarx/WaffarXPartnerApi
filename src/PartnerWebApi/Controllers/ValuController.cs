@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
 namespace PartnerWebApi.Controllers;
@@ -43,12 +45,14 @@ public class ValuController : ControllerBase
         var result = await _valuService.GetProductDetails(id);
         return Ok(result);
     }
+
     [HttpGet("getstoredetails/{id}")]
     public async Task<IActionResult> GetStoreDetails(Guid id)
     {
         var result = await _valuService.GetStoreDetails(id);
         return Ok(result);
     }
+
     [HttpGet("shoppingtrip/{section}/{storeId}/{productId?}")]
     public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "", string UId = ""
         ,string subId = "", string variant = "")
