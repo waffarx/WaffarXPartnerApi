@@ -5,7 +5,7 @@ namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 public class JWTUserBaseService
 {
     public int ClientApiId { get; set; }
-    public string UserLanguage { get; set; }
+    private string UserLanguage { get; set; }
     public bool IsEnglish { get; set; }
 
     // User claims from JWT token  
