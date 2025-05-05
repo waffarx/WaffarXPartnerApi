@@ -533,14 +533,7 @@ public class ValuService : BaseService, IValuService
                     Data = new ProductSearchResultWithFiltersDto
                     {
                         Products = products,
-                        Filters = new SearchFilterDto
-                        {
-                            Brands = searchResults.Data.Filters?.Brands,
-                            Stores = searchResults.Data.Filters?.Stores,
-                            MinPrice = searchResults.Data.Filters.MinPrice,
-                            MaxPrice = searchResults.Data.Filters.MaxPrice,
-                            Offers = searchResults.Data.Filters?.Offers,
-                        }
+                        Filters = null
                     }
                 };
 
