@@ -58,7 +58,7 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> ShoppingTrip(string section, Guid storeId, string productId = "", string uId = ""
         ,string subId = "", string variant = "")
     {
-        var result = await _valuService.CreateExitClick(section, storeId, productId, UId, subId, variant);
+        var result = await _valuService.CreateExitClick(section, storeId, productId, uId, subId, variant);
         return Ok(result);
     }
 
