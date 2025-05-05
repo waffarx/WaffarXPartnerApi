@@ -6,6 +6,9 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInte
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceImplementation;
+using WaffarXPartnerApi.Application.Helper;
+using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -37,15 +40,21 @@ public static class DependencyInjection
         services.AddMongoDb(configuration);
 
         services.AddSingleton(TimeProvider.System);
+
         #region Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IApiClientRepository, ApiClientRepository>();
         #endregion
 
-
-        //services.AddScoped<IClientService, ClientService>();
+        #region Services
         services.AddScoped<IValuService, ValuService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IStoreSettingService, StoreSettingService>();
+
+        #endregion
 
 
         return services;

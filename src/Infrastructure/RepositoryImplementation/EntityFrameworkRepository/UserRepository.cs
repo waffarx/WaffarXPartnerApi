@@ -54,9 +54,18 @@ public class UserRepository : IUserRepository
 
     public async Task<bool> UpdateAsync(User user)
     {
-        user.UpdatedAt = DateTime.UtcNow;
-        _context.Users.Update(user);
-        var updated = await _context.SaveChangesAsync();
+        var updated = 0;
+        if (user != null)
+        {
+            user.UpdatedAt = DateTime.UtcNow;
+            // Copy all properties EXCEPT UserId
+            _context.Entry(user).CurrentValues.SetValues(user);
+
+            // Explicitly prevent UserId from being updated
+            _context.Entry(user).Property(x => x.UserId).IsModified = false;
+
+            updated = await _context.SaveChangesAsync();
+        }
         return updated > 0;
     }
 }

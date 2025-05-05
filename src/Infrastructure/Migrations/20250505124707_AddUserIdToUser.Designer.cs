@@ -3,17 +3,20 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using WaffarXPartnerApi.Infrastructure.Data;
 
 #nullable disable
 
-namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
+namespace WaffarXPartnerApi.Infrastructure.Migrations
 {
     [DbContext(typeof(WaffarXPartnerDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250505124707_AddUserIdToUser")]
+    partial class AddUserIdToUser
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -150,6 +153,41 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .HasDatabaseName("IX_PageActions_PageId");
 
                     b.ToTable("PageActions");
+                });
+
+            modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.Team", b =>
@@ -289,6 +327,12 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
+                    b.Property<int>("UserId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
                     b.Property<string>("Username")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -363,6 +407,17 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.Navigation("Page");
                 });
 
+            modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.RefreshToken", b =>
+                {
+                    b.HasOne("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.TeamPageAction", b =>
                 {
                     b.HasOne("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.User", "CreatedByUser")
@@ -426,6 +481,8 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.User", b =>
                 {
                     b.Navigation("AuditLogs");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("TeamPageActions");
 

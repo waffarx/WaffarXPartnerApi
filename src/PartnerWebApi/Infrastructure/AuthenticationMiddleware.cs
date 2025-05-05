@@ -7,7 +7,6 @@ using System.Security.Cryptography;
 using System.Text;
 using WaffarXPartnerApi.Application.Common.DTOs;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
-using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 

@@ -85,5 +85,11 @@ public static class AppSettings
         ExternalApis.SharedApiUrl = configuration["ExternalApis:SharedApiUrl"];
         ExternalApis.ExitClickBaseUrl = configuration["ExternalApis:ExitClickBaseUrl"];
 
+        // JWT Settings
+        JwtSettings.SecretKey = configuration["JwtSettings:SecretKey"];
+        JwtSettings.Issuer = configuration["JwtSettings:Issuer"];
+        JwtSettings.Audience = configuration["JwtSettings:Audience"];
+        JwtSettings.ExpiryInMinutes = int.Parse(configuration["JwtSettings:ExpiryInMinutes"]);
+
     }
 }

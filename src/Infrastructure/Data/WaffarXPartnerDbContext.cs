@@ -1,6 +1,7 @@
-﻿using System.Reflection;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Design;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Infrastructure.Data.Configurations;
 
 namespace WaffarXPartnerApi.Infrastructure.Data;
 
@@ -24,6 +25,26 @@ public class WaffarXPartnerDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder builder)
     {
         base.OnModelCreating(builder);
-        builder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
+        builder.ApplyConfiguration(new AuditLogConfiguration());
+        builder.ApplyConfiguration(new PageActionConfiguration());
+        builder.ApplyConfiguration(new PageConfiguration());
+        builder.ApplyConfiguration(new TeamConfiguration());
+        builder.ApplyConfiguration(new TeamPageActionConfiguration());
+        builder.ApplyConfiguration(new UserConfiguration());
+        builder.ApplyConfiguration(new UserTeamConfiguration());
+        builder.ApplyConfiguration(new RefreshTokenConfigration());
+    }
+}
+public class WaffarXPartnerDbContextFactory : IDesignTimeDbContextFactory<WaffarXPartnerDbContext>
+{
+    public WaffarXPartnerDbContext CreateDbContext(string[] args)
+    {
+
+        var connectionString = "Server=34.73.19.195;Database=WaffarxPartners;user id=wx-partners;password=r1trERlb@6ci4$e;MultipleActiveResultSets=true;TrustServerCertificate=True;";
+
+        var optionsBuilder = new DbContextOptionsBuilder<WaffarXPartnerDbContext>();
+        optionsBuilder.UseSqlServer(connectionString);
+
+        return new WaffarXPartnerDbContext(optionsBuilder.Options);
     }
 }
