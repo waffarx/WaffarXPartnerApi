@@ -7,7 +7,5 @@ public class StoreProductSearchRequestDtoValidator : AbstractValidator<StoreProd
         RuleFor(x => x.PageNumber).NotNull().GreaterThanOrEqualTo(1).WithMessage("ValuPageNumberMinLength");
         RuleFor(x => x.PageSize).NotNull().GreaterThanOrEqualTo(1).WithMessage("ValuPageSizeMinLength");
         RuleFor(x => x.PageSize).NotNull().LessThanOrEqualTo(50).WithMessage("ValuPageSizeLength");
-
-        RuleFor(x => x.MinPrice).NotNull().GreaterThanOrEqualTo(0).WithMessage("ValuMinPriceMinLength");
     }
 }
