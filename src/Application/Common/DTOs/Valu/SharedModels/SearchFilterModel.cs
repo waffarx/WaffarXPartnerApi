@@ -4,5 +4,6 @@ public class SearchFilterModel : FilterBase
     public string OfferId { get; set; }
     public string Brands { get; set; }
     public List<int> Stores { get; set; }
+    public string Category { get; set; }
 
 }
