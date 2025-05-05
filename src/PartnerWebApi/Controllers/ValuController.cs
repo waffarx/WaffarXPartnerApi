@@ -69,4 +69,11 @@ public class ValuController : ControllerBase
         var result = await _valuService.StoreSearchProduct(query);
         return Ok(result);
     }
+
+    [HttpGet("getstorecategories/{id}")]
+    public async Task<IActionResult> GetStoredCategories(Guid id)
+    {
+        var result = await _valuService.GetStoreCategories(id);
+        return Ok(result);
+    }
 }

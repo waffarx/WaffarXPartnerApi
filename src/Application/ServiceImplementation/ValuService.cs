@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedP
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -477,7 +478,6 @@ public class ValuService : BaseService, IValuService
             throw;
         }
     }
-
     public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch)
     {
         try
@@ -554,6 +554,52 @@ public class ValuService : BaseService, IValuService
         catch (Exception)
         {
             throw;
+        }
+    }
+    public async Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+
+            GetStoreDto store = new GetStoreDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                StoreId = storeId
+            };
+
+            // Make the POST request using our generic HTTP service
+            var stroreCategoriesResults = await _httpService.PostAsync<GenericResponse<StoreCategoriesModel>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoreCategories",
+                store,
+                headers);
+            if (stroreCategoriesResults.Status == StaticValues.Success && stroreCategoriesResults.Data != null
+                && stroreCategoriesResults.Data.StoreId > 0 
+                && (stroreCategoriesResults.Data.EnCategoriesList?.Count > 0 || stroreCategoriesResults.Data.ArCategoriesList?.Count > 0))
+            {
+                return new GenericResponse<StoreCategoriesDto>
+                {
+                    Status = StaticValues.Success,
+                    Data = new StoreCategoriesDto
+                    {
+                        CategoriesEn = stroreCategoriesResults.Data.EnCategoriesList,
+                        CategoriesAr = stroreCategoriesResults.Data.ArCategoriesList,
+                    }
+                };
+            }
+            return new GenericResponse<StoreCategoriesDto>()
+            {
+                Data = new StoreCategoriesDto(),
+                Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw; 
         }
     }
 
