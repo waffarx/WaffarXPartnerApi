@@ -64,6 +64,7 @@ public static class AppSettings
         public static string ValuUrl { get; set; }
         public static string SharedApiUrl { get; set; }
         public static string ExitClickBaseUrl {get; set; }
+        public static string EClickAuthBaseUrl {get; set; }
 
     }
     public static void Initialize(IConfiguration configuration)
@@ -84,6 +85,7 @@ public static class AppSettings
         ExternalApis.ValuUrl = configuration["ExternalApis:ValuUrl"];
         ExternalApis.SharedApiUrl = configuration["ExternalApis:SharedApiUrl"];
         ExternalApis.ExitClickBaseUrl = configuration["ExternalApis:ExitClickBaseUrl"];
+        ExternalApis.EClickAuthBaseUrl = configuration["ExternalApis:ExitClickAuthBaseUrl"];
 
         // JWT Settings
         JwtSettings.SecretKey = configuration["JwtSettings:SecretKey"];

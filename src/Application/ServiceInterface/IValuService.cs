@@ -1,5 +1,8 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
-using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 namespace WaffarXPartnerApi.Application.ServiceInterface;
@@ -10,6 +13,8 @@ public interface IValuService
     Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
     Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
     Task<GenericResponseWithCount<List<StoreResponseDto>>> GetStores(GetStoresRequestDto model);
-    Task<string> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
+    Task<GenericResponse<string>> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
         ,string shoppingTripIdentifier = "", string variant = "");
+
+    Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch);
 }

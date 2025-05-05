@@ -2,6 +2,10 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
 using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -10,18 +14,21 @@ using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 public class ValuService : BaseService, IValuService
 {
     private readonly IHttpService _httpService;
     private readonly IApiClientRepository _apiClientRepository;
+    private readonly IAdvertiserRepository _advertiserRepository;
 
     public ValuService(IHttpService httpService, IHttpContextAccessor httpContextAccessor
-        , IApiClientRepository apiClientRepository) : base(httpContextAccessor)
+        , IApiClientRepository apiClientRepository, IAdvertiserRepository advertiserRepository) : base(httpContextAccessor)
     {
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
+        _advertiserRepository = advertiserRepository;   
     }
 
     public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
@@ -35,7 +42,7 @@ public class ValuService : BaseService, IValuService
             GetFeaturedProductRequestDto requestObj = new GetFeaturedProductRequestDto
             {
                 ClientApiId = ClientApiId,
-                PageSize = product.PageSize,
+                Count = product.PageSize,
                 PageNumber = product.PageNumber,
                 IsEnglish = IsEnglish,
             };
@@ -62,7 +69,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
             {
                 Data = new List<BaseProductSearchResultDto>(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
                 TotalCount = 0,
             };
         }
@@ -105,7 +112,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<DetailedProductSearchResultDto>()
             {
                 Data = new DetailedProductSearchResultDto(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch (Exception)
@@ -162,7 +169,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponse<StoreDetailDto>()
             {
                 Data = new StoreDetailDto(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch(Exception)
@@ -215,7 +222,7 @@ public class ValuService : BaseService, IValuService
             return new GenericResponseWithCount<List<StoreResponseDto>>
             {
                 Data = new List<StoreResponseDto>(),
-                Status = StaticValues.Success,
+                Status = StaticValues.Error,
             };
         }
         catch(Exception)
@@ -239,12 +246,18 @@ public class ValuService : BaseService, IValuService
             SearchFilterModel filterModel = null;
             if (productSearch.Filter != null)
             {
+                List<int> storeIds = new List<int>();
+                if (productSearch.Filter.Stores?.Count > 0)
+                {
+                    List<Guid> guids = productSearch.Filter.Stores.Select(sg => new Guid(sg)).ToList();
+                    storeIds = await _advertiserRepository.GetStoreIds(guids);
+                }
                 filterModel = new SearchFilterModel
                 {
-                    Brands = productSearch?.Filter?.Brands,
-                    Stores = productSearch?.Filter?.Stores,
-                    MinPrice = productSearch?.Filter?.MinPrice ?? 0,
-                    MaxPrice = productSearch?.Filter?.MaxPrice ?? 0,
+                    Brands = productSearch?.Filter?.Brand,
+                    Stores = storeIds,
+                    MinPrice = productSearch?.Filter?.MinPrice,
+                    MaxPrice = productSearch?.Filter?.MaxPrice,
                     OfferId = productSearch?.Filter?.OfferId
                 };
 
@@ -252,7 +265,7 @@ public class ValuService : BaseService, IValuService
             ProductSearchDto requestBody = new ProductSearchDto
             {
 
-                ClientApiId = ClientApiId,
+                ClientApiId = ClientApiId.Value,
                 IsEnglish = IsEnglish,
                 PageNumber = productSearch.PageNumber,
                 ItemCount = productSearch.PageSize,
@@ -295,8 +308,8 @@ public class ValuService : BaseService, IValuService
             }
             return new GenericResponse<ProductSearchResultWithFiltersDto>
             {
-                Data = new ProductSearchResultWithFiltersDto(),
-                Status = StaticValues.Success
+                Data = new ProductSearchResultWithFiltersDto() { },
+                Status = StaticValues.Error
             };
         }
         catch (Exception)
@@ -305,9 +318,10 @@ public class ValuService : BaseService, IValuService
         }
     }
 
-    public async Task<string> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
+    public async Task<GenericResponse<string>> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
         , string shoppingTripIdentifier = "", string variant = "")
     {
+        GenericResponse<string> response = new GenericResponse<string>();
         try
         {
             // Get All Data Needed
@@ -327,12 +341,18 @@ public class ValuService : BaseService, IValuService
                 AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
                 requestBody,
                 headers);
-            if (searchResults.Status == StaticValues.Success
-                && searchResults.Data != null && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
+            if (searchResults != null  && searchResults.Data != null && searchResults.Status == StaticValues.Success
+                 && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
             {
-                return searchResults.Data.RedirectUrl;
+                response.Status = StaticValues.Success; 
+                response.Data =  searchResults.Data.RedirectUrl;
+                return response;
             }
-            return "";
+
+            response.Status = StaticValues.Error;
+            response.Data = "";
+            response.Errors = new List<string>();   
+            return response;
         }
         catch (Exception)
         {
@@ -343,7 +363,6 @@ public class ValuService : BaseService, IValuService
     {
         try
         {
-
             if (model == null)
                 return null;
             BaseProductSearchResultDto res = new BaseProductSearchResultDto
@@ -368,10 +387,12 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id,
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id,
                 },
                 Offers = model?.Offers,
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id,
+                ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
             };
             return res;
 
@@ -410,7 +431,8 @@ public class ValuService : BaseService, IValuService
                     Logo = model?.Store?.Logo,
                     Name = model?.Store?.Name,
                     LogoPng = model?.Store?.LogoPng,
-                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id 
+                    ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id, 
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id 
 
                 },
                 Offers = model?.Offers,
@@ -441,12 +463,93 @@ public class ValuService : BaseService, IValuService
                     OldPrice = v.old_price,
                     OldPriceText = v.OldPriceText,    
                     ShoppingURL = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id + StaticValues.Variant + v.variant_id,
+                    ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
                 }).ToList(),
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id,
+                ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
 
             };
             return res;
         
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch)
+    {
+        try
+        {
+            ProductSearchResultWithFiltersDto response = new ProductSearchResultWithFiltersDto();
+
+            // Set up any headers you need
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            SearchFilterModel filterModel = null;
+           
+            List<Guid> guids = new List<Guid>() { storeProductSearch.StoreId };
+            List<int> storeIds = await _advertiserRepository.GetStoreIds(guids);
+
+            filterModel = new SearchFilterModel
+            {
+                Brands = "",
+                Stores = storeIds,
+                MinPrice = storeProductSearch?.MinPrice,
+                MaxPrice = storeProductSearch?.MaxPrice,
+                Category = storeProductSearch?.Category,    
+            };
+
+            ProductSearchDto requestBody = new ProductSearchDto
+            {
+                ClientApiId = ClientApiId.Value,
+                IsEnglish = IsEnglish,
+                PageNumber = storeProductSearch.PageNumber,
+                ItemCount = storeProductSearch.PageSize,
+                SearchText = "",
+                Filter = filterModel
+            };
+
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponse<ValuSearchResponseDto>>(
+                AppSettings.ExternalApis.ValuUrl + "search",
+                requestBody,
+                headers);
+            if (searchResults.Data != null && searchResults.Data.Products.Any())
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+                SearchFilterDto filter = new SearchFilterDto();
+                foreach (var product in searchResults.Data.Products)
+                {
+                    products.Add(MapToBaseProduct(product));
+                }
+
+                return new GenericResponse<ProductSearchResultWithFiltersDto>
+                {
+                    Status = StaticValues.Success,
+                    Data = new ProductSearchResultWithFiltersDto
+                    {
+                        Products = products,
+                        Filters = new SearchFilterDto
+                        {
+                            Brands = searchResults.Data.Filters?.Brands,
+                            Stores = searchResults.Data.Filters?.Stores,
+                            MinPrice = searchResults.Data.Filters.MinPrice,
+                            MaxPrice = searchResults.Data.Filters.MaxPrice,
+                            Offers = searchResults.Data.Filters?.Offers,
+                        }
+                    }
+                };
+
+            }
+            return new GenericResponse<ProductSearchResultWithFiltersDto>
+            {
+                Data = new ProductSearchResultWithFiltersDto(),
+                Status = StaticValues.Error
+            };
         }
         catch (Exception)
         {

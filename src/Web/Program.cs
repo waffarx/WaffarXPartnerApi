@@ -72,7 +72,12 @@ app.UseSwaggerUi(settings =>
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    //await app.InitialiseDatabaseAsync();
+
+    app.UseSwaggerUi(settings =>
+    {
+        settings.Path = "/api";
+        settings.DocumentPath = "/api/specification.json";
+    });
 }
 else
 {
