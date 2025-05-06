@@ -210,7 +210,8 @@ public class ValuService : BaseService, IValuService
                         Logo = item.Logo,
                         LogoPng = item.LogoPng,
                         Name = item.Name,
-                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id
                     });
                 }
                 return new GenericResponseWithCount<List<StoreResponseDto>>
