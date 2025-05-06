@@ -19,7 +19,7 @@ public class ApiClientRepository : IApiClientRepository
         {
             return await _context.ApiClients.Where(ac => ac.Id == Id && ac.IsActive == true).FirstOrDefaultAsync();
         }
-        catch(Exception)
+        catch (Exception)
         {
             // Log the exception
             throw;
@@ -31,7 +31,7 @@ public class ApiClientRepository : IApiClientRepository
     {
         try
         {
-            return await _context.AppUsersClients.Where(ac => ac.UserToken == Id ).Select(x => x.UserId).FirstOrDefaultAsync();
+            return await _context.AppUsersClients.Where(ac => ac.UserToken == Id).Select(x => x.UserId).FirstOrDefaultAsync();
         }
         catch (Exception)
         {
@@ -45,7 +45,7 @@ public class ApiClientRepository : IApiClientRepository
     {
         try
         {
-            return await _context.ApiClients.Where(ac => ac.Id == Id && ac.IsActive == true).Select(c =>c.ClientId).FirstOrDefaultAsync();
+            return await _context.ApiClients.Where(ac => ac.Id == Id && ac.IsActive == true).Select(c => c.ClientId).FirstOrDefaultAsync();
         }
         catch (Exception)
         {
@@ -53,5 +53,20 @@ public class ApiClientRepository : IApiClientRepository
             throw;
         }
 
+    }
+
+    public async Task<Guid> GetClientGuidById(int Id)
+    {
+        try
+        {
+            return await _context.ApiClients
+                .Where(ac => ac.ClientId == Id && ac.IsActive == true)
+                .Select(c => Guid.Parse(c.Id)) // Convert string to Guid  
+                .FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }

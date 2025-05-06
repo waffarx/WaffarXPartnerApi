@@ -5,6 +5,7 @@ using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 public class JwtService : IJwtService
@@ -26,7 +27,9 @@ public class JwtService : IJwtService
                 new Claim("userId", user.Id.ToString()),
                 new Claim("firstName", user.FirstName ?? string.Empty),
                 new Claim("lastName", user.LastName ?? string.Empty),
-                new Claim("clientApiId", user.ClientApiId.ToString())
+                new Claim("clientApiId", user.ClientApiId.ToString()),
+                new Claim("userIdInt", user.UserId.ToString()),
+
             };
 
         if (user.IsSuperAdmin)
@@ -100,9 +103,9 @@ public class JwtService : IJwtService
 }
 public class JwtSettings
 {
-    public string Secret { get; set; }
-    public string Issuer { get; set; }
-    public string Audience { get; set; }
-    public int AccessTokenExpirationMinutes { get; set; }
-    public int RefreshTokenExpirationDays { get; set; }
+    public string Secret { get; set; } = AppSettings.JwtSettings.SecretKey;
+    public string Issuer { get; set; } = AppSettings.JwtSettings.Issuer;
+    public string Audience { get; set; } = AppSettings.JwtSettings.Audience;
+    public int AccessTokenExpirationMinutes { get; set; } = AppSettings.JwtSettings.ExpiryInMinutes;
+    public int RefreshTokenExpirationDays { get; set; } = AppSettings.JwtSettings.ExpiryInMinutes;
 }

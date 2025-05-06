@@ -1,6 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 
 namespace WaffarXPartnerApi.Infrastructure.Data
@@ -12,7 +13,7 @@ namespace WaffarXPartnerApi.Infrastructure.Data
             // Register MongoDB client
             services.AddSingleton<IMongoClient>(sp =>
             {
-                var connectionString = configuration.GetConnectionString("MongoDb");
+                var connectionString = configuration.GetConnectionString("MongoConnection");
                 return new MongoClient(connectionString);
             });
 
@@ -20,7 +21,7 @@ namespace WaffarXPartnerApi.Infrastructure.Data
             services.AddSingleton(sp =>
             {
                 var client = sp.GetRequiredService<IMongoClient>();
-                var databaseName = configuration["ConnectionStrings:MongoDatabaseName"];
+                var databaseName = AppSettings.ConnectionStrings.MongoDatabaseName;
                 return client.GetDatabase(databaseName);
             });
 

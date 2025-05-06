@@ -12,6 +12,9 @@ using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkR
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
 using StackExchange.Redis;
 using Microsoft.Extensions.Logging;
+using WaffarXPartnerApi.Application.Helper;
+using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -47,6 +50,7 @@ public static class DependencyInjection
         });
 
         services.AddSingleton(TimeProvider.System);
+
         #region Repositories
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
@@ -60,9 +64,15 @@ public static class DependencyInjection
         services.AddScoped<ICacheService, CacheService>();
         #endregion
 
-
-        //services.AddScoped<IClientService, ClientService>();
+        #region Services
         services.AddScoped<IValuService, ValuService>();
+        services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IPasswordHasher, PasswordHasher>();
+        services.AddScoped<IStoreSettingService, StoreSettingService>();
+        services.AddScoped<IOfferSettingService, OfferSettingService>();
+
+        #endregion
 
 
         return services;

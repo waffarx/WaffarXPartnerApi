@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
+using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 
 namespace WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 public class StoreSearchSetting
@@ -9,7 +10,7 @@ public class StoreSearchSetting
 
     public string SettingType { get; set; }
 
-    public List<int> StoreIds { get; set; }
+    public List<StoreSettings> Stores { get; set; }
 
     public DateTime CreatedAt { get; set; }
 

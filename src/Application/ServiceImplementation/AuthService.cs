@@ -219,16 +219,16 @@ public class AuthService : IAuthService
             RefreshToken = refreshToken.Token,
             AccessTokenExpiresAt = accessTokenExpiry,
             RefreshTokenExpiresAt = refreshToken.ExpiryDate,
-            User = new UserDto
-            {
-                Id = user.Id,
-                Username = user.Username,
-                Email = user.Email,
-                FirstName = user.FirstName,
-                LastName = user.LastName,
-                IsSuperAdmin = user.IsSuperAdmin,
-                ClientApiId = user.ClientApiId
-            }
+            //User = new UserDto
+            //{
+            //    Id = user.Id,
+            //    Username = user.Username,
+            //    Email = user.Email,
+            //    FirstName = user.FirstName,
+            //    LastName = user.LastName,
+            //    IsSuperAdmin = user.IsSuperAdmin,
+            //    ClientApiId = user.ClientApiId
+            //}
         };
     }
 

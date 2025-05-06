@@ -5,6 +5,5 @@
         public string ClientId { get; set; } = string.Empty;    
         public string Signature { get; set; } = string.Empty;
         public string Date { get; set; } = string.Empty;    
-        public string UserToken { get; set; } = string.Empty;    
     }
 }

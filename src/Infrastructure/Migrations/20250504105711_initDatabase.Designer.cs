@@ -9,11 +9,11 @@ using WaffarXPartnerApi.Infrastructure.Data;
 
 #nullable disable
 
-namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
+namespace WaffarXPartnerApi.Infrastructure.Migrations
 {
     [DbContext(typeof(WaffarXPartnerDbContext))]
-    [Migration("20250414155733_initDb")]
-    partial class initDb
+    [Migration("20250504105711_initDatabase")]
+    partial class initDatabase
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,6 +36,9 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("ClientApiId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -64,11 +67,11 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.HasIndex("CreatedAt")
                         .HasDatabaseName("IX_AuditLogs_Timestamp");
 
+                    b.HasIndex("EntityType")
+                        .HasDatabaseName("IX_AuditLogs_EntityId");
+
                     b.HasIndex("UserId")
                         .HasDatabaseName("IX_AuditLogs_UserId");
-
-                    b.HasIndex("EntityType", "EntityId")
-                        .HasDatabaseName("IX_AuditLogs_EntityType_EntityId");
 
                     b.ToTable("AuditLogs");
                 });
@@ -79,6 +82,9 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<int>("ClientApiId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -104,7 +110,7 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.HasIndex("PageName")
                         .IsUnique();
 
-                    b.ToTable("Pages", (string)null);
+                    b.ToTable("Pages");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.PageAction", b =>
@@ -146,11 +152,42 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.HasIndex("PageId")
                         .HasDatabaseName("IX_PageActions_PageId");
 
-                    b.HasIndex("PageId", "ActionName")
-                        .IsUnique()
-                        .HasDatabaseName("UQ_PageActions_PageId_ActionName");
-
                     b.ToTable("PageActions");
+                });
+
+            modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.Team", b =>
@@ -159,6 +196,9 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
+
+                    b.Property<int>("ClientApiId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -184,7 +224,7 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.HasIndex("TeamName")
                         .IsUnique();
 
-                    b.ToTable("Teams", (string)null);
+                    b.ToTable("Teams");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.TeamPageAction", b =>
@@ -238,8 +278,8 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .HasColumnType("uniqueidentifier")
                         .HasDefaultValueSql("NEWID()");
 
-                    b.Property<Guid?>("ClientApiId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<int>("ClientApiId")
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
@@ -303,7 +343,7 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                     b.HasIndex("Username")
                         .IsUnique();
 
-                    b.ToTable("Users", (string)null);
+                    b.ToTable("Users");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.UserTeam", b =>
@@ -359,6 +399,17 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Page");
+                });
+
+            modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.RefreshToken", b =>
+                {
+                    b.HasOne("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.TeamPageAction", b =>
@@ -424,6 +475,8 @@ namespace WaffarXPartnerApi.Infrastructure.Data.Migrations
             modelBuilder.Entity("WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities.User", b =>
                 {
                     b.Navigation("AuditLogs");
+
+                    b.Navigation("RefreshTokens");
 
                     b.Navigation("TeamPageActions");
 
