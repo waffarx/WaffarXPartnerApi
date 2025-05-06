@@ -7,6 +7,8 @@ public class StoreLookUp
     [BsonId]
     public ObjectId Id { get; set; }
     public int StoreId { get; set; }
+    [BsonGuidRepresentation(GuidRepresentation.Standard)]
+
     public Guid StoreGuid { get; set; }
     public string NameAr { get; set; }
     public string NameEn { get; set; }

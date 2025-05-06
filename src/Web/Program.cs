@@ -11,6 +11,7 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);
 
+builder.Services.AddControllers();
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
 
@@ -18,7 +19,6 @@ builder.Services.AddApplicationServices();
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddWebServices();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddControllers();
 
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddHttpClient<IHttpService, HttpService>(client =>

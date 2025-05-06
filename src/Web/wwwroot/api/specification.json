@@ -16,6 +16,172 @@
         }
       }
     },
+    "/api/OfferSetting/addupdateoffer": {
+      "post": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_AddOrUpdateOffer",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferSettingRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/getoffer": {
+      "get": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_GetOffers",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/getofferdetail": {
+      "post": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_GetOfferDetails",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferDetailRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/addupdatelookup": {
+      "post": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_AddOrUpdateOfferLookUp",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferLookUpRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/getofferlookup": {
+      "get": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_GetOffersLookup",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/StoreSettings/update": {
       "post": {
         "tags": [
@@ -277,6 +443,83 @@
   },
   "components": {
     "schemas": {
+      "OfferSettingRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "offerLookUpId": {
+            "type": "string",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "isProductLevel": {
+            "type": "boolean"
+          },
+          "isStoreLevel": {
+            "type": "boolean"
+          },
+          "storeIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          "productIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "OfferDetailRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "isProductLevel": {
+            "type": "boolean"
+          },
+          "isStoreLevel": {
+            "type": "boolean"
+          }
+        }
+      },
+      "OfferLookUpRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": true
+          },
+          "nameAr": {
+            "type": "string",
+            "nullable": true
+          },
+          "nameEn": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
       "StoreSettingRequestDto": {
         "type": "object",
         "additionalProperties": false,

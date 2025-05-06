@@ -70,6 +70,7 @@ public static class DependencyInjection
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IStoreSettingService, StoreSettingService>();
+        services.AddScoped<IOfferSettingService, OfferSettingService>();
 
         #endregion
 

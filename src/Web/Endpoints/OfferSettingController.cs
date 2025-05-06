@@ -8,11 +8,11 @@ namespace WaffarXPartnerApi.API.Controllers;
 [Authorize]
 [ApiController]
 [Route("api/[controller]")]
-public class OfferSettingsController : ControllerBase
+public class OfferSettingController : ControllerBase
 {
     private readonly IOfferSettingService _offerSettingService;
 
-    public OfferSettingsController(IOfferSettingService offerSettingService)
+    public OfferSettingController(IOfferSettingService offerSettingService)
     {
         _offerSettingService = offerSettingService;
     }

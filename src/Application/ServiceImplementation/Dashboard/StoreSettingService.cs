@@ -3,7 +3,7 @@ using MongoDB.Bson;
 using MongoDB.Driver;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
-using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
@@ -21,7 +21,6 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
     private readonly IMongoCollection<StoreLookUp> _storeLookUpCollection;
 
     private readonly IApiClientRepository _apiClientRepository;
-
     private readonly IHttpService _httpService;
 
 
@@ -106,7 +105,7 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             {
                 ["Content-Type"] = "application/json"
             };
-            var clientGuid =  await _apiClientRepository.GetClientGuidById(ClientApiId);
+            var clientGuid = await _apiClientRepository.GetClientGuidById(ClientApiId);
             GetStoresDto requestBody = new GetStoresDto
             {
                 ClientApiId = clientGuid,
@@ -150,7 +149,6 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             throw;
         }
     }
-
     public async Task<GenericResponse<List<StoreLookUpResponseDto>>> GetStoreLookUp()
     {
         try
@@ -182,7 +180,7 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             };
 
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
