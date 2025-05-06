@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedP
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -210,7 +211,8 @@ public class ValuService : BaseService, IValuService
                         Logo = item.Logo,
                         LogoPng = item.LogoPng,
                         Name = item.Name,
-                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id
                     });
                 }
                 return new GenericResponseWithCount<List<StoreResponseDto>>
@@ -415,14 +417,7 @@ public class ValuService : BaseService, IValuService
                     Data = new ProductSearchResultWithFiltersDto
                     {
                         Products = products,
-                        Filters = new SearchFilterDto
-                        {
-                            Brands = searchResults.Data.Filters?.Brands,
-                            Stores = searchResults.Data.Filters?.Stores,
-                            MinPrice = searchResults.Data.Filters.MinPrice,
-                            MaxPrice = searchResults.Data.Filters.MaxPrice,
-                            Offers = searchResults.Data.Filters?.Offers,
-                        }
+                        Filters = null
                     }
                 };
 
@@ -436,6 +431,52 @@ public class ValuService : BaseService, IValuService
         catch (Exception)
         {
             throw;
+        }
+    }
+    public async Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+
+            GetStoreDto store = new GetStoreDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                StoreId = storeId
+            };
+
+            // Make the POST request using our generic HTTP service
+            var stroreCategoriesResults = await _httpService.PostAsync<GenericResponse<StoreCategoriesModel>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoreCategories",
+                store,
+                headers);
+            if (stroreCategoriesResults.Status == StaticValues.Success && stroreCategoriesResults.Data != null
+                && stroreCategoriesResults.Data.StoreId > 0 
+                && (stroreCategoriesResults.Data.EnCategoriesList?.Count > 0 || stroreCategoriesResults.Data.ArCategoriesList?.Count > 0))
+            {
+                return new GenericResponse<StoreCategoriesDto>
+                {
+                    Status = StaticValues.Success,
+                    Data = new StoreCategoriesDto
+                    {
+                        CategoriesEn = stroreCategoriesResults.Data.EnCategoriesList,
+                        CategoriesAr = stroreCategoriesResults.Data.ArCategoriesList,
+                    }
+                };
+            }
+            return new GenericResponse<StoreCategoriesDto>()
+            {
+                Data = new StoreCategoriesDto(),
+                Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw; 
         }
     }
 
