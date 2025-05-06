@@ -4,8 +4,8 @@ using System.ComponentModel.DataAnnotations;
 namespace WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 public class User
 {
-    //[Key]
-    //[DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int UserId { get; set; }
     public Guid Id { get; set; }
     public string Username { get; set; }
