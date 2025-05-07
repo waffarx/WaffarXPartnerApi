@@ -11,11 +11,13 @@ public class PartnerRepository : IPartnerRepository
 {
     private readonly IMongoCollection<FeaturedProductSetting> _featuredProductCollection;
     private readonly IMongoCollection<StoreSearchSetting> _storeSearchSettingsCollection;
+    private readonly IMongoCollection<FeaturedProductSettingAudit> _featuredProductSettingAuditCollection;
     private readonly IMongoCollection<OfferSetting> _offerSettingsCollection;
     public PartnerRepository(IMongoDatabase database)
     {
         _featuredProductCollection = database.GetCollection<FeaturedProductSetting>("FeaturedProductSetting");
         _storeSearchSettingsCollection = database.GetCollection<StoreSearchSetting>("StoreSearchSetting");
+        _featuredProductSettingAuditCollection = database.GetCollection<FeaturedProductSettingAudit>("FeaturedProductSettingAudit");
         _offerSettingsCollection = database.GetCollection<OfferSetting>("OfferSetting");
 
     }
@@ -164,4 +166,34 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
+    public async Task<bool> DeleteFeaturedProductById(ObjectId productId, int clientApiId, int userId)
+    {
+        try
+        {
+            var filter = Builders<FeaturedProductSetting>.Filter.And(
+                    Builders<FeaturedProductSetting>.Filter.Eq(x=> x.ClientApiId, clientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, productId)
+            );
+
+            // Delete the featured product
+            var result = await _featuredProductCollection.DeleteOneAsync(filter);
+            if (result.DeletedCount > 0)
+            {
+                var featuredProduct = await _featuredProductCollection.Find(filter).FirstOrDefaultAsync();
+                await _featuredProductSettingAuditCollection.InsertOneAsync(new FeaturedProductSettingAudit
+                {
+                    ClientApiId = clientApiId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = userId,
+                    OriginalDocument = featuredProduct
+                });
+            }
+            return result.DeletedCount > 0;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
 }

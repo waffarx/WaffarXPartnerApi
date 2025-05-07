@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
 using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
@@ -25,6 +26,14 @@ public class ProductSettingController : ControllerBase
     public async Task<IActionResult> GetOffers(GetPartnerFeaturedProductDto featuredProductDto)
     {
         var response = await _productSettingService.GetFeaturedProducts(featuredProductDto);
+        return Ok(response);
+
+    }
+
+    [HttpPost("deletefeaturedproducts")]
+    public async Task<IActionResult> DeleteFeaturedProducts(DeleteFeaturedProductDto featuredProductDto)
+    {
+        var response = await _productSettingService.DeleteFeaturedProduct(featuredProductDto);
         return Ok(response);
 
     }
