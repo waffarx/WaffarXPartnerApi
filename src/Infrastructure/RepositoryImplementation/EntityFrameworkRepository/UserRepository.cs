@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
-using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.Data;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository;
@@ -67,5 +67,15 @@ public class UserRepository : IUserRepository
             updated = await _context.SaveChangesAsync();
         }
         return updated > 0;
+    }
+
+    public Task<bool> AssignUserToTeam(Guid userId, Guid teamId)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> RemoveUserFromTeam(Guid userId, Guid teamId)
+    {
+        throw new NotImplementedException();
     }
 }

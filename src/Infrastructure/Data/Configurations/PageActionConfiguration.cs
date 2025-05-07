@@ -39,5 +39,9 @@ public class PageActionConfiguration : IEntityTypeConfiguration<PageAction>
             .WithMany(p => p.PageActions)
             .HasForeignKey(pa => pa.PageId);
 
+        builder.HasMany(p => p.TeamPageActions)
+          .WithOne(tpa => tpa.PageAction)
+          .HasForeignKey(tpa => tpa.PageActionId);
+
     }
 }

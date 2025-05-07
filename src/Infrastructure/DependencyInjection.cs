@@ -17,6 +17,7 @@ using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
