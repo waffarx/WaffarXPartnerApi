@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Sentry.Protocol;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
-using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
@@ -14,7 +13,6 @@ using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
-using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
@@ -28,13 +26,8 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
     private readonly IPartnerRepository _partnerRepository; 
     private readonly IHttpService _httpService;
     private readonly ICacheService _cacheService;
-    public ProductSettingService(IMongoDatabase database
-        , IAdvertiserRepository advertiserRepository
-        , IPartnerRepository partnerRepository
-        , IApiClientRepository apiClientRepository
-        , ICacheService cacheService
-        , IHttpService httpService
-        , IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+    public ProductSettingService(IMongoDatabase database, IAdvertiserRepository advertiserRepository, IPartnerRepository partnerRepository, IApiClientRepository apiClientRepository
+        , ICacheService cacheService, IHttpService httpService, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
     {
         _partnerRepository = partnerRepository; 
         _apiClientRepository = apiClientRepository;
@@ -136,5 +129,36 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
             throw;
         }
         
+    }
+    public async Task<GenericResponse<bool>> DeleteFeaturedProduct(DeleteFeaturedProductDto productDto)
+    {
+        GenericResponse<bool> response = new GenericResponse<bool>();   
+        try
+        {
+            if (!ObjectId.TryParse(productDto.productId, out ObjectId objectId))
+            {
+
+                response.Status = StaticValues.Error;
+                response.Data = false;
+                response.Errors = new List<string> { "Invalid product" };
+                return response; 
+            }
+            bool isDeleted = await _partnerRepository.DeleteFeaturedProductById(objectId, ClientApiId, UserIdInt);
+            if (isDeleted) 
+            {
+                response.Status = StaticValues.Success;
+                response.Data = true;
+                response.Message = "Product Deleted Successfully";
+                return response;
+            }
+            response.Status = StaticValues.Error;
+            response.Data = false;
+            response.Errors = new List<string> { "Invalid product" };
+            return response;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }

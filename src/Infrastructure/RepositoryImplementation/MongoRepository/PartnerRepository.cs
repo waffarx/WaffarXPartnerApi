@@ -6,16 +6,19 @@ using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
+using WaffarXPartnerApi.Domain.Entities.SqlEntities.WaffarXEntities;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
 {
     private readonly IMongoCollection<FeaturedProductSetting> _featuredProductCollection;
     private readonly IMongoCollection<StoreSearchSetting> _storeSearchSettingsCollection;
+    private readonly IMongoCollection<FeaturedProductSettingAudit> _featuredProductSettingAuditCollection;
     public PartnerRepository(IMongoDatabase database)
     {
         _featuredProductCollection = database.GetCollection<FeaturedProductSetting>("FeaturedProductSetting");
         _storeSearchSettingsCollection = database.GetCollection<StoreSearchSetting>("StoreSearchSetting");
+        _featuredProductSettingAuditCollection = database.GetCollection<FeaturedProductSettingAudit>("FeaturedProductSettingAudit");
     }
 
     public async Task<PaginationResultModel<List<FeaturedProductModel>>> GetFeaturedProducts(int clientApiId, List<int> WhiteListIds ,bool isActive = false ,int pageNumber = 1, int pageSize = 20)
@@ -65,7 +68,6 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
-
     public async Task<List<int>> GetWhiteListStores(int apiClientId, List<int> disabledStores)
     {
         try
@@ -88,4 +90,34 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
+    public async Task<bool> DeleteFeaturedProductById(ObjectId productId, int clientApiId, int userId)
+    {
+        try
+        {
+            var filter = Builders<FeaturedProductSetting>.Filter.And(
+                    Builders<FeaturedProductSetting>.Filter.Eq(x=> x.ClientApiId, clientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, productId)
+            );
+
+            // Delete the featured product
+            var result = await _featuredProductCollection.DeleteOneAsync(filter);
+            if (result.DeletedCount > 0)
+            {
+                var featuredProduct = await _featuredProductCollection.Find(filter).FirstOrDefaultAsync();
+                await _featuredProductSettingAuditCollection.InsertOneAsync(new FeaturedProductSettingAudit
+                {
+                    ClientApiId = clientApiId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = userId,
+                    OriginalDocument = featuredProduct
+                });
+            }
+            return result.DeletedCount > 0;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
 }

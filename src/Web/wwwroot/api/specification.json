@@ -477,6 +477,44 @@
           }
         ]
       }
+    },
+    "/api/ProductSetting/deletefeaturedproducts": {
+      "post": {
+        "tags": [
+          "ProductSetting"
+        ],
+        "operationId": "ProductSetting_DeleteFeaturedProducts",
+        "requestBody": {
+          "x-name": "featuredProductDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteFeaturedProductDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -639,6 +677,16 @@
           "pageSize": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "DeleteFeaturedProductDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
