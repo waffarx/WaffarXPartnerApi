@@ -25,10 +25,10 @@ public class JwtService : IJwtService
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim("userId", user.Id.ToString()),
+                new Claim("userIdInt", user.UserId.ToString()),
                 new Claim("firstName", user.FirstName ?? string.Empty),
                 new Claim("lastName", user.LastName ?? string.Empty),
                 new Claim("clientApiId", user.ClientApiId.ToString()),
-                new Claim("userIdInt", user.UserId.ToString()),
 
             };
 

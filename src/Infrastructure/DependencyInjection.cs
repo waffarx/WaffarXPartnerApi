@@ -15,6 +15,8 @@ using Microsoft.Extensions.Logging;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
+using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
+using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -58,6 +60,7 @@ public static class DependencyInjection
         services.AddScoped<IAdvertiserRepository, AdvertiserRepository>();
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<ICacheRepository, RedisRepository>();
+        services.AddScoped<IPartnerRepository, PartnerRepository>();
 
 
         services.AddScoped<IResourceService, ResourceService>();
@@ -71,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<IPasswordHasher, PasswordHasher>();
         services.AddScoped<IStoreSettingService, StoreSettingService>();
         services.AddScoped<IOfferSettingService, OfferSettingService>();
+        services.AddScoped<IProductSettingService, ProductSettingService>();
 
         #endregion
 

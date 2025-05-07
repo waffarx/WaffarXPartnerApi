@@ -21,5 +21,9 @@ public class AdvertiserRepository : IAdvertiserRepository
             throw;
         }
     }
+    public async Task<List<int>> GetDisabledStores()
+    {
+        return await _context.Vadvertisers.Where(a => a.ShoppingDisabled.Value).Select(a => a.Id).ToListAsync();
+    }
 
 }

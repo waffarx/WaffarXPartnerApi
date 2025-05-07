@@ -439,6 +439,44 @@
           }
         }
       }
+    },
+    "/api/ProductSetting/getfeaturedproducts": {
+      "get": {
+        "tags": [
+          "ProductSetting"
+        ],
+        "operationId": "ProductSetting_GetOffers",
+        "requestBody": {
+          "x-name": "featuredProductDto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/GetPartnerFeaturedProductDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -587,6 +625,20 @@
         "properties": {
           "token": {
             "type": "string"
+          }
+        }
+      },
+      "GetPartnerFeaturedProductDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       }

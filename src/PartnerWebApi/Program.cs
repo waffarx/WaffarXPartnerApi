@@ -1,5 +1,4 @@
 using FluentValidation.AspNetCore;
-using FluentValidation;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using PartnerWebApi.Infrastructure;
 using Serilog;

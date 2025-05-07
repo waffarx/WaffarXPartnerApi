@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 
 namespace WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
+
+[BsonIgnoreExtraElements]
 public class FeaturedProductSetting
 {
     [BsonId]
