@@ -2,6 +2,7 @@
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 

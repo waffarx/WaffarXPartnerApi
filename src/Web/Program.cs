@@ -11,6 +11,16 @@ using System.Text;
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", policy =>
+    {
+        policy
+            .AllowAnyOrigin()
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 builder.Services.AddControllers();
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
@@ -104,6 +114,7 @@ app.MapEndpoints();
 //app.UseExceptionHandlingMiddleware();
 app.UseAuthentication();
 app.UseAuthorization();
+app.UseCors("AllowAll");
 
 
 app.Run();

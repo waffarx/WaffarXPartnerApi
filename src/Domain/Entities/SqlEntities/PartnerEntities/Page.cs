@@ -10,5 +10,4 @@ public class Page
 
     // Navigation properties
     public virtual ICollection<PageAction> PageActions { get; set; }
-    public virtual ICollection<TeamPageAction> TeamPageActions { get; set; }
 }
