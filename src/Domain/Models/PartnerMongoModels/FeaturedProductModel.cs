@@ -1,11 +1,10 @@
 ﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
 
-namespace WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
-public class ProductFeature
+namespace WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
+public class FeaturedProductModel
 {
-    public ObjectId ProductId { get; set; }
     public int StoreId { get; set; }
+    public ObjectId ProductId { get; set; }
     public int ProductRank { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
