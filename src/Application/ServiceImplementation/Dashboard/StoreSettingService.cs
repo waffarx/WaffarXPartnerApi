@@ -2,7 +2,6 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard;
-using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
@@ -12,6 +11,8 @@ using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 public class StoreSettingService : JWTUserBaseService, IStoreSettingService
@@ -22,15 +23,17 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
 
     private readonly IApiClientRepository _apiClientRepository;
     private readonly IHttpService _httpService;
+    private readonly ICacheRepository _cacheRepository;
 
 
-    public StoreSettingService(IMongoDatabase database, IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService) : base(httpContextAccessor)
+    public StoreSettingService(IMongoDatabase database, IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService, ICacheRepository cacheRepository) : base(httpContextAccessor)
     {
         _storeSettingsCollection = database.GetCollection<StoreSearchSetting>("StoreSearchSetting");
         _storeSettingAuditCollection = database.GetCollection<StoreSearchSettingAudit>("StoreSearchSettingAudit");
         _storeLookUpCollection = database.GetCollection<StoreLookUp>("StoreLookUp");
         _apiClientRepository = apiClientRepository;
         _httpService = httpService;
+        _cacheRepository = cacheRepository;
     }
     public async Task<GenericResponse<bool>> UpdateStoreSettingList(List<StoreSettingRequestDto> stores)
     {
@@ -94,6 +97,12 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
 
                 await _storeSettingsCollection.InsertOneAsync(newStoreSetting);
             }
+            // purge the cache key after updating the store settings
+            var clientGuid = await _apiClientRepository.GetClientGuidById(ClientApiId);
+            string whiteListedStoresCacheKey = $"WhiteListedStores:{clientGuid}";
+            string apiClientIdCacheKey = $"ApiClientId:{clientGuid}";
+            await _cacheRepository.RemoveAsync(whiteListedStoresCacheKey);
+            await _cacheRepository.RemoveAsync(apiClientIdCacheKey);
             return new GenericResponse<bool>
             {
                 Data = true,
@@ -105,7 +114,7 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             throw;
         }
     }
-    public async Task<GenericResponse<List<StoreResponseDto>>> GetWhiteListedStores()
+    public async Task<GenericResponse<List<WhiteListedStoreResonseDto>>> GetWhiteListedStores()
     {
         try
         {
@@ -123,32 +132,33 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
 
             };
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDto>>>(
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<WhiteListedStoreResonseDto>>>(
                 AppSettings.ExternalApis.ValuUrl + "GetStores",
                 requestBody,
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
             {
-                List<StoreResponseDto> stores = new List<StoreResponseDto>();
+                List<WhiteListedStoreResonseDto> stores = new List<WhiteListedStoreResonseDto>();
                 foreach (var item in searchResults.Data)
                 {
-                    stores.Add(new StoreResponseDto
+                    stores.Add(new WhiteListedStoreResonseDto
                     {
-                        Id = (Guid)item.Id,
+                        Id = item.Id,
                         Logo = item.Logo,
                         LogoPng = item.LogoPng,
                         Name = item.Name,
+                        Rank = item.Rank,
                     });
                 }
-                return new GenericResponse<List<StoreResponseDto>>
+                return new GenericResponse<List<WhiteListedStoreResonseDto>>
                 {
                     Status = StaticValues.Success,
                     Data = stores,
                 };
             }
-            return new GenericResponse<List<StoreResponseDto>>
+            return new GenericResponse<List<WhiteListedStoreResonseDto>>
             {
-                Data = new List<StoreResponseDto>(),
+                Data = new List<WhiteListedStoreResonseDto>(),
                 Status = StaticValues.Success,
             };
         }

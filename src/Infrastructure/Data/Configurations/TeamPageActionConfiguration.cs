@@ -15,7 +15,7 @@ public class TeamPageActionConfiguration : IEntityTypeConfiguration<TeamPageActi
         builder.Property(tpa => tpa.TeamId)
             .IsRequired();
 
-        builder.Property(tpa => tpa.PageId)
+        builder.Property(tpa => tpa.PageActionId)
             .IsRequired();
 
         builder.Property(tpa => tpa.CreatedAt)
@@ -31,23 +31,23 @@ public class TeamPageActionConfiguration : IEntityTypeConfiguration<TeamPageActi
             .WithMany(t => t.TeamPageActions)
             .HasForeignKey(tpa => tpa.TeamId);
 
-        builder.HasOne(tpa => tpa.Page)
-            .WithMany(p => p.TeamPageActions)
-            .HasForeignKey(tpa => tpa.PageId);
+        //builder.HasOne(tpa => tpa.PageAction)
+        //    .WithMany(p => p.TeamPageActions)
+        //    .HasForeignKey(tpa => tpa.PageActionId);
 
         builder.HasOne(tpa => tpa.CreatedByUser)
             .WithMany(u => u.TeamPageActions)
             .HasForeignKey(tpa => tpa.CreatedBy);
 
-        builder.HasIndex(tpa => new { tpa.TeamId, tpa.PageId })
+        builder.HasIndex(tpa => new { tpa.TeamId, tpa.PageActionId })
             .HasDatabaseName("UQ_TeamPageAction_TeamId_PageId")
             .IsUnique();
 
         builder.HasIndex(tpa => tpa.TeamId)
             .HasDatabaseName("IX_TeamPageAction_TeamId");
 
-        builder.HasIndex(tpa => tpa.PageId)
-            .HasDatabaseName("IX_TeamPageAction_PageId");
+        builder.HasIndex(tpa => tpa.PageActionId)
+            .HasDatabaseName("IX_TeamPageAction_PageActionId");
 
         // Added index for CreatedBy
         builder.HasIndex(tpa => tpa.CreatedBy)

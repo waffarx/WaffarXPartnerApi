@@ -6,6 +6,6 @@ namespace WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 public interface IStoreSettingService
 {
     Task<GenericResponse<bool>> UpdateStoreSettingList(List<StoreSettingRequestDto> stores);
-    Task<GenericResponse<List<StoreResponseDto>>> GetWhiteListedStores();
+    Task<GenericResponse<List<WhiteListedStoreResonseDto>>> GetWhiteListedStores();
     Task<GenericResponse<List<StoreLookUpResponseDto>>> GetStoreLookUp();
 }
