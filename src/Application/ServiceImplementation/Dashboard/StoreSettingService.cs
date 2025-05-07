@@ -39,6 +39,14 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             // Find the existing store setting by ClientId
             var filter = Builders<StoreSearchSetting>.Filter.Eq(s => s.ClientApiId, ClientApiId);
             var existingStoreSetting = await _storeSettingsCollection.Find(filter).FirstOrDefaultAsync();
+
+            var storesToAddIds = stores.Select(s => s.StoreId).ToList();
+            var storesToAddGuids = storesToAddIds
+                       .Select(s => Guid.TryParse(s, out var guid) ? guid : (Guid?)null)
+                       .Where(guid => guid != null)
+                       .Select(guid => guid.Value)
+                       .ToList();
+            var storeLookup = await _storeLookUpCollection.Find(s => storesToAddGuids.Contains(s.StoreGuid)).ToListAsync();
             List<StoreSettings> storeSettings = new List<StoreSettings>();
             foreach (var store in stores)
             {
@@ -46,7 +54,7 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                 {
                     IsFeatured = store.IsFeatured,
                     Rank = store.Rank,
-                    StoreId = store.StoreId
+                    StoreId = storeLookup.Where(x => x.StoreGuid == Guid.Parse(store.StoreId)).FirstOrDefault()?.StoreId ?? 0
                 });
             }
 

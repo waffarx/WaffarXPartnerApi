@@ -563,8 +563,8 @@
         "additionalProperties": false,
         "properties": {
           "storeId": {
-            "type": "integer",
-            "format": "int32"
+            "type": "string",
+            "nullable": true
           },
           "isFeatured": {
             "type": "boolean"
