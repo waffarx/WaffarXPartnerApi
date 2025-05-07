@@ -5,7 +5,6 @@ using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
-using WaffarXPartnerApi.Domain.Entities.SqlEntities.WaffarXEntities;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
