@@ -63,7 +63,52 @@ public class TeamRepository : ITeamRepository
             throw;
         }
     }
+    public async Task<bool> UpdateTeam(UpdateTeamWithActionModel model)
+    {
+        try
+        {
+            // get the team by id and api client id 
+            var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == model.TeamId && x.ClientApiId == model.ClientApiId);
+            if(team != null)
+            {
+                // update the team 
+                team.TeamName = model.Name;
+                team.Description = model.Description;
+                team.UpdatedAt = new DateTime();
+                 _waffarXPartnerDbContext.Teams.Update(team);
+                // remove all page actions for this team 
+                var pageActions = await _waffarXPartnerDbContext.TeamPageActions.Where(x => x.TeamId == model.TeamId).ToListAsync();
+                if (pageActions != null)
+                {
+                   _waffarXPartnerDbContext.TeamPageActions.RemoveRange(pageActions);
+                }
+                // add the new page actions
+                List<TeamPageAction> teamPageActionsToAdd = new List<TeamPageAction>();
+                foreach (var action in model.PageActionIds)
+                {
+                    teamPageActionsToAdd.Add(new TeamPageAction
+                    {
+                        PageActionId = action,
+                        TeamId = model.TeamId,
+                        CreatedAt = new DateTime(),
+                        CreatedBy = model.UpdatedBy,
+                    });
+                }
+                await _waffarXPartnerDbContext.TeamPageActions.AddRangeAsync(teamPageActionsToAdd);
+                await _waffarXPartnerDbContext.SaveChangesAsync();
+                return true; // team updated successfully
+            }
+            else
+            {
+                return false;
+            }
 
+        }
+        catch(Exception)
+        {
+            throw;
+        }
+    }
     public async Task<bool> DeleteTeam(Guid id)
     {
         try
@@ -99,7 +144,6 @@ public class TeamRepository : ITeamRepository
             throw;
         }
     }
-
     public async Task<List<TeamModel>> GetAllTeams(int clientApiId)
     {
         try
@@ -149,50 +193,4 @@ public class TeamRepository : ITeamRepository
         }
     }
 
-    public async Task<bool> UpdateTeam(UpdateTeamWithActionModel model)
-    {
-        try
-        {
-            // get the team by id and api client id 
-            var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == model.TeamId && x.ClientApiId == model.ClientApiId);
-            if(team != null)
-            {
-                // update the team 
-                team.TeamName = model.Name;
-                team.Description = model.Description;
-                team.UpdatedAt = new DateTime();
-                 _waffarXPartnerDbContext.Teams.Update(team);
-                // remove all page actions for this team 
-                var pageActions = await _waffarXPartnerDbContext.TeamPageActions.Where(x => x.TeamId == model.TeamId).ToListAsync();
-                if (pageActions != null)
-                {
-                   _waffarXPartnerDbContext.TeamPageActions.RemoveRange(pageActions);
-                }
-                // add the new page actions
-                List<TeamPageAction> teamPageActionsToAdd = new List<TeamPageAction>();
-                foreach (var action in model.PageActionIds)
-                {
-                    teamPageActionsToAdd.Add(new TeamPageAction
-                    {
-                        PageActionId = action,
-                        TeamId = model.TeamId,
-                        CreatedAt = new DateTime(),
-                        CreatedBy = model.UpdatedBy,
-                    });
-                }
-                await _waffarXPartnerDbContext.TeamPageActions.AddRangeAsync(teamPageActionsToAdd);
-                await _waffarXPartnerDbContext.SaveChangesAsync();
-                return true; // team updated successfully
-            }
-            else
-            {
-                return false;
-            }
-
-        }
-        catch(Exception)
-        {
-            throw;
-        }
-    }
 }

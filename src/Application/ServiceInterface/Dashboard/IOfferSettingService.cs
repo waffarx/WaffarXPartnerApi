@@ -8,5 +8,5 @@ public interface IOfferSettingService
     Task<GenericResponse<bool>> AddOrUpdateOfferLookUp(OfferLookUpRequestDto model);
     Task<GenericResponse<List<OfferResponseDto>>> GetOffers();
     Task<GenericResponse<bool>> AddOrUpdateOffer(OfferSettingRequestDto model);
-    Task<GenericResponse<OfferDetailResponseDto>> GetOfferDetails(OfferDetailRequestDto model);
+    Task<GenericResponse<OfferDetailResponseDto>> GetOfferDetails(string id);
 }

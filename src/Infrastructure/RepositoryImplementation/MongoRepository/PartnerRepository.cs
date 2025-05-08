@@ -436,4 +436,23 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
+
+    public async Task<List<int>> GetStoreIdsByStoreGuids(List<string> guids)
+    {
+        try
+        { 
+            var storeGuids = guids.Select(g => Guid.TryParse(g, out var guid) ? guid : (Guid?)null)
+                .Where(guid => guid != null)
+                .Select(guid => guid.Value)
+                .ToList();
+            var storeLookup = await _storeLookUpCollection.Find(s => storeGuids.Contains(s.StoreGuid)).ToListAsync();
+            return storeLookup.Select(x => x.StoreId).ToList();
+
+
+        }
+        catch(Exception)
+        {
+            throw;
+        }
+    }
 }

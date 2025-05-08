@@ -18,13 +18,11 @@ public class UpdateTeamWithActionModel : BaseTeamActionModel
 public class CreateTeamWithActionModel : BaseTeamActionModel
 {
     public Guid CreatedBy { get; set; }
-    public string CreatedByUserName { get; set; }
 }
 public class BaseTeamActionModel
 {
     public string Name { get; set; }
     public string Description { get; set; }
-    public bool IsActive { get; set; }
     public int ClientApiId { get; set; }
     public List<Guid> PageActionIds { get; set; } = new List<Guid>();
 }

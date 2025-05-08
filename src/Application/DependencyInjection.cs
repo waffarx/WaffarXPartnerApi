@@ -1,9 +1,9 @@
 ﻿using System.Reflection;
-using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.PaginationRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.Mappings;
 
 namespace Microsoft.Extensions.DependencyInjection;
 
@@ -11,8 +11,7 @@ public static class DependencyInjection
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
-        services.AddAutoMapper(Assembly.GetExecutingAssembly());
-
+        services.AddAutoMapper(typeof(MappingProfile));
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
         services.AddScoped<IValidator<ProductSearchRequestDto>, ProductSearchRequestDtoValidator>();

@@ -18,6 +18,7 @@ using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
+using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository.Partner;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -62,6 +63,7 @@ public static class DependencyInjection
         services.AddScoped<IResourceRepository, ResourceRepository>();
         services.AddScoped<ICacheRepository, RedisRepository>();
         services.AddScoped<IPartnerRepository, PartnerRepository>();
+        services.AddScoped<ITeamRepository, TeamRepository>();
 
 
         services.AddScoped<IResourceService, ResourceService>();
