@@ -25,8 +25,10 @@ public class TeamRepository : ITeamRepository
                 CreatedAt = new DateTime(),
 
             });
+
             if (teamToCreate != null)
             {
+                await _waffarXPartnerDbContext.SaveChangesAsync();
                 // chech all actions in the input are valid 
                 var actions = await _waffarXPartnerDbContext.PageActions.Where(x => model.PageActionIds.Contains(x.Id)).ToListAsync();
                 if (actions.Count == model.PageActionIds.Count)

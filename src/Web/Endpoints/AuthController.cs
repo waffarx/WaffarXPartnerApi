@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
@@ -25,21 +26,11 @@ public class AuthController : ControllerBase
         }
         return BadRequest(result.Message);
     }
-
+    [Authorize]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequestDto request)
     {
-        var user = new User
-        {
-            Username = request.Username,
-            Email = request.Email,
-            FirstName = request.FirstName,
-            LastName = request.LastName,
-            ClientApiId = request.ClientApiId,
-            
-            
-        };
-        var result = await _authService.RegisterAsync(user, request.Password);
+        var result = await _authService.RegisterAsync(request);
         if (result.Success)
         {
             return Ok(result);

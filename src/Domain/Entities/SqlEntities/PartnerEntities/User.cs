@@ -22,9 +22,9 @@ public class User
     public int ClientApiId { get; set; }
 
     // Navigation properties
-    public virtual ICollection<AuditLog> AuditLogs { get; set; }
     public virtual ICollection<TeamPageAction> TeamPageActions { get; set; }
     public virtual ICollection<UserTeam> UserTeams { get; set; }
+    public virtual ICollection<AuditLog> AuditLogs { get; set; }
     public virtual ICollection<RefreshToken> RefreshTokens { get; set; }
 
 }

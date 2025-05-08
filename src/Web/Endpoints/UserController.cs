@@ -51,7 +51,7 @@ public class UserController : ControllerBase
     /// </summary>
     /// <param name="dto">The team creation data.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
-    [HttpPost("createTeam")]
+    [HttpPost("createteam")]
     public async Task<IActionResult> CreateTeam(CreateTeamDto dto)
     {
         var response = await _userService.CreateTeamAsync(dto);
@@ -107,4 +107,10 @@ public class UserController : ControllerBase
     }
 
     #endregion
+    [HttpPost("addupdateusertoteam")]
+    public async Task<IActionResult> AddUserToTeam(AssignUserToTeamRequestDto model)
+    {
+        var response = await _userService.AddUserToTeamAsync(model);
+        return Ok(response);
+    }
 }
