@@ -1,7 +1,7 @@
 ﻿namespace WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
-public class WhiteListStoreModel
+public class WhitelistStoreToUpdate
 {
-    public int StoreId { get; set; }
+    public string StoreId { get; set; }
     public bool IsFeatured { get; set; }
     public int Rank { get; set; }
 }

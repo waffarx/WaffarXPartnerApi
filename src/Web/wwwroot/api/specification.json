@@ -275,6 +275,70 @@
         ]
       }
     },
+    "/api/User/logout": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_Logout",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/User/resetpassword": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_ResetPassword",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ResetPasswordRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Auth/login": {
       "post": {
         "tags": [
@@ -610,6 +674,20 @@
           "rank": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ResetPasswordRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "oldPassword": {
+            "type": "string",
+            "nullable": true
+          },
+          "newPassword": {
+            "type": "string",
+            "nullable": true
           }
         }
       },

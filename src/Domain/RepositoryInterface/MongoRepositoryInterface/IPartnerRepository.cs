@@ -10,4 +10,10 @@ public interface IPartnerRepository
     Task<OfferSetting> GetOfferSetting(int clientApiId, string offerSettingId);
     Task<bool> AddUpdateOfferSetting(OfferSettingModel model);
     Task<bool> DeleteFeaturedProductById(ObjectId productId, int clientApiId, int userId);
+    Task<List<OfferSettingListingModel>> GetOfferSettingListing(int clientApiId, bool isEnglish = true);
+    Task<List<StoreModel>> GetStoreDataByStoreIds(List<int> storeIds, bool isEnglish = true);
+    Task<bool> AddOfferLookUp(OfferLookUpModel model);
+    Task<List<OfferLookUpModel>> GetOfferLookUp(int clientApiId);
+    Task<List<StoreLookUpModel>> GetAllStoreLookUp();
+    Task<bool> UpdateWhiteListStore(UpdateWhiteListStoreRequestModel model);   
 }
