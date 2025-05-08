@@ -6,5 +6,6 @@ public class RegisterRequestDto
     public string Password { get; set; }
     public string FirstName { get; set; }
     public string LastName { get; set; }
-    public int ClientApiId { get; set; }
+    public List<string> TeamsIds { get; set; }
+
 }

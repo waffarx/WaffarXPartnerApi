@@ -1,4 +1,5 @@
 ﻿using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 
 namespace WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 public interface IUserRepository
@@ -8,7 +9,7 @@ public interface IUserRepository
     Task<User> GetByEmailAsync(string email);
     Task<bool> CreateAsync(User user);
     Task<bool> UpdateAsync(User user);
-    Task<bool> AssignUserToTeam(Guid userId, Guid teamId);
+    Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds);
     Task<bool> RemoveUserFromTeam(Guid userId, Guid teamId);
-
+    Task<List<PageActionModel>> GetUserPageAndPageAction(Guid userId);
 }

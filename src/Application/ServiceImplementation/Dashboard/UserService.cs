@@ -5,6 +5,7 @@ using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
@@ -92,6 +93,24 @@ public class UserService : JWTUserBaseService, IUserService
             throw;
         }
     }
+    public async Task<GenericResponse<bool>> AddUserToTeamAsync(AssignUserToTeamRequestDto model)
+    {
+        try
+        {
+            var userGuid = Guid.TryParse(model.UserId.ToString(), out var userId) ? userId : Guid.Empty;
+            var result = await _userRepository.AssignUserToTeam(userGuid, model.TeamIds);
+            return new GenericResponse<bool>
+            {
+                Status = result ? StaticValues.Success : StaticValues.Error,
+                Message = result ? "User added to team successfully" : "Failed to add user to team",
+                Data = result
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 
     #region Team Function
     public async Task<GenericResponse<bool>> CreateTeamAsync(CreateTeamDto dto)
@@ -99,6 +118,8 @@ public class UserService : JWTUserBaseService, IUserService
         try
         {
             var model = _mapper.Map<CreateTeamWithActionModel>(dto);
+            model.CreatedBy = UserId;
+            model.ClientApiId = ClientApiId;
             var result = await _teamRepository.CreateTeam(model);
             return new GenericResponse<bool>
             {
@@ -118,6 +139,8 @@ public class UserService : JWTUserBaseService, IUserService
         try
         {
             var model = _mapper.Map<UpdateTeamWithActionModel>(dto);
+            model.UpdatedBy = UserId;
+            model.ClientApiId = ClientApiId;
             var result = await _teamRepository.UpdateTeam(model);
             return new GenericResponse<bool>
             {
@@ -187,5 +210,6 @@ public class UserService : JWTUserBaseService, IUserService
             throw;
         }
     }
+
     #endregion
 }
