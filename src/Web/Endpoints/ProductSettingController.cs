@@ -22,7 +22,7 @@ public class ProductSettingController : ControllerBase
     }
 
 
-    [HttpGet("getfeaturedproducts")]
+    [HttpPost("getfeaturedproducts")]
     public async Task<IActionResult> GetOffers(GetPartnerFeaturedProductDto featuredProductDto)
     {
         var response = await _productSettingService.GetFeaturedProducts(featuredProductDto);
