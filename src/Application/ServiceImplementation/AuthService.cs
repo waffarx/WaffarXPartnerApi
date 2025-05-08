@@ -1,4 +1,7 @@
-﻿using WaffarXPartnerApi.Application.Helper;
+﻿using Microsoft.AspNetCore.Http;
+using WaffarXPartnerApi.Application.Common.DTOs;
+using WaffarXPartnerApi.Application.Helper;
+using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
@@ -6,7 +9,7 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInte
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation;
 
-public class AuthService : IAuthService
+public class AuthService : JWTUserBaseService, IAuthService
 {
     private readonly IUserRepository _userRepository;
     private readonly IRefreshTokenRepository _refreshTokenRepository;
@@ -14,10 +17,11 @@ public class AuthService : IAuthService
     private readonly IPasswordHasher _passwordHasher;
 
     public AuthService(
+        IHttpContextAccessor httpContextAccessor,
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtService jwtService,
-        IPasswordHasher passwordHasher)
+        IPasswordHasher passwordHasher): base(httpContextAccessor)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
@@ -55,16 +59,16 @@ public class AuthService : IAuthService
         return tokenResult;
     }
 
-    public async Task<TokenResponse> RegisterAsync(User user, string password)
+    public async Task<TokenResponse> RegisterAsync(RegisterRequestDto model)
     {
-        var existingUser = await _userRepository.GetByUsernameAsync(user.Username);
+        var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
 
         if (existingUser != null)
         {
             return new TokenResponse { Success = false, Message = "Username already exists" };
         }
 
-        existingUser = await _userRepository.GetByEmailAsync(user.Email);
+        existingUser = await _userRepository.GetByEmailAsync(model.Email);
 
         if (existingUser != null)
         {
@@ -72,22 +76,27 @@ public class AuthService : IAuthService
         }
 
         // Hash password
-        var (hashedPassword, hashKey) = _passwordHasher.HashPassword(password);
-        user.Password = hashedPassword;
-        user.HashKey = hashKey;
-
-        // Set creation values
-        user.Id = Guid.NewGuid();
-        user.CreatedAt = DateTime.UtcNow;
-        user.UpdatedAt = DateTime.UtcNow;
-        user.IsActive = true;
-
+        var (hashedPassword, hashKey) = _passwordHasher.HashPassword(model.Password);
+        User user = new User
+        {
+            FirstName = model.FirstName,
+            LastName = model.LastName,
+            Username = model.Username,
+            Email = model.Email,
+            IsActive = true,
+            IsSuperAdmin = false,
+            ClientApiId = ClientApiId,
+            Password = hashedPassword,
+            HashKey = hashKey,
+            Id = Guid.NewGuid(),
+            CreatedAt = DateTime.Now,
+        };
         var success = await _userRepository.CreateAsync(user);
-
         if (!success)
         {
             return new TokenResponse { Success = false, Message = "Failed to create user" };
         }
+        await _userRepository.AssignUserToTeam(user.Id, model.TeamsIds);
 
         // Generate tokens
         var tokenResult = await GenerateTokensAsync(user);

@@ -338,7 +338,7 @@
         ]
       }
     },
-    "/api/User/createTeam": {
+    "/api/User/createteam": {
       "post": {
         "tags": [
           "User"
@@ -579,7 +579,12 @@
               }
             }
           }
-        }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
       }
     },
     "/api/Auth/refreshtoken": {
@@ -995,7 +1000,7 @@
         "properties": {
           "teamId": {
             "type": "string",
-            "format": "guid"
+            "nullable": true
           },
           "name": {
             "type": "string",
@@ -1005,21 +1010,12 @@
             "type": "string",
             "nullable": true
           },
-          "updatedBy": {
-            "type": "string",
-            "format": "guid"
-          },
           "pageActionIds": {
             "type": "array",
             "nullable": true,
             "items": {
-              "type": "string",
-              "format": "guid"
+              "type": "string"
             }
-          },
-          "clientApiId": {
-            "type": "integer",
-            "format": "int32"
           }
         }
       },
@@ -1061,9 +1057,12 @@
             "type": "string",
             "nullable": true
           },
-          "clientApiId": {
-            "type": "integer",
-            "format": "int32"
+          "teamsIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
           }
         }
       },

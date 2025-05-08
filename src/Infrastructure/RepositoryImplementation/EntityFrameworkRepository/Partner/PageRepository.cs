@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.Data;
 
