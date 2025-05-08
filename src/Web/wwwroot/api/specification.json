@@ -682,7 +682,7 @@
       }
     },
     "/api/ProductSetting/getfeaturedproducts": {
-      "get": {
+      "post": {
         "tags": [
           "ProductSetting"
         ],
