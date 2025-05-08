@@ -10,7 +10,6 @@ using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
-using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
@@ -19,21 +18,13 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 namespace WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 public class OfferSettingService : JWTUserBaseService, IOfferSettingService
 {
-    private readonly IMongoCollection<OfferSetting> _offerSettingsCollection;
-    private readonly IMongoCollection<OfferLookUp> _offerLookupsCollection;
-    private readonly IMongoCollection<StoreLookUp> _storeLookUpCollection;
-
     private readonly IHttpService _httpService;
 
     private readonly IApiClientRepository _apiClientRepository;
     private readonly IPartnerRepository _partnerRepository;
 
-
-    public OfferSettingService(IMongoDatabase database, IHttpContextAccessor httpContextAccessor, IHttpService httpService, IApiClientRepository apiClientRepository, IPartnerRepository partnerRepository) : base(httpContextAccessor)
+    public OfferSettingService(IHttpContextAccessor httpContextAccessor, IHttpService httpService, IApiClientRepository apiClientRepository, IPartnerRepository partnerRepository) : base(httpContextAccessor)
     {
-        _offerSettingsCollection = database.GetCollection<OfferSetting>("OfferSetting");
-        _offerLookupsCollection = database.GetCollection<OfferLookUp>("OfferLookUp");
-        _storeLookUpCollection = database.GetCollection<StoreLookUp>("StoreLookUp");
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
         _partnerRepository = partnerRepository;
@@ -57,7 +48,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 ProductIds = model.ProductIds,
                 StoreIds = model.StoreIds,
             };
-            var result =   await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
+            var result = await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
             return new GenericResponse<bool>
             {
                 Data = true,
@@ -73,37 +64,30 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     {
         try
         {
-            // Filter OfferSettings by ClientApiId  
-            var filter = Builders<OfferSetting>.Filter.Eq(s => s.ClientApiId, ClientApiId);
-            var offerSettings = await _offerSettingsCollection.Find(filter).ToListAsync();
-
-            if (offerSettings == null || !offerSettings.Any())
+            List<OfferSettingListingModel> offers = new List<OfferSettingListingModel>();
+            offers = await _partnerRepository.GetOfferSettingListing(ClientApiId);
+            if (!offers.Any())
             {
                 return new GenericResponse<List<OfferResponseDto>>
                 {
                     Data = new List<OfferResponseDto>(),
+                    Message = StaticValues.Success
                 };
             }
-
-            var response = new List<OfferResponseDto>();
-
-            foreach (var offerSetting in offerSettings)
+            List<OfferResponseDto> response = new List<OfferResponseDto>();
+            foreach (var item in offers)
             {
-                // Fetch the associated OfferLookUp  
-                var offerLookup = await _offerLookupsCollection.Find(l => l.Id == offerSetting.OfferLookUpId).FirstOrDefaultAsync();
-
-                // Map the data to the response DTO  
                 response.Add(new OfferResponseDto
                 {
-                    OfferId = offerSetting.Id.ToString(), // Convert ObjectId to Guid  
-                    OfferName = IsEnglish ? offerLookup?.NameEn : offerLookup?.NameAr,
-                    StartDate = offerSetting.StartDate,
-                    EndDate = offerSetting.EndDate,
-                    IsProductLevel = offerSetting.IsProductLevel,
-                    IsStoreLevel = offerSetting.IsStoreLevel,
+                    EndDate = item.EndDate,
+                    IsProductLevel = item.IsProductLevel,
+                    IsStoreLevel = item.IsStoreLevel,
+                    OfferId = item.OfferId,
+                    OfferName = item.OfferName,
+                    StartDate = item.StartDate,
                 });
-            }
 
+            }
             return new GenericResponse<List<OfferResponseDto>>
             {
                 Data = response,
@@ -119,7 +103,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     {
         try
         {
-            var offerSetting =  await _partnerRepository.GetOfferSetting(ClientApiId, model.Id);
+            var offerSetting = await _partnerRepository.GetOfferSetting(ClientApiId, model.Id);
             if (offerSetting == null)
             {
                 return new GenericResponse<OfferDetailResponseDto>
@@ -164,23 +148,21 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
             }
             if (model.IsStoreLevel)
             {
-                var storeFilter = Builders<StoreLookUp>.Filter.In(s => s.StoreId, offerSetting.StoreIds);
-                var storeLookUps = await _storeLookUpCollection.Find(storeFilter).ToListAsync();
+                List<StoreModel> storesDetailsToGet = await _partnerRepository.GetStoreDataByStoreIds(offerSetting.StoreIds);
                 response.Stores = new List<StoreDto>();
-                if (storeLookUps != null && storeLookUps.Any())
+                if (storesDetailsToGet.Any())
                 {
-                    foreach (var store in storeLookUps)
+                    foreach (var store in storesDetailsToGet)
                     {
                         response.Stores.Add(new StoreDto
                         {
-                            Id = store.StoreGuid,
-                            Name = IsEnglish ? store.NameEn : store.NameAr,
-                            Logo = store.LogoUrl,
-                            LogoPng = store.LogoPngUrl
+                            Id = store.Id,
+                            Name = store.Name,
+                            Logo = store.Logo,
+                            LogoPng = store.LogoPng
                         });
                     }
                 }
-
 
             }
             return new GenericResponse<OfferDetailResponseDto>
@@ -201,29 +183,16 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     {
         try
         {
-            if (model.Id == null)
+            OfferLookUpModel offerLookUp = new OfferLookUpModel
             {
-                await _offerLookupsCollection.InsertOneAsync(new OfferLookUp
-                {
-                    ClientApiId = ClientApiId,
-                    NameAr = model.NameAr,
-                    NameEn = model.NameEn,
-                    CreatedAt = DateTime.UtcNow,
-                    CreatedBy = UserIdInt,
-                    UniqueKey = model.NameEn.ToUpper() + model.NameAr.ToUpper(),
-                });
-            }
-            else
-            {
-                var filter = Builders<OfferLookUp>.Filter.Eq(s => s.ClientApiId, ClientApiId) &
-                             Builders<OfferLookUp>.Filter.Eq(s => s.Id, new ObjectId(model.Id));
+                ClientApiId = ClientApiId,
+                Id = model.Id,
+                NameAr = model.NameAr,
+                NameEn = model.NameEn,
+                UserId = UserIdInt,
 
-                var update = Builders<OfferLookUp>.Update
-                    .Set(s => s.NameAr, model.NameAr)
-                    .Set(s => s.NameEn, model.NameEn)
-                    .Set(s => s.UpdatedBy, UserIdInt);
-                await _offerLookupsCollection.UpdateOneAsync(filter, update);
-            }
+            };
+            await _partnerRepository.AddOfferLookUp(offerLookUp);
             return new GenericResponse<bool>
             {
                 Data = true,
@@ -241,21 +210,13 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     {
         try
         {
-            var filter = Builders<OfferLookUp>.Filter.Eq(s => s.ClientApiId, ClientApiId);
-            var offerLookUp = await _offerLookupsCollection.Find(filter).ToListAsync();
-            if (offerLookUp == null || !offerLookUp.Any())
-            {
-                return new GenericResponse<List<OfferLookUpResponsetDto>>
-                {
-                    Data = new List<OfferLookUpResponsetDto>(),
-                };
-            }
+            var offerLookUp = await _partnerRepository.GetOfferLookUp(ClientApiId);
             var response = new List<OfferLookUpResponsetDto>();
             foreach (var offer in offerLookUp)
             {
                 response.Add(new OfferLookUpResponsetDto
                 {
-                    Id = offer.Id.ToString(),
+                    Id = offer.Id,
                     NameEn = offer.NameEn,
                     NameAr = offer.NameAr,
                 });

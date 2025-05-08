@@ -5,6 +5,7 @@ using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
+using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
@@ -13,13 +14,18 @@ public class PartnerRepository : IPartnerRepository
     private readonly IMongoCollection<StoreSearchSetting> _storeSearchSettingsCollection;
     private readonly IMongoCollection<FeaturedProductSettingAudit> _featuredProductSettingAuditCollection;
     private readonly IMongoCollection<OfferSetting> _offerSettingsCollection;
-    public PartnerRepository(IMongoDatabase database)
+    private readonly IMongoCollection<OfferLookUp> _offerLookupsCollection;
+    private readonly IMongoCollection<StoreLookUp> _storeLookUpCollection;
+    private readonly IMongoCollection<StoreSearchSettingAudit> _storeSearchSettingAuditCollection;
+    public PartnerRepository(IMongoDatabase database, IMongoCollection<OfferLookUp> offerLookupsCollection, IMongoCollection<StoreLookUp> storeLookUpCollection, IMongoCollection<StoreSearchSettingAudit> storeSearchSettingAuditCollection)
     {
         _featuredProductCollection = database.GetCollection<FeaturedProductSetting>("FeaturedProductSetting");
         _storeSearchSettingsCollection = database.GetCollection<StoreSearchSetting>("StoreSearchSetting");
         _featuredProductSettingAuditCollection = database.GetCollection<FeaturedProductSettingAudit>("FeaturedProductSettingAudit");
         _offerSettingsCollection = database.GetCollection<OfferSetting>("OfferSetting");
-
+        _offerLookupsCollection = offerLookupsCollection;
+        _storeLookUpCollection = storeLookUpCollection;
+        _storeSearchSettingAuditCollection = storeSearchSettingAuditCollection;
     }
 
     public async Task<bool> AddUpdateOfferSetting(OfferSettingModel model)
@@ -76,13 +82,13 @@ public class PartnerRepository : IPartnerRepository
             }
             return true;
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
     }
 
-    public async Task<PaginationResultModel<List<FeaturedProductModel>>> GetFeaturedProducts(int clientApiId, List<int> WhiteListIds ,bool isActive = false ,int pageNumber = 1, int pageSize = 20)
+    public async Task<PaginationResultModel<List<FeaturedProductModel>>> GetFeaturedProducts(int clientApiId, List<int> WhiteListIds, bool isActive = false, int pageNumber = 1, int pageSize = 20)
     {
         PaginationResultModel<List<FeaturedProductModel>> paginatedList = new PaginationResultModel<List<FeaturedProductModel>>();
         try
@@ -100,7 +106,7 @@ public class PartnerRepository : IPartnerRepository
                     // Get the current date
                     DateTime nowDate = DateTime.Now;
 
-                    filter = p => p.ClientApiId == clientApiId 
+                    filter = p => p.ClientApiId == clientApiId
                     && (p.Product.StartDate <= nowDate && p.Product.EndDate >= nowDate);
                 }
                 // Get paged data
@@ -138,7 +144,7 @@ public class PartnerRepository : IPartnerRepository
                          Builders<OfferSetting>.Filter.Eq(s => s.Id, new ObjectId(offerSettingId));
             return await _offerSettingsCollection.Find(filter).FirstOrDefaultAsync();
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
@@ -171,7 +177,7 @@ public class PartnerRepository : IPartnerRepository
         try
         {
             var filter = Builders<FeaturedProductSetting>.Filter.And(
-                    Builders<FeaturedProductSetting>.Filter.Eq(x=> x.ClientApiId, clientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
                     Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, productId)
             );
 
@@ -196,4 +202,238 @@ public class PartnerRepository : IPartnerRepository
         }
     }
 
+    public async Task<List<OfferSettingListingModel>> GetOfferSettingListing(int clientApiId, bool isEnglish = true)
+    {
+        try
+        {
+            // Filter OfferSettings by ClientApiId  
+            var filter = Builders<OfferSetting>.Filter.Eq(s => s.ClientApiId, clientApiId);
+            var offerSettings = await _offerSettingsCollection.Find(filter).ToListAsync();
+            if (offerSettings == null || !offerSettings.Any())
+            {
+                return new List<OfferSettingListingModel>();
+            }
+
+            var result = new List<OfferSettingListingModel>();
+
+            foreach (var offerSetting in offerSettings)
+            {
+                // Fetch the associated OfferLookUp  
+                var offerLookup = await _offerLookupsCollection.Find(l => l.Id == offerSetting.OfferLookUpId).FirstOrDefaultAsync();
+
+                result.Add(new OfferSettingListingModel
+                {
+                    OfferId = offerSetting.Id.ToString(), // Convert ObjectId to Guid  
+                    OfferName = isEnglish ? offerLookup?.NameEn : offerLookup?.NameAr,
+                    StartDate = offerSetting.StartDate,
+                    EndDate = offerSetting.EndDate,
+                    IsProductLevel = offerSetting.IsProductLevel,
+                    IsStoreLevel = offerSetting.IsStoreLevel,
+                });
+            }
+            return result;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<List<StoreModel>> GetStoreDataByStoreIds(List<int> storeIds, bool isEnglish = true)
+    {
+        try
+        {
+            var storeFilter = Builders<StoreLookUp>.Filter.In(s => s.StoreId, storeIds);
+            var storeLookUps = await _storeLookUpCollection.Find(storeFilter).ToListAsync();
+            if (storeLookUps == null || !storeLookUps.Any())
+            {
+                return new List<StoreModel>();
+            }
+            var response = new List<StoreModel>();
+            if (storeLookUps != null && storeLookUps.Any())
+            {
+                foreach (var store in storeLookUps)
+                {
+                    response.Add(new StoreModel
+                    {
+                        Id = store.StoreGuid,
+                        Name = isEnglish ? store.NameEn : store.NameAr,
+                        Logo = store.LogoUrl,
+                        LogoPng = store.LogoPngUrl
+                    });
+                }
+            }
+            return response;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+
+    }
+
+    public async Task<bool> AddOfferLookUp(OfferLookUpModel model)
+    {
+        try
+        {
+            if (model.Id == null)
+            {
+                await _offerLookupsCollection.InsertOneAsync(new OfferLookUp
+                {
+                    ClientApiId = model.ClientApiId,
+                    NameAr = model.NameAr,
+                    NameEn = model.NameEn,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = model.UserId,
+                    UniqueKey = model.NameEn.ToUpper() + model.NameAr.ToUpper(),
+                });
+            }
+            else
+            {
+                var filter = Builders<OfferLookUp>.Filter.Eq(s => s.ClientApiId, model.ClientApiId) &
+                             Builders<OfferLookUp>.Filter.Eq(s => s.Id, new ObjectId(model.Id));
+
+                var update = Builders<OfferLookUp>.Update
+                    .Set(s => s.NameAr, model.NameAr)
+                    .Set(s => s.NameEn, model.NameEn)
+                    .Set(s => s.UpdatedBy, model.UserId);
+                await _offerLookupsCollection.UpdateOneAsync(filter, update);
+            }
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<List<OfferLookUpModel>> GetOfferLookUp(int clientApiId)
+    {
+        try
+        {
+            var filter = Builders<OfferLookUp>.Filter.Eq(s => s.ClientApiId, clientApiId);
+            var offerLookUp = await _offerLookupsCollection.Find(filter).ToListAsync();
+            if (offerLookUp == null || !offerLookUp.Any())
+            {
+                return new List<OfferLookUpModel>();
+            }
+            var response = new List<OfferLookUpModel>();
+            foreach (var offer in offerLookUp)
+            {
+                response.Add(new OfferLookUpModel
+                {
+                    Id = offer.Id.ToString(),
+                    NameEn = offer.NameEn,
+                    NameAr = offer.NameAr,
+                });
+            }
+            return response;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<List<StoreLookUpModel>> GetAllStoreLookUp()
+    {
+        try
+        {
+            var filter = Builders<StoreLookUp>.Filter.Eq(s => s.IsActive, true);
+
+            var allStores = await _storeLookUpCollection.Find(filter).ToListAsync();
+            if (allStores == null || !allStores.Any())
+            {
+                return new List<StoreLookUpModel>();
+            }
+            var response = new List<StoreLookUpModel>();
+            foreach (var store in allStores)
+            {
+                response.Add(new StoreLookUpModel
+                {
+                    Id = store.StoreGuid,
+                    NameEn = store.NameEn,
+                    NameAr = store.NameAr,
+                    Logo = store.LogoUrl,
+                    LogoPng = store.LogoPngUrl
+                });
+            }
+            return response;
+        }
+        catch(Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<bool> UpdateWhiteListStore(UpdateWhiteListStoreRequestModel model)
+    {
+        try
+        {
+            // Find the existing store setting by ClientId
+            var filter = Builders<StoreSearchSetting>.Filter.Eq(s => s.ClientApiId, model.ClientApiId);
+            var existingStoreSetting = await _storeSearchSettingsCollection.Find(filter).FirstOrDefaultAsync();
+
+            var storesToAddIds = model.StoreList.Select(s => s.StoreId).ToList();
+            var storesToAddGuids = storesToAddIds
+                       .Select(s => Guid.TryParse(s, out var guid) ? guid : (Guid?)null)
+                       .Where(guid => guid != null)
+                       .Select(guid => guid.Value)
+                       .ToList();
+            var storeLookup = await _storeLookUpCollection.Find(s => storesToAddGuids.Contains(s.StoreGuid)).ToListAsync();
+            List<StoreSettings> storeSettings = new List<StoreSettings>();
+            foreach (var store in model.StoreList)
+            {
+                storeSettings.Add(new StoreSettings
+                {
+                    IsFeatured = store.IsFeatured,
+                    Rank = store.Rank,
+                    StoreId = storeLookup.Where(x => x.StoreGuid == Guid.Parse(store.StoreId)).FirstOrDefault()?.StoreId ?? 0
+                });
+            }
+
+            if (existingStoreSetting != null)
+            {
+                // Add an audit log for the store setting update
+                var auditLog = new StoreSearchSettingAudit
+                {
+                    ClientApiId = model.ClientApiId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = model.UserId,
+                    OriginalDocument = existingStoreSetting,
+                };
+
+                await _storeSearchSettingAuditCollection.InsertOneAsync(auditLog);
+
+                // Update the existing store setting
+                var update = Builders<StoreSearchSetting>.Update
+                    .Set(s => s.Stores, storeSettings)
+                    .Set(s => s.UpdatedAt, DateTime.UtcNow)
+                    .Set(s => s.UpdatedBy, model.UserId);
+
+                await _storeSearchSettingsCollection.UpdateOneAsync(filter, update);
+            }
+            else
+            {
+                // Insert a new store setting if it doesn't exist
+                var newStoreSetting = new StoreSearchSetting
+                {
+                    ClientApiId = model.ClientApiId,
+                    SettingType = "whitelisedStores",
+                    Stores = storeSettings,
+                    CreatedBy = model.UserId,
+                    CreatedAt = DateTime.UtcNow,
+
+                };
+
+                await _storeSearchSettingsCollection.InsertOneAsync(newStoreSetting);
+            }
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }
