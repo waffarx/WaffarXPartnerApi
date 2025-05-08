@@ -191,7 +191,8 @@ public class PartnerRepository : IPartnerRepository
                     ClientApiId = clientApiId,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = userId,
-                    OriginalDocument = featuredProduct
+                    OriginalDocument = featuredProduct,
+                    Type = "Delete",
                 });
             }
             return result.DeletedCount > 0;
