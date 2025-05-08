@@ -1,0 +1,15 @@
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
+
+namespace WaffarXPartnerApi.Application.Common.Mappings;
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        CreateMap<CreateTeamDto, CreateTeamWithActionModel>();
+        CreateMap<UpdateTeamDto, UpdateTeamWithActionModel>();
+        CreateMap<TeamModel, TeamDto>();
+        CreateMap<TeamDetailsModel, TeamDetailsDto>();
+        CreateMap<UserModel, TeamUserDto>();
+    }
+}

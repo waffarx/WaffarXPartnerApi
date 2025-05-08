@@ -35,6 +35,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     {
         try
         {
+            List<int> storesList =  await _partnerRepository.GetStoreIdsByStoreGuids(model.StoreIds);
             OfferSettingModel offerSettingModel = new OfferSettingModel
             {
                 ClientApiId = ClientApiId,
@@ -46,7 +47,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 UserId = UserIdInt,
                 Id = model.Id,
                 ProductIds = model.ProductIds,
-                StoreIds = model.StoreIds,
+                StoreIds = storesList,
             };
             var result = await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
             return new GenericResponse<bool>
@@ -99,11 +100,11 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
             throw;
         }
     }
-    public async Task<GenericResponse<OfferDetailResponseDto>> GetOfferDetails(OfferDetailRequestDto model)
+    public async Task<GenericResponse<OfferDetailResponseDto>> GetOfferDetails(string id)
     {
         try
         {
-            var offerSetting = await _partnerRepository.GetOfferSetting(ClientApiId, model.Id);
+            var offerSetting = await _partnerRepository.GetOfferSetting(ClientApiId, id);
             if (offerSetting == null)
             {
                 return new GenericResponse<OfferDetailResponseDto>
@@ -117,7 +118,12 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 };
             }
             OfferDetailResponseDto response = new OfferDetailResponseDto();
-            if (model.IsProductLevel)
+            response.StartDate = offerSetting.StartDate;
+            response.EndDate = offerSetting.EndDate;
+            response.IsProductLevel = offerSetting.IsProductLevel;
+            response.IsStoreLevel = offerSetting.IsStoreLevel;
+            response.OfferLookupId = offerSetting.OfferLookUpId.ToString();
+            if (offerSetting.IsProductLevel)
             {
                 var headers = new Dictionary<string, string>
                 {
@@ -146,7 +152,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                     response.Products = products;
                 }
             }
-            if (model.IsStoreLevel)
+            if (offerSetting.IsStoreLevel)
             {
                 List<StoreModel> storesDetailsToGet = await _partnerRepository.GetStoreDataByStoreIds(offerSetting.StoreIds);
                 response.Stores = new List<StoreDto>();

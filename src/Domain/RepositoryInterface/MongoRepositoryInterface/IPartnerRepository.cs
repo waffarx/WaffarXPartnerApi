@@ -15,5 +15,6 @@ public interface IPartnerRepository
     Task<bool> AddOfferLookUp(OfferLookUpModel model);
     Task<List<OfferLookUpModel>> GetOfferLookUp(int clientApiId);
     Task<List<StoreLookUpModel>> GetAllStoreLookUp();
-    Task<bool> UpdateWhiteListStore(UpdateWhiteListStoreRequestModel model);   
+    Task<bool> UpdateWhiteListStore(UpdateWhiteListStoreRequestModel model);
+    Task<List<int>> GetStoreIdsByStoreGuids(List<string> guids);
 }

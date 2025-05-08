@@ -45,10 +45,10 @@ public class OfferSettingController : ControllerBase
     /// </summary>
     /// <param name="model">The offer detail request data.</param>
     /// <returns>GenericResponse containing the offer details.</returns>
-    [HttpPost("getofferdetail")]
-    public async Task<IActionResult> GetOfferDetails(OfferDetailRequestDto model)
+    [HttpGet("getofferdetail/{id}")]
+    public async Task<IActionResult> GetOfferDetails(string id)
     {
-        var response = await _offerSettingService.GetOfferDetails(model);
+        var response = await _offerSettingService.GetOfferDetails(id);
         return Ok(response);
     }
 

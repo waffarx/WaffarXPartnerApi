@@ -1,5 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.API.Controllers;
@@ -42,4 +44,67 @@ public class UserController : ControllerBase
         return Ok(response);
 
     }
+    #region Team Endpoints
+
+    /// <summary>
+    /// Creates a new team.
+    /// </summary>
+    /// <param name="dto">The team creation data.</param>
+    /// <returns>GenericResponse indicating success or failure.</returns>
+    [HttpPost("createTeam")]
+    public async Task<IActionResult> CreateTeam(CreateTeamDto dto)
+    {
+        var response = await _userService.CreateTeamAsync(dto);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Updates an existing team.
+    /// </summary>
+    /// <param name="dto">The team update data.</param>
+    /// <returns>GenericResponse indicating success or failure.</returns>
+    [HttpPost("updateteam")]
+    public async Task<IActionResult> UpdateTeam(UpdateTeamDto dto)
+    {
+        var response = await _userService.UpdateTeamAsync(dto);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Deletes a team by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the team to delete.</param>
+    /// <returns>GenericResponse indicating success or failure.</returns>
+    [HttpDelete("deleteteam/{id:guid}")]
+    public async Task<IActionResult> DeleteTeam(Guid id)
+    {
+        var response = await _userService.DeleteTeamAsync(id);
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Retrieves all teams for the current client API ID.
+    /// </summary>
+    /// <param name="clientApiId">The client API ID.</param>
+    /// <returns>GenericResponse containing a list of teams.</returns>
+    [HttpGet("allteam")]
+    public async Task<IActionResult> GetAllTeams()
+    {
+        var response = await _userService.GetAllTeamsAsync();
+        return Ok(response);
+    }
+
+    /// <summary>
+    /// Retrieves the details of a specific team by its ID.
+    /// </summary>
+    /// <param name="id">The ID of the team.</param>
+    /// <returns>GenericResponse containing the team details.</returns>
+    [HttpGet("teamdetails/{id:guid}")]
+    public async Task<IActionResult> GetTeamDetails(Guid id)
+    {
+        var response = await _userService.GetTeamDetailsAsync(id);
+        return Ok(response);
+    }
+
+    #endregion
 }
