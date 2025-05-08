@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.Data;
 

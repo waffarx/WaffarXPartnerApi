@@ -1,6 +1,7 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 
 namespace WaffarXPartnerApi.Application.Common.Mappings;
