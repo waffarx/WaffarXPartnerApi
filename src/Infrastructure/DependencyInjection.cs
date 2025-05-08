@@ -79,6 +79,7 @@ public static class DependencyInjection
         services.AddScoped<IOfferSettingService, OfferSettingService>();
         services.AddScoped<IProductSettingService, ProductSettingService>();
         services.AddScoped<IUserService, UserService>();
+        services.AddScoped<ISearchService, SearchService>();
 
         #endregion
 

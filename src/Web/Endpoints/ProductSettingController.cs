@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.AddFeaturedProduct;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
-using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
@@ -21,7 +21,6 @@ public class ProductSettingController : ControllerBase
         _productSettingService = productSettingService;
     }
 
-
     [HttpPost("getfeaturedproducts")]
     public async Task<IActionResult> GetOffers(GetPartnerFeaturedProductDto featuredProductDto)
     {
@@ -34,6 +33,22 @@ public class ProductSettingController : ControllerBase
     public async Task<IActionResult> DeleteFeaturedProducts(DeleteFeaturedProductDto featuredProductDto)
     {
         var response = await _productSettingService.DeleteFeaturedProduct(featuredProductDto);
+        return Ok(response);
+
+    }
+
+    [HttpPost("updatefeaturedproduct")]
+    public async Task<IActionResult> UpdateFeaturedProduct(UpdateFeaturedProductDto featuredProductDto)
+    {
+        var response = await _productSettingService.UpdateFeaturedProduct(featuredProductDto);
+        return Ok(response);
+
+    }
+
+    [HttpPost("addfeaturedproducts")]
+    public async Task<IActionResult> UpdateFeaturedProduct(List<AddFeaturedProductDto> products)
+    {
+        var response = await _productSettingService.AddFeaturedProductList(products);
         return Ok(response);
 
     }

@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
+using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
@@ -180,12 +181,11 @@ public class PartnerRepository : IPartnerRepository
                     Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
                     Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, productId)
             );
-
+            var featuredProduct = await _featuredProductCollection.Find(filter).FirstOrDefaultAsync();
             // Delete the featured product
             var result = await _featuredProductCollection.DeleteOneAsync(filter);
-            if (result.DeletedCount > 0)
+            if (result.DeletedCount > 0 && featuredProduct != null)
             {
-                var featuredProduct = await _featuredProductCollection.Find(filter).FirstOrDefaultAsync();
                 await _featuredProductSettingAuditCollection.InsertOneAsync(new FeaturedProductSettingAudit
                 {
                     ClientApiId = clientApiId,
@@ -446,9 +446,9 @@ public class PartnerRepository : IPartnerRepository
                 .Where(guid => guid != null)
                 .Select(guid => guid.Value)
                 .ToList();
+
             var storeLookup = await _storeLookUpCollection.Find(s => storeGuids.Contains(s.StoreGuid)).ToListAsync();
             return storeLookup.Select(x => x.StoreId).ToList();
-
 
         }
         catch(Exception)
@@ -456,4 +456,123 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
+    public async Task<List<StoreIdsModel>> GetStoreIdsByGuids(List<string> guids)
+    {
+        try
+        {
+            var storeGuids = guids.Select(g => Guid.TryParse(g, out var guid) ? guid : (Guid?)null)
+            .Where(guid => guid != null)
+            .Select(guid => guid.Value)
+            .ToList();
+            if (storeGuids?.Count > 0)
+            {
+                var storeLookup = await _storeLookUpCollection.Find(s => storeGuids.Contains(s.StoreGuid)).ToListAsync();
+                return storeLookup.Select(x => new StoreIdsModel
+                {
+                    StoreId = x.StoreId,
+                    StoreGuid = x.StoreGuid
+                }).ToList();
+            }
+            return new List<StoreIdsModel>();   
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<bool> UpdateFeaturedProduct(UpdateFeaturedProductModel model)
+    {
+        try
+        {
+            var filter = Builders<FeaturedProductSetting>.Filter.And(
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, model.ClientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, new ObjectId(model.ProductId))
+            );
+            var featuredProduct = await _featuredProductCollection.Find(filter).FirstOrDefaultAsync();
+            // Check if existed the featured product
+            
+            if (featuredProduct != null)
+            {
+                // Create a base update definition
+                var updateDefinition = Builders<FeaturedProductSetting>.Update
+                    .Set(s => s.Product.StartDate, model.StartDate)
+                    .Set(s => s.Product.EndDate, model.EndDate)
+                    .Set(s => s.UpdatedBy, model.UserId)
+                    .Set(s => s.UpdatedAt, DateTime.UtcNow);
+
+                var result = await _featuredProductCollection.UpdateOneAsync(filter, updateDefinition);
+
+                bool isUpdated = result.ModifiedCount > 0;
+                if (isUpdated)
+                {
+                    await _featuredProductSettingAuditCollection.InsertOneAsync(new FeaturedProductSettingAudit
+                    {
+                        ClientApiId = model.ClientApiId,
+                        CreatedAt = DateTime.UtcNow,
+                        CreatedBy = model.UserId,
+                        OriginalDocument = featuredProduct,
+                        Type = "Update",
+                    });
+                }
+                return isUpdated;
+            }
+            return false;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<int> GetActiveFeaturedProductMaxRank(int clientApiId)
+    {
+        try
+        {
+            var filter = Builders<FeaturedProductSetting>.Filter.And(
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Lte(x => x.Product.StartDate, DateTime.Now),
+                    Builders<FeaturedProductSetting>.Filter.Gte(x => x.Product.EndDate, DateTime.Now)
+            );
+            var featuredProduct = await _featuredProductCollection.Find(filter).SortByDescending(x => x.Product.ProductRank).FirstOrDefaultAsync();
+            if (featuredProduct != null)
+            {
+                return featuredProduct.Product.ProductRank;
+            }
+            return 0;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<bool> AddFeaturedProductList(List<AddFeaturedProductModel> products)
+    {
+        try
+        {
+            var featuredProducts = products.Select(x => new FeaturedProductSetting
+            {
+                ClientApiId = x.ClientApiId,
+                CreatedAt = DateTime.UtcNow,
+                CreatedBy = x.UserId,
+                Product = new ProductFeature
+                {
+                    StoreId = x.StoreIdInt,
+                    ProductId = x.ProductId,
+                    StartDate = x.StartDate,
+                    EndDate = x.EndDate,
+                    ProductRank = x.ProductRank
+                },
+                UpdatedAt = DateTime.UtcNow,
+                UpdatedBy = x.UserId,   
+                SettingType = "FeaturedProduct"
+            }).ToList();
+
+            await _featuredProductCollection.InsertManyAsync(featuredProducts);
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
 }

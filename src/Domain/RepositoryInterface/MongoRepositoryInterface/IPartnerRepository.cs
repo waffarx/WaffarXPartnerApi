@@ -17,4 +17,8 @@ public interface IPartnerRepository
     Task<List<StoreLookUpModel>> GetAllStoreLookUp();
     Task<bool> UpdateWhiteListStore(UpdateWhiteListStoreRequestModel model);
     Task<List<int>> GetStoreIdsByStoreGuids(List<string> guids);
+    Task<bool> UpdateFeaturedProduct(UpdateFeaturedProductModel model);
+    Task<int> GetActiveFeaturedProductMaxRank(int clientApiId);
+    Task<List<StoreIdsModel>> GetStoreIdsByGuids(List<string> guids);
+    Task<bool> AddFeaturedProductList(List<AddFeaturedProductModel> products);
 }
