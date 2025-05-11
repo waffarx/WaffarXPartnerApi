@@ -29,9 +29,9 @@ public class AuthService : JWTUserBaseService, IAuthService
         _passwordHasher = passwordHasher;
     }
 
-    public async Task<TokenResponse> LoginAsync(string username, string password)
+    public async Task<TokenResponse> LoginAsync(string Email, string password)
     {
-        var user = await _userRepository.GetByUsernameAsync(username);
+        var user = await _userRepository.GetByEmailAsync(Email);
 
         if (user == null)
         {
@@ -53,6 +53,7 @@ public class AuthService : JWTUserBaseService, IAuthService
         user.LastLogin = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user);
 
+        var pages =  await _userRepository.GetUserPageAndPageAction(user.Id);
         // Generate tokens
         var tokenResult = await GenerateTokensAsync(user);
 

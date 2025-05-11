@@ -105,12 +105,12 @@ public class UserController : ControllerBase
         var response = await _userService.GetTeamDetailsAsync(id);
         return Ok(response);
     }
-
-    #endregion
     [HttpPost("addupdateusertoteam")]
     public async Task<IActionResult> AddUserToTeam(AssignUserToTeamRequestDto model)
     {
         var response = await _userService.AddUserToTeamAsync(model);
         return Ok(response);
     }
+    #endregion
+
 }

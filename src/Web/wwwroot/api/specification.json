@@ -516,6 +516,44 @@
         ]
       }
     },
+    "/api/User/addupdateusertoteam": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_AddUserToTeam",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AssignUserToTeamRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/Auth/login": {
       "post": {
         "tags": [
@@ -902,11 +940,28 @@
           }
         }
       },
+      "AssignUserToTeamRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "userId": {
+            "type": "string",
+            "nullable": true
+          },
+          "teamIds": {
+            "type": "array",
+            "nullable": true,
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
       "LoginRequestDto": {
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "username": {
+          "email": {
             "type": "string",
             "nullable": true
           },

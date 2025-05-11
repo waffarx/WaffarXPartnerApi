@@ -125,32 +125,43 @@ public class UserRepository : IUserRepository
         throw new NotImplementedException();
     }
 
-    public async Task<List<PageActionModel>> GetUserPageAndPageAction(Guid userId)
+    public async Task<List<UserPageActionsModel>> GetUserPageAndPageAction(Guid userId)
     {
         try
         {
             var user = await _context.Users
                 .Include(u => u.UserTeams)
-                .ThenInclude(ut => ut.Team)
-                .ThenInclude(t => t.TeamPageActions)
-                .ThenInclude(tpa => tpa.PageAction)
+                    .ThenInclude(ut => ut.Team)
+                        .ThenInclude(t => t.TeamPageActions)
+                            .ThenInclude(tpa => tpa.PageAction)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
-                return new List<PageActionModel>();
+                return new List<UserPageActionsModel>();
             }
 
             var pageActions = user.UserTeams
-                .SelectMany(ut => ut.Team.TeamPageActions)
-                .Select(tpa => new PageActionModel
-                {
-                    Id = tpa.PageAction.Id,
-                    Name = tpa.PageAction.ActionName,
-                    Description = tpa.PageAction.Description
-                })
-                .Distinct()
-                .ToList();
+                             .SelectMany(ut => ut.Team.TeamPageActions)
+                             .Where(tpa => tpa.PageAction != null && tpa.PageAction.Page != null)
+                             .GroupBy(tpa => new
+                             {
+                                 tpa.PageAction.Page.Id,
+                                 tpa.PageAction.Page.PageName,
+                                 tpa.PageAction.Page.Description
+                             })
+                             .Select(g => new UserPageActionsModel
+                             {
+                                 PageId = g.Key.Id,
+                                 PageName = g.Key.PageName,
+                                 PageDescription = g.Key.Description,
+                                 Actions = g.Select(tpa => new PageActionModel
+                                 {
+                                     Id = tpa.PageAction.Id,
+                                     Name = tpa.PageAction.ActionName,
+                                     Description = tpa.PageAction.Description
+                             }).Distinct().ToList()}).ToList();
+
 
             return pageActions;
         }
