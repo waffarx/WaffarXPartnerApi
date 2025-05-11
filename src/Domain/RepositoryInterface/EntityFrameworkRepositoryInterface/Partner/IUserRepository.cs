@@ -12,4 +12,6 @@ public interface IUserRepository
     Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds);
     Task<bool> RemoveUserFromTeam(Guid userId, Guid teamId);
     Task<List<UserPageActionsModel>> GetUserPageAndPageAction(Guid userId);
+    Task<PaginationResultModel<List<UserSearchModel>>> SearchUserByEmail(UserSearchRequestModel model);
 }
+

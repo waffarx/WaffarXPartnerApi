@@ -338,6 +338,44 @@
         ]
       }
     },
+    "/api/User/searchuser": {
+      "post": {
+        "tags": [
+          "User"
+        ],
+        "operationId": "User_SearchUser",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSearchRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/User/createteam": {
       "post": {
         "tags": [
@@ -1111,6 +1149,24 @@
           "newPassword": {
             "type": "string",
             "nullable": true
+          }
+        }
+      },
+      "UserSearchRequestDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

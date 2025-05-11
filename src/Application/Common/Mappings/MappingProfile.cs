@@ -21,6 +21,7 @@ public class MappingProfile : Profile
         CreateMap<UserPageActionsModel, UserPageActionDto>().ForMember(src => src.PageId, dest => dest.MapFrom(x => x.PageId.ToString()));
         CreateMap<PageDetailModel, PageDetailDto>().ReverseMap();
         CreateMap<PageModel, PageDto>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
+        CreateMap<UserSearchResultDto ,UserSearchModel>().ReverseMap();
 
     }
 }
