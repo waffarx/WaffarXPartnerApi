@@ -1,7 +1,7 @@
 ﻿using System.Security.Claims;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 
-namespace WaffarXPartnerApi.Application.ServiceInterface;
+namespace WaffarXPartnerApi.Application.ServiceInterface.Shared;
 
 
 public interface IJwtService

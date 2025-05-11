@@ -1,8 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs;
-using WaffarXPartnerApi.Application.ServiceInterface;
-using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
 
@@ -20,22 +19,16 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Login(LoginRequestDto request)
     {
         var result = await _authService.LoginAsync(request.Email, request.Password);
-        if (result.Success)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result.Message);
+        return Ok(result);
+
     }
     [Authorize]
     [HttpPost("register")]
     public async Task<IActionResult> Register(RegisterRequestDto request)
     {
         var result = await _authService.RegisterAsync(request);
-        if (result.Success)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result.Message);
+        return Ok(result);
+
     }
     [HttpPost("refreshtoken")]
     public async Task<IActionResult> RefreshToken(TokenDto model)
@@ -68,6 +61,14 @@ public class AuthController : ControllerBase
         return BadRequest(result.Message);
     }
 
+    [Authorize]
+    [HttpPost("deactivateuser")]
+    public async Task<IActionResult> DeactivateUser(string userId)
+    {
+        var result = await _authService.DeactivateUser(userId);
+        return Ok(result);
+
+    }
 
 }
 

@@ -134,12 +134,14 @@ public class UserRepository : IUserRepository
                     .ThenInclude(ut => ut.Team)
                         .ThenInclude(t => t.TeamPageActions)
                             .ThenInclude(tpa => tpa.PageAction)
+                                .ThenInclude(p=>p.Page)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
                 return new List<UserPageActionsModel>();
             }
+
 
             var pageActions = user.UserTeams
                              .SelectMany(ut => ut.Team.TeamPageActions)

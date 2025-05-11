@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository;
 using WaffarXPartnerApi.Application.ServiceInterface;
-using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository.WaffarX;
@@ -19,6 +18,7 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository.Partner;
+using WaffarXPartnerApi.Application.ServiceImplementation;
 
 namespace Microsoft.Extensions.DependencyInjection;
 #nullable disable
@@ -64,6 +64,7 @@ public static class DependencyInjection
         services.AddScoped<ICacheRepository, RedisRepository>();
         services.AddScoped<IPartnerRepository, PartnerRepository>();
         services.AddScoped<ITeamRepository, TeamRepository>();
+        services.AddScoped<IPageRepository, PageRepository>();
 
 
         services.AddScoped<IResourceService, ResourceService>();
@@ -80,6 +81,7 @@ public static class DependencyInjection
         services.AddScoped<IProductSettingService, ProductSettingService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ISearchService, SearchService>();
+        services.AddScoped<ICommonService, CommenService>();
 
         #endregion
 

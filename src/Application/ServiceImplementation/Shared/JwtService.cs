@@ -1,13 +1,13 @@
 ﻿using System.Security.Claims;
 using System.Text;
 using Microsoft.Extensions.Options;
-using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 
-namespace WaffarXPartnerApi.Application.ServiceImplementation;
+namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 public class JwtService : IJwtService
 {
     private readonly JwtSettings _jwtSettings;

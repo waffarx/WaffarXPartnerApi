@@ -1,6 +1,4 @@
-﻿using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
-
-namespace WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
+﻿namespace WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 public class PageModel
 {
     public Guid Id { get; set; }

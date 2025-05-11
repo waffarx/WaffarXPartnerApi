@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Http;
 using WaffarXPartnerApi.Application.Common.DTOs;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
-using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
-using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 
-namespace WaffarXPartnerApi.Application.ServiceImplementation;
+namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 
 public class AuthService : JWTUserBaseService, IAuthService
 {
@@ -15,65 +18,101 @@ public class AuthService : JWTUserBaseService, IAuthService
     private readonly IRefreshTokenRepository _refreshTokenRepository;
     private readonly IJwtService _jwtService;
     private readonly IPasswordHasher _passwordHasher;
+    private readonly IMapper _mapper;
 
     public AuthService(
         IHttpContextAccessor httpContextAccessor,
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtService jwtService,
-        IPasswordHasher passwordHasher): base(httpContextAccessor)
+        IPasswordHasher passwordHasher,
+        IMapper mapper) : base(httpContextAccessor)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtService = jwtService;
         _passwordHasher = passwordHasher;
+        _mapper = mapper;
     }
 
-    public async Task<TokenResponse> LoginAsync(string Email, string password)
+    public async Task<GenericResponse<TokenResponseDto>> LoginAsync(string Email, string password)
     {
         var user = await _userRepository.GetByEmailAsync(Email);
 
         if (user == null)
         {
-            return new TokenResponse { Success = false, Message = "User not found" };
+            return new GenericResponse<TokenResponseDto>
+            {
+                Message = "User not found",
+                Status = StaticValues.Error,
+                Data = new TokenResponseDto()
+
+            };
         }
 
         if (!user.IsActive)
         {
-            return new TokenResponse { Success = false, Message = "User account is inactive" };
+            return new GenericResponse<TokenResponseDto>
+            {
+                Data = new TokenResponseDto(),
+                Status = StaticValues.Error,
+                Message = "User account is inactive"
+            };
         }
 
         // Verify password using the stored hash key
         if (!_passwordHasher.VerifyPassword(password, user.Password, user.HashKey))
         {
-            return new TokenResponse { Success = false, Message = "Invalid password" };
+            return new GenericResponse<TokenResponseDto>
+            {
+                Data = new TokenResponseDto(),
+                Status = StaticValues.Error,
+                Message = "Invalid password"
+            };
         }
 
         // Update last login time
         user.LastLogin = DateTime.UtcNow;
         await _userRepository.UpdateAsync(user);
 
-        var pages =  await _userRepository.GetUserPageAndPageAction(user.Id);
+        var pages = await _userRepository.GetUserPageAndPageAction(user.Id);
+        var pagesToReturn = _mapper.Map<List<UserPageActionDto>>(pages); // new List<UserPageActionDto>();
         // Generate tokens
         var tokenResult = await GenerateTokensAsync(user);
 
-        return tokenResult;
+        return new GenericResponse<TokenResponseDto>
+        {
+            Status = StaticValues.Success,
+            Data = new TokenResponseDto
+            {
+                AccessToken = tokenResult.AccessToken,
+                RefreshToken = tokenResult.RefreshToken,
+                AccessTokenExpiresAt = tokenResult.AccessTokenExpiresAt,
+                RefreshTokenExpiresAt = tokenResult.RefreshTokenExpiresAt,
+                UserPages = pagesToReturn,
+            },
+        };
     }
 
-    public async Task<TokenResponse> RegisterAsync(RegisterRequestDto model)
+    public async Task<GenericResponse<TokenResponseDto>> RegisterAsync(RegisterRequestDto model)
     {
         var existingUser = await _userRepository.GetByUsernameAsync(model.Username);
 
         if (existingUser != null)
         {
-            return new TokenResponse { Success = false, Message = "Username already exists" };
+            return new GenericResponse<TokenResponseDto>
+            {
+                Data = new TokenResponseDto(),
+                Message = "Username already exists",
+                Status = StaticValues.Error
+            };
         }
 
         existingUser = await _userRepository.GetByEmailAsync(model.Email);
 
         if (existingUser != null)
         {
-            return new TokenResponse { Success = false, Message = "Email already exists" };
+            return new GenericResponse<TokenResponseDto> { Data = new TokenResponseDto(), Message = "Email already exists", Status = StaticValues.Error };
         }
 
         // Hash password
@@ -95,14 +134,25 @@ public class AuthService : JWTUserBaseService, IAuthService
         var success = await _userRepository.CreateAsync(user);
         if (!success)
         {
-            return new TokenResponse { Success = false, Message = "Failed to create user" };
+            return new GenericResponse<TokenResponseDto> { Data = new TokenResponseDto(), Message = "Failed to create user", Status = StaticValues.Error };
         }
         await _userRepository.AssignUserToTeam(user.Id, model.TeamsIds);
 
         // Generate tokens
         var tokenResult = await GenerateTokensAsync(user);
+        GenericResponse<TokenResponseDto> tokenResponse = new GenericResponse<TokenResponseDto>
+        {
+            Status = StaticValues.Success,
+            Data = new TokenResponseDto
+            {
+                AccessToken = tokenResult.AccessToken,
+                RefreshToken = tokenResult.RefreshToken,
+                AccessTokenExpiresAt = tokenResult.AccessTokenExpiresAt,
+                RefreshTokenExpiresAt = tokenResult.RefreshTokenExpiresAt,
+            },
+        };
 
-        return tokenResult;
+        return tokenResponse;
     }
 
     public async Task<TokenResponse> RefreshTokenAsync(string refreshToken)
@@ -267,5 +317,33 @@ public class AuthService : JWTUserBaseService, IAuthService
         var randomBytes = new byte[40];
         rng.GetBytes(randomBytes);
         return Convert.ToBase64String(randomBytes);
+    }
+
+    public async Task<GenericResponse<bool>> DeactivateUser(string userId)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
+            if (user == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Data = false,
+                    Message = "User not found",
+                };
+            }
+            user.IsActive = false;
+            var updateResult = await _userRepository.UpdateAsync(user);
+            await _refreshTokenRepository.RevokeAllUserTokensAsync(user.Id);
+            return new GenericResponse<bool>
+            {
+                Data = updateResult,
+                Message = updateResult ? "User deactivated successfully" : "Error Happen while Save Changes",
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
