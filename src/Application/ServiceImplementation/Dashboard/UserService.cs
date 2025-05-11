@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
+using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
@@ -206,6 +207,43 @@ public class UserService : JWTUserBaseService, IUserService
             };
         }
         catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<GenericResponseWithCount<List<UserSearchResultDto>>> SearchForUser(UserSearchRequestDto request)
+    {
+        try
+        {
+            UserSearchRequestModel userSearchRequestModel = new UserSearchRequestModel
+            {
+                ClientApiId = ClientApiId,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                Email = request.Email
+            };
+            var result = await _userRepository.SearchUserByEmail(userSearchRequestModel);
+            if (result.Data != null && result.Data.Count == 0)
+            {
+                return new GenericResponseWithCount<List<UserSearchResultDto>>
+                {
+                    Status = StaticValues.Error,
+                    Message = "No users found",
+                    Data = new List<UserSearchResultDto>(),
+                    TotalCount = 0
+                };
+            }
+            return new GenericResponseWithCount<List<UserSearchResultDto>>
+            {
+                Status = StaticValues.Success,
+                Message = "User search completed successfully",
+                Data = _mapper.Map<List<UserSearchResultDto>>(result.Data),
+                TotalCount = result.TotalRecords,
+            };
+
+        }
+        catch(Exception)
         {
             throw;
         }

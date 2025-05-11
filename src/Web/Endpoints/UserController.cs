@@ -44,6 +44,13 @@ public class UserController : ControllerBase
         return Ok(response);
 
     }
+
+    [HttpPost("searchuser")]
+    public async Task<IActionResult> SearchUser(UserSearchRequestDto request)
+    {
+        var response = await _userService.SearchForUser(request);
+        return Ok(response);
+    }
     #region Team Endpoints
 
     /// <summary>

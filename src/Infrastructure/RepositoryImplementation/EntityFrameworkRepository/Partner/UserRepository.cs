@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
+using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.Data;
 
@@ -134,7 +135,7 @@ public class UserRepository : IUserRepository
                     .ThenInclude(ut => ut.Team)
                         .ThenInclude(t => t.TeamPageActions)
                             .ThenInclude(tpa => tpa.PageAction)
-                                .ThenInclude(p=>p.Page)
+                                .ThenInclude(p => p.Page)
                 .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
@@ -162,10 +163,47 @@ public class UserRepository : IUserRepository
                                      Id = tpa.PageAction.Id,
                                      Name = tpa.PageAction.ActionName,
                                      Description = tpa.PageAction.Description
-                             }).Distinct().ToList()}).ToList();
+                                 }).Distinct().ToList()
+                             }).ToList();
 
 
             return pageActions;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<PaginationResultModel<List<UserSearchModel>>> SearchUserByEmail(UserSearchRequestModel model)
+    {
+        try
+        {
+            var isEmptyEmail = string.IsNullOrEmpty(model.Email);
+            var users = _context.Users
+                .Include(x => x.UserTeams)
+                    .ThenInclude(x => x.Team)
+                .AsNoTracking()
+                .Where(x => x.ClientApiId == model.ClientApiId && !isEmptyEmail ? x.Email.Contains(model.Email) : true)
+                .Select(u => new UserSearchModel
+                {
+                    Email = u.Email,
+                    Teams = u.UserTeams.Select(ut => ut.Team.TeamName).ToList(),
+                    UserId = u.Id.ToString(),
+                    UserName = u.Username,
+                });
+            var totalCount = await users.CountAsync();
+
+            var paginatedUsers = await users
+                .Skip((model.PageNumber - 1) * model.PageSize)
+                .Take(model.PageSize)
+                .ToListAsync();
+            return new PaginationResultModel<List<UserSearchModel>>
+            {
+                Data = paginatedUsers,
+                TotalRecords = totalCount,
+            };
+
         }
         catch (Exception)
         {

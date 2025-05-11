@@ -13,5 +13,6 @@ public interface IUserService
     Task<GenericResponse<List<TeamDto>>> GetAllTeamsAsync();
     Task<GenericResponse<TeamDetailsDto>> GetTeamDetailsAsync(Guid id);
     Task<GenericResponse<bool>> AddUserToTeamAsync(AssignUserToTeamRequestDto model);
+    Task<GenericResponseWithCount<List<UserSearchResultDto>>> SearchForUser(UserSearchRequestDto request);
 
 }
