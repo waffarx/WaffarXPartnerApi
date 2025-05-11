@@ -879,12 +879,27 @@
         ]
       }
     },
-    "/api/ProductSetting/getallfeaturedproducts": {
+    "/api/ProductSetting/saveproductranks": {
       "post": {
         "tags": [
           "ProductSetting"
         ],
-        "operationId": "ProductSetting_GetAllFeaturedProducts",
+        "operationId": "ProductSetting_UpdateProductRanks",
+        "requestBody": {
+          "x-name": "products",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RankProductsDto"
+                }
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
         "responses": {
           "200": {
             "description": "",
@@ -1167,6 +1182,9 @@
           "pageSize": {
             "type": "integer",
             "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -1217,6 +1235,20 @@
           "endDate": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "RankProductsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "string",
+            "nullable": true
+          },
+          "productRank": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

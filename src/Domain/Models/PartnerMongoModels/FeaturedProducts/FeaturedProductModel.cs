@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson;
 
-namespace WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
+namespace WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 public class FeaturedProductModel
 {
     public int StoreId { get; set; }

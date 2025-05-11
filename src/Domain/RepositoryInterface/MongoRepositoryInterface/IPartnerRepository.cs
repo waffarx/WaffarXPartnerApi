@@ -1,6 +1,7 @@
 ﻿using MongoDB.Bson;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 
 namespace WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 public interface IPartnerRepository
@@ -21,4 +22,5 @@ public interface IPartnerRepository
     Task<int> GetActiveFeaturedProductMaxRank(int clientApiId);
     Task<List<StoreIdsModel>> GetStoreIdsByGuids(List<string> guids);
     Task<bool> AddFeaturedProductList(List<AddFeaturedProductModel> products);
+    Task<bool> SaveProductsRank(int clientApiId, int userId, List<FeaturedProductsBase> products);
 }

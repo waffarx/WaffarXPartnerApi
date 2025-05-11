@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.AddFeaturedProduct;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.RankFeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
@@ -52,6 +54,12 @@ public class ProductSettingController : ControllerBase
         return Ok(response);
 
     }
+    
+    [HttpPost("saveproductranks")]
+    public async Task<IActionResult> UpdateProductRanks(List<RankProductsDto> products)
+    {
+        var response = await _productSettingService.SaveFeaturedProductRank(products);
+        return Ok(response);
 
-   
+    }
 }

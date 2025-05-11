@@ -6,7 +6,7 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.MongoRepositoryInterface;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
-using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
@@ -568,6 +568,56 @@ public class PartnerRepository : IPartnerRepository
 
             await _featuredProductCollection.InsertManyAsync(featuredProducts);
             return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<bool> SaveProductsRank(int clientApiId, int userId, List<FeaturedProductsBase> products)
+    {
+        try
+        {
+            var productIds = products.Select(x => x.ProductId).ToList();
+            var allfilter = Builders<FeaturedProductSetting>.Filter.And(
+                Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
+                Builders<FeaturedProductSetting>.Filter.In(x => x.Product.ProductId, productIds)
+            );
+            var featuredProducts = await _featuredProductCollection.Find(allfilter).ToListAsync();
+
+            var updates = new List<WriteModel<FeaturedProductSetting>>();
+            foreach (var product in products)
+            {
+                var filter = Builders<FeaturedProductSetting>.Filter.And(
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
+                    Builders<FeaturedProductSetting>.Filter.Eq(x => x.Product.ProductId, product.ProductId)
+                );
+
+                var update = Builders<FeaturedProductSetting>.Update
+                    .Set(x => x.Product.ProductRank, product.ProductRank)
+                    .Set(x => x.UpdatedAt, DateTime.UtcNow)
+                    .Set(x => x.UpdatedBy, product.UserId);
+
+                updates.Add(new UpdateOneModel<FeaturedProductSetting>(filter, update));
+            }
+            if (updates.Count == 0)
+                return false;
+
+            var result = await _featuredProductCollection.BulkWriteAsync(updates);
+            if (result.ModifiedCount > 0)
+            {
+                var updatedFeaturedProducts = featuredProducts.Select(x => new FeaturedProductSettingAudit
+                {
+                    ClientApiId = x.ClientApiId,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = userId,
+                    Type = "Update",
+                    OriginalDocument = x,
+                }).ToList();
+                await _featuredProductSettingAuditCollection.InsertManyAsync(updatedFeaturedProducts);
+            }
+            return result.ModifiedCount > 0;
         }
         catch (Exception)
         {
