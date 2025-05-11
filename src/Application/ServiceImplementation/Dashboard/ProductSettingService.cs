@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Http;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.AddFeaturedProduct;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
@@ -13,6 +15,7 @@ using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
@@ -26,14 +29,16 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
     private readonly IPartnerRepository _partnerRepository; 
     private readonly IHttpService _httpService;
     private readonly ICacheService _cacheService;
+    private readonly IMapper _mapper;
     public ProductSettingService(IMongoDatabase database, IAdvertiserRepository advertiserRepository, IPartnerRepository partnerRepository, IApiClientRepository apiClientRepository
-        , ICacheService cacheService, IHttpService httpService, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
+        , ICacheService cacheService, IHttpService httpService, IMapper mapper, IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
     {
         _partnerRepository = partnerRepository; 
         _apiClientRepository = apiClientRepository;
         _httpService = httpService;
         _cacheService = cacheService;
         _advertiserRepository = advertiserRepository;
+        _mapper = mapper;
     }
     public async Task<GenericResponseWithCount<List<FeaturedProductResponseDto>>> GetFeaturedProducts(GetPartnerFeaturedProductDto featuredProductDto)
     {
@@ -160,5 +165,86 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
         {
             throw;
         }
+    }
+    public async Task<GenericResponse<bool>> UpdateFeaturedProduct(UpdateFeaturedProductDto productDto)
+    {
+        GenericResponse<bool> response = new GenericResponse<bool>();
+        try
+        {
+            if (!ObjectId.TryParse(productDto.ProductId, out ObjectId objectId))
+            {
+
+                response.Status = StaticValues.Error;
+                response.Data = false;
+                response.Errors = new List<string> { "Invalid product" };
+                return response;
+            }
+            UpdateFeaturedProductModel model = _mapper.Map<UpdateFeaturedProductModel>(productDto);
+            model.UserId = UserIdInt;
+            model.ClientApiId = ClientApiId;
+            bool isUpdated = await _partnerRepository.UpdateFeaturedProduct(model);
+            if (isUpdated)
+            {
+                response.Status = StaticValues.Success;
+                response.Data = true;
+                response.Message = "Product Saved Successfully";
+                return response;
+            }
+            response.Status = StaticValues.Error;
+            response.Data = false;
+            response.Errors = new List<string> { "Invalid product" };
+            return response;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<GenericResponse<bool>> AddFeaturedProductList(List<AddFeaturedProductDto> products)
+    {
+        try
+        {
+            // Get Max Active Featured Product Rank
+            var maxRank = await _partnerRepository.GetActiveFeaturedProductMaxRank(ClientApiId);
+
+            // Get All Store Ids from List of Store Guids
+            var storeIds = await _partnerRepository.GetStoreIdsByGuids(products.Select(x => x.StoreId).ToList());
+
+            // Map List of AddFeaturedProductDto to List of AddFeaturedProductModel
+            List<AddFeaturedProductModel> featuredProducts = new List<AddFeaturedProductModel>();
+            foreach (var product in products)
+            {
+                maxRank = maxRank + 1;
+                AddFeaturedProductModel featuerd = new AddFeaturedProductModel()
+                {
+                    ClientApiId = ClientApiId,
+                    UserId = UserIdInt,
+                    StoreId  = product.StoreId,
+                    StoreIdInt = storeIds.FirstOrDefault(x => x.StoreGuid.ToString() == product.StoreId)?.StoreId ?? 0,
+                    ProductRank = maxRank,
+                    EndDate = product.EndDate,
+                    ProductId = ObjectId.Parse(product.ProductId),  
+                    StartDate = product.StartDate
+                };
+                featuredProducts.Add(featuerd); 
+            }
+            // Add Featured Product List to Database
+            bool isAdded = await _partnerRepository.AddFeaturedProductList(featuredProducts);
+            
+            return  new GenericResponse<bool>() 
+            {
+                Status = isAdded ? StaticValues.Success : StaticValues.Error,
+                Data = isAdded,
+                Message = isAdded ? "Product Added Successfully" : "Failed to Add Product",
+                Errors = isAdded ? null : new List<string> { "Failed to Add Products" }
+            };
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
+       
+        
     }
 }

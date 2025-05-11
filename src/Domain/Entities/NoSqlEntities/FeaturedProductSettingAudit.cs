@@ -10,6 +10,7 @@ public class FeaturedProductSettingAudit
     public DateTime CreatedAt { get; set; }
     public int ClientApiId { get; set; }
     public string Type { get; set; }
+
     [BsonElement("FeaturedProductSetting")]
     public FeaturedProductSetting OriginalDocument { get; set; }
 }
