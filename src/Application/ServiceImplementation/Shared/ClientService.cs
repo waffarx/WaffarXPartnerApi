@@ -1,5 +1,5 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs;
-using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;

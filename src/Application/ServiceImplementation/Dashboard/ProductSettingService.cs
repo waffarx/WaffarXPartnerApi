@@ -13,7 +13,6 @@ using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
-using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;

@@ -1,14 +1,16 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs;
+using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 
-namespace WaffarXPartnerApi.Application.ServiceInterface;
+namespace WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 public interface IAuthService
 {
-    Task<TokenResponse> LoginAsync(string username, string password);
-    Task<TokenResponse> RegisterAsync(RegisterRequestDto user);
+    Task<GenericResponse<TokenResponseDto>> LoginAsync(string username, string password);
+    Task<GenericResponse<TokenResponseDto>> RegisterAsync(RegisterRequestDto user);
     Task<TokenResponse> RefreshTokenAsync(string refreshToken);
     Task<bool> RevokeTokenAsync(string refreshToken);
     Task<TokenValidationResult> ValidateJwtTokenAsync(string token);
+    Task<GenericResponse<bool>> DeactivateUser(string userId);
 }
 public class TokenResponse
 {

@@ -1,4 +1,4 @@
-﻿namespace WaffarXPartnerApi.Application.ServiceInterface;
+﻿namespace WaffarXPartnerApi.Application.ServiceInterface.Shared;
 public interface IHttpService
 {
     Task<T> GetAsync<T>(string url, Dictionary<string, string> headers = null);

@@ -1,12 +1,11 @@
 using Serilog;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
-using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
-using WaffarXPartnerApi.Application.ServiceInterface;
 using Serilog.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);

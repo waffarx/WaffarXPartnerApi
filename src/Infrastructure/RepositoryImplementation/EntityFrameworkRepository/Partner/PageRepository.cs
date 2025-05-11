@@ -16,10 +16,10 @@ public class PageRepository : IPageRepository
         try
         {
             var pages = await _waffarXPartnerDbContext.Pages
-                             .Where(x => x.ClientApiId == clientApiId)
+                             .Where(x => x.ClientApiId == clientApiId && x.IsActive)
                              .Select(x => new PageDetailModel
                              {
-                                 Pages = new List<PageModel>
+                                 Page = new List<PageModel>
                                  {
                                              new PageModel
                                              {

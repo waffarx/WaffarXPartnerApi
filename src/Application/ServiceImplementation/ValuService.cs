@@ -13,6 +13,7 @@ using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
@@ -30,7 +31,7 @@ public class ValuService : BaseService, IValuService
     {
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
-        _advertiserRepository = advertiserRepository;   
+        _advertiserRepository = advertiserRepository;
     }
 
     public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
@@ -75,11 +76,11 @@ public class ValuService : BaseService, IValuService
                 TotalCount = 0,
             };
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
-        
+
     }
 
     public async Task<GenericResponse<DetailedProductSearchResultDto>> GetProductDetails(string id)
@@ -174,9 +175,9 @@ public class ValuService : BaseService, IValuService
                 Status = StaticValues.Error,
             };
         }
-        catch(Exception)
+        catch (Exception)
         { throw; }
-     
+
     }
 
     public async Task<GenericResponseWithCount<List<StoreResponseDto>>> GetStores(GetStoresRequestDto model)
@@ -207,7 +208,7 @@ public class ValuService : BaseService, IValuService
                 {
                     stores.Add(new StoreResponseDto
                     {
-                        Id = (Guid)item.Id,
+                        Id = item.Id,
                         Logo = item.Logo,
                         LogoPng = item.LogoPng,
                         Name = item.Name,
@@ -228,11 +229,11 @@ public class ValuService : BaseService, IValuService
                 Status = StaticValues.Error,
             };
         }
-        catch(Exception)
+        catch (Exception)
         {
             throw;
         }
-      
+
     }
 
     public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch)
@@ -344,17 +345,17 @@ public class ValuService : BaseService, IValuService
                 AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
                 requestBody,
                 headers);
-            if (searchResults != null  && searchResults.Data != null && searchResults.Status == StaticValues.Success
+            if (searchResults != null && searchResults.Data != null && searchResults.Status == StaticValues.Success
                  && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
             {
-                response.Status = StaticValues.Success; 
-                response.Data =  searchResults.Data.RedirectUrl;
+                response.Status = StaticValues.Success;
+                response.Data = searchResults.Data.RedirectUrl;
                 return response;
             }
 
             response.Status = StaticValues.Error;
             response.Data = "";
-            response.Errors = new List<string>();   
+            response.Errors = new List<string>();
             return response;
         }
         catch (Exception)
@@ -374,7 +375,7 @@ public class ValuService : BaseService, IValuService
                 ["Content-Type"] = "application/json"
             };
             SearchFilterModel filterModel = null;
-           
+
             List<Guid> guids = new List<Guid>() { storeProductSearch.StoreId };
             List<int> storeIds = await _advertiserRepository.GetStoreIds(guids);
 
@@ -384,7 +385,7 @@ public class ValuService : BaseService, IValuService
                 Stores = storeIds,
                 MinPrice = storeProductSearch?.MinPrice,
                 MaxPrice = storeProductSearch?.MaxPrice,
-                Category = storeProductSearch?.Category,    
+                Category = storeProductSearch?.Category,
             };
 
             ProductSearchDto requestBody = new ProductSearchDto
@@ -455,7 +456,7 @@ public class ValuService : BaseService, IValuService
                 store,
                 headers);
             if (stroreCategoriesResults.Status == StaticValues.Success && stroreCategoriesResults.Data != null
-                && stroreCategoriesResults.Data.StoreId > 0 
+                && stroreCategoriesResults.Data.StoreId > 0
                 && (stroreCategoriesResults.Data.EnCategoriesList?.Count > 0 || stroreCategoriesResults.Data.ArCategoriesList?.Count > 0))
             {
                 return new GenericResponse<StoreCategoriesDto>
@@ -476,7 +477,7 @@ public class ValuService : BaseService, IValuService
         }
         catch (Exception)
         {
-            throw; 
+            throw;
         }
     }
 

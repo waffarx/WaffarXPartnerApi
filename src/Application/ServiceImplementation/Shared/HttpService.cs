@@ -1,9 +1,9 @@
 ﻿using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 
-namespace WaffarXPartnerApi.Application.ServiceImplementation;
+namespace WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 public class HttpService : IHttpService
 {
     private readonly HttpClient _httpClient;

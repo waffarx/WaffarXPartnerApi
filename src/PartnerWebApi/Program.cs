@@ -4,9 +4,8 @@ using PartnerWebApi.Infrastructure;
 using Serilog;
 using Serilog.Exceptions;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
-using WaffarXPartnerApi.Application.ServiceImplementation;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
-using WaffarXPartnerApi.Application.ServiceInterface;
+using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);

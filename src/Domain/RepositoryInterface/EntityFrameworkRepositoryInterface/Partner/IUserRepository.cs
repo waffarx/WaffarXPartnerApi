@@ -11,5 +11,5 @@ public interface IUserRepository
     Task<bool> UpdateAsync(User user);
     Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds);
     Task<bool> RemoveUserFromTeam(Guid userId, Guid teamId);
-    Task<List<PageActionModel>> GetUserPageAndPageAction(Guid userId);
+    Task<List<UserPageActionsModel>> GetUserPageAndPageAction(Guid userId);
 }

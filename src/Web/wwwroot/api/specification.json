@@ -724,6 +724,42 @@
         }
       }
     },
+    "/api/Auth/deactivateuser": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "operationId": "Auth_DeactivateUser",
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            },
+            "x-position": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
     "/api/ProductSetting/getfeaturedproducts": {
       "post": {
         "tags": [
@@ -957,6 +993,32 @@
           }
         ]
       }
+    },
+    "/api/Shared/pages": {
+      "get": {
+        "tags": [
+          "Shared"
+        ],
+        "operationId": "Shared_GetPagesWithAction",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1119,7 +1181,7 @@
         "type": "object",
         "additionalProperties": false,
         "properties": {
-          "username": {
+          "email": {
             "type": "string",
             "nullable": true
           },

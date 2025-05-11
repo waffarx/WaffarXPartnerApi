@@ -156,6 +156,7 @@ public class TeamRepository : ITeamRepository
             {
                 Id = x.Id,
                 Name = x.TeamName,
+                Description = x.Description
             }).ToListAsync();
             return teams;
         }
