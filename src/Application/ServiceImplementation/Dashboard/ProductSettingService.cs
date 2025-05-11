@@ -57,7 +57,7 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
             var WhiteListedStores = await _cacheService.GetOrSetCacheValueAsync(
                      whiteListedStoresCacheKey, () => _partnerRepository.GetWhiteListStores(ClientApiId, disabledStores), TimeSpan.FromHours(24));
             
-            var ClientFeaturedList = await _partnerRepository.GetFeaturedProducts(ClientApiId, WhiteListedStores, false ,featuredProductDto.PageNumber, featuredProductDto.PageSize);
+            var ClientFeaturedList = await _partnerRepository.GetFeaturedProducts(ClientApiId, WhiteListedStores, featuredProductDto.IsActive, featuredProductDto.PageNumber, featuredProductDto.PageSize);
             if (ClientFeaturedList != null && ClientFeaturedList.TotalRecords > 0 && ClientFeaturedList.Data?.Count > 0)
             {
                 var productIds = ClientFeaturedList.Data.Select(x => x.ProductId).ToList();

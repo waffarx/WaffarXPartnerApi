@@ -729,7 +729,7 @@
         "tags": [
           "ProductSetting"
         ],
-        "operationId": "ProductSetting_GetOffers",
+        "operationId": "ProductSetting_GetFeaturedProducts",
         "requestBody": {
           "x-name": "featuredProductDto",
           "content": {
@@ -859,6 +859,32 @@
           "required": true,
           "x-position": 1
         },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/ProductSetting/getallfeaturedproducts": {
+      "post": {
+        "tags": [
+          "ProductSetting"
+        ],
+        "operationId": "ProductSetting_GetAllFeaturedProducts",
         "responses": {
           "200": {
             "description": "",

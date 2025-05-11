@@ -22,7 +22,7 @@ public class ProductSettingController : ControllerBase
     }
 
     [HttpPost("getfeaturedproducts")]
-    public async Task<IActionResult> GetOffers(GetPartnerFeaturedProductDto featuredProductDto)
+    public async Task<IActionResult> GetFeaturedProducts(GetPartnerFeaturedProductDto featuredProductDto)
     {
         var response = await _productSettingService.GetFeaturedProducts(featuredProductDto);
         return Ok(response);
@@ -52,4 +52,6 @@ public class ProductSettingController : ControllerBase
         return Ok(response);
 
     }
+
+   
 }
