@@ -5,6 +5,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.AddFeaturedPr
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.DeleteFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProducts.GetFeaturedProduct;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.RankFeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
@@ -16,6 +17,7 @@ using WaffarXPartnerApi.Application.ServiceInterface;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
@@ -57,7 +59,7 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
             var WhiteListedStores = await _cacheService.GetOrSetCacheValueAsync(
                      whiteListedStoresCacheKey, () => _partnerRepository.GetWhiteListStores(ClientApiId, disabledStores), TimeSpan.FromHours(24));
             
-            var ClientFeaturedList = await _partnerRepository.GetFeaturedProducts(ClientApiId, WhiteListedStores, false ,featuredProductDto.PageNumber, featuredProductDto.PageSize);
+            var ClientFeaturedList = await _partnerRepository.GetFeaturedProducts(ClientApiId, WhiteListedStores, featuredProductDto.IsActive, featuredProductDto.PageNumber, featuredProductDto.PageSize);
             if (ClientFeaturedList != null && ClientFeaturedList.TotalRecords > 0 && ClientFeaturedList.Data?.Count > 0)
             {
                 var productIds = ClientFeaturedList.Data.Select(x => x.ProductId).ToList();
@@ -246,5 +248,36 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
         }
        
         
+    }
+    public async Task<GenericResponse<bool>> SaveFeaturedProductRank(List<RankProductsDto> products)
+    {
+        GenericResponse<bool> response = new GenericResponse<bool>();
+        try
+        {
+            List<FeaturedProductsBase> featuredProducts = products.Select(x => new FeaturedProductsBase
+            {
+                ClientApiId = ClientApiId, 
+                ProductId = ObjectId.Parse(x.ProductId),    
+                ProductRank = x.ProductRank,
+                UserId  = UserIdInt,  
+            }).ToList();
+            bool result = await _partnerRepository.SaveProductsRank(ClientApiId, UserIdInt, featuredProducts);
+            if(result)
+            {
+                response.Status = StaticValues.Success;
+                response.Data = true;
+                response.Message = "Product Rank Saved Successfully";
+                return response;
+            }
+            response.Status = StaticValues.Error;
+            response.Data = true;
+            response.Errors = new List<string> { "Failed to save product ranks" };
+            return response;
+        }
+        catch (Exception)
+        {
+
+            throw;
+        }
     }
 }

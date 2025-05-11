@@ -729,7 +729,7 @@
         "tags": [
           "ProductSetting"
         ],
-        "operationId": "ProductSetting_GetOffers",
+        "operationId": "ProductSetting_GetFeaturedProducts",
         "requestBody": {
           "x-name": "featuredProductDto",
           "content": {
@@ -852,6 +852,47 @@
                 "type": "array",
                 "items": {
                   "$ref": "#/components/schemas/AddFeaturedProductDto"
+                }
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/ProductSetting/saveproductranks": {
+      "post": {
+        "tags": [
+          "ProductSetting"
+        ],
+        "operationId": "ProductSetting_UpdateProductRanks",
+        "requestBody": {
+          "x-name": "products",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/components/schemas/RankProductsDto"
                 }
               }
             }
@@ -1141,6 +1182,9 @@
           "pageSize": {
             "type": "integer",
             "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -1191,6 +1235,20 @@
           "endDate": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "RankProductsDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "productId": {
+            "type": "string",
+            "nullable": true
+          },
+          "productRank": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
