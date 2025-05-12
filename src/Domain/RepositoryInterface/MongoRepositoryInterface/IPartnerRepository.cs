@@ -23,4 +23,5 @@ public interface IPartnerRepository
     Task<List<StoreIdsModel>> GetStoreIdsByGuids(List<string> guids);
     Task<bool> AddFeaturedProductList(List<AddFeaturedProductModel> products);
     Task<bool> SaveProductsRank(int clientApiId, int userId, List<FeaturedProductsBase> products);
+    Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds, List<int> disabledStores = null);
 }
