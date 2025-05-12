@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
+using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 using WaffarXPartnerApi.Infrastructure.Data;
 
@@ -173,7 +174,9 @@ public class TeamRepository : ITeamRepository
             // by team id get the team and join to the user under this team and map back to the model
             var teamDetails = await _waffarXPartnerDbContext.Teams
                 .Include(x => x.UserTeams)
-                .ThenInclude(x => x.User)
+                .Include(x => x.TeamPageActions)
+                        .ThenInclude(x => x.PageAction)
+                            .ThenInclude(x => x.Page)
                 .AsSplitQuery()
                 .AsNoTracking()
                 .Where(x => x.Id == id)
@@ -186,6 +189,20 @@ public class TeamRepository : ITeamRepository
                         UserId = u.UserId,
                         UserName = u.User.Username,
                         Email = u.User.Email,
+                    }).ToList(),
+                    Pages = x.TeamPageActions.Select(p => new PageDetailModel
+                    {
+                        Page = new PageModel
+                        {
+                            Id = p.PageAction.Page.Id,
+                            Name = p.PageAction.Page.PageName,
+                            PageActions = p.PageAction.Page.PageActions.Select(a => new PageActionModel
+                            {
+                                Id = a.Id,
+                                Name = a.ActionName,
+                                Description = a.Description
+                            }).ToList(),
+                        },  
                     }).ToList(),
                 }).FirstOrDefaultAsync();
 

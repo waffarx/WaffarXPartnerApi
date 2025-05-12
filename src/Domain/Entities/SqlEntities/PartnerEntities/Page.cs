@@ -7,6 +7,7 @@ public class Page
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
     public int ClientApiId { get; set; }
+    public bool IsSuperAdminPage { get; set; }
 
     // Navigation properties
     public virtual ICollection<PageAction> PageActions { get; set; }

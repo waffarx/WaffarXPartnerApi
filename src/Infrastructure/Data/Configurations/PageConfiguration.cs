@@ -31,6 +31,7 @@ public class PageConfiguration : IEntityTypeConfiguration<Page>
 
         builder.Property(p => p.ClientApiId)
                .IsRequired();
+        builder.Property(p => p.IsSuperAdminPage).IsRequired();
 
         builder.HasMany(p => p.PageActions)
                .WithOne(pa => pa.Page)
