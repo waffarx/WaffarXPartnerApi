@@ -19,21 +19,21 @@ public class PageRepository : IPageRepository
                              .Where(x => x.ClientApiId == clientApiId && x.IsActive)
                              .Select(x => new PageDetailModel
                              {
-                                 Page = new List<PageModel>
-                                 {
-                                             new PageModel
-                                             {
-                                                 Id = x.Id,
-                                                 Name = x.PageName,
-                                                 Description = x.Description,
-                                                 PageActions = x.PageActions.Select(a => new PageActionModel
-                                                 {
-                                                     Id = a.Id,
-                                                     Name = a.ActionName,
-                                                     Description = a.Description
-                                                 }).ToList()
-                                             }
-                                 }
+                                 Page =
+
+                                     new PageModel
+                                     {
+                                         Id = x.Id,
+                                         Name = x.PageName,
+                                         Description = x.Description,
+                                         PageActions = x.PageActions.Select(a => new PageActionModel
+                                         {
+                                             Id = a.Id,
+                                             Name = a.ActionName,
+                                             Description = a.Description
+                                         }).ToList()
+                                     }
+
                              }).ToListAsync();
             return pages;
         }
