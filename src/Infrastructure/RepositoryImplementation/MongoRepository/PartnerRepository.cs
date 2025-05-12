@@ -390,7 +390,8 @@ public class PartnerRepository : IPartnerRepository
                 {
                     IsFeatured = store.IsFeatured,
                     Rank = store.Rank,
-                    StoreId = storeLookup.Where(x => x.StoreGuid == Guid.Parse(store.StoreId)).FirstOrDefault()?.StoreId ?? 0
+                    StoreId = storeLookup.Where(x => x.StoreGuid == Guid.Parse(store.StoreId)).FirstOrDefault()?.StoreId ?? 0,
+                    BackgroundColor = store.BackgroundColor,
                 });
             }
 
