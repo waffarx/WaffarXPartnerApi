@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using MongoDB.Driver;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard;
-using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
@@ -20,14 +19,16 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
     private readonly ICacheRepository _cacheRepository;
 
     private readonly IPartnerRepository _partnerRepository;
+    private readonly IAdvertiserRepository _advertiserRepository;
 
 
-    public StoreSettingService(IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService, ICacheRepository cacheRepository, IPartnerRepository partnerRepository) : base(httpContextAccessor)
+    public StoreSettingService(IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService, ICacheRepository cacheRepository, IPartnerRepository partnerRepository, IAdvertiserRepository advertiserRepository) : base(httpContextAccessor)
     {
         _apiClientRepository = apiClientRepository;
         _httpService = httpService;
         _cacheRepository = cacheRepository;
         _partnerRepository = partnerRepository;
+        _advertiserRepository = advertiserRepository;
     }
     public async Task<GenericResponse<bool>> UpdateStoreSettingList(List<StoreSettingRequestDto> stores)
     {
@@ -73,26 +74,18 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
             {
                 ["Content-Type"] = "application/json"
             };
-            var clientGuid = await _apiClientRepository.GetClientGuidById(ClientApiId);
-            GetStoresDto requestBody = new GetStoresDto
-            {
-                ClientApiId = clientGuid,
-                IsEnglish = IsEnglish,
-                ItemCount = 1000,
-                PageNumber = 1,
 
-            };
+           var disabledStores = await  _advertiserRepository.GetDisabledStores();
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<WhiteListedStoreResonseDto>>>(
-                AppSettings.ExternalApis.ValuUrl + "GetStores",
-                requestBody,
+            var searchResults = await _httpService.PostAsync<GenericResponse<List<WhiteListedStoreResonseDto>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoresDetails" + "?apiClientId=" + ClientApiId.ToString(),
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
             {
-                List<WhiteListedStoreResonseDto> stores = new List<WhiteListedStoreResonseDto>();
+                List<WhiteListedStoreResonseDto> whiteListedstores = new List<WhiteListedStoreResonseDto>();
                 foreach (var item in searchResults.Data)
                 {
-                    stores.Add(new WhiteListedStoreResonseDto
+                    whiteListedstores.Add(new WhiteListedStoreResonseDto
                     {
                         Id = item.Id,
                         Logo = item.Logo,
@@ -103,10 +96,11 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                         IsFeatured = item.IsFeatured,
                     });
                 }
+
                 return new GenericResponse<List<WhiteListedStoreResonseDto>>
                 {
                     Status = StaticValues.Success,
-                    Data = stores,
+                    Data = whiteListedstores,
                 };
             }
             return new GenericResponse<List<WhiteListedStoreResonseDto>>

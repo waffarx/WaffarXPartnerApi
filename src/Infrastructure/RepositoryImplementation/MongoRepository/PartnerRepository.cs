@@ -7,6 +7,7 @@ using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using System.Linq.Expressions;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
+using MongoDB.Bson.Serialization;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
@@ -626,4 +627,42 @@ public class PartnerRepository : IPartnerRepository
         }
     }
 
+public async Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds, List<int> disabledStores = null)
+    {
+        List<DetailedStoreModel> storeList = new List<DetailedStoreModel>();
+        try
+        {
+            // Adjust the filter to use the correct type for the collection  
+            var filter = Builders<StoreSearchSetting>.Filter.In("Stores.StoreId", storeIds);
+            if (disabledStores?.Count > 0)
+            {
+                filter = Builders<StoreSearchSetting>.Filter.And(
+                    Builders<StoreSearchSetting>.Filter.In("Stores.StoreId", storeIds),
+                    Builders<StoreSearchSetting>.Filter.Nin("Stores.StoreId", disabledStores)
+                );
+            }
+
+            // Adjust the projection to match the type of the collection  
+            var projection = Builders<StoreSearchSetting>.Projection
+                .Exclude("_id");
+
+            var result = await _storeSearchSettingsCollection.Find(filter).Project<StoreSearchSetting>(projection).ToListAsync();
+            if (result?.Count > 0)
+            {
+                foreach (var doc in result)
+                {
+                    storeList.Add(new DetailedStoreModel
+                    {
+                        // Map the properties from StoreSearchSetting to DetailedStoreModel  
+                        // Adjust the mapping logic as per your data structure  
+                    });
+                }
+            }
+            return storeList;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
 }

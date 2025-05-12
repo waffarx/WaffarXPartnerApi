@@ -1135,6 +1135,10 @@
           "rank": {
             "type": "integer",
             "format": "int32"
+          },
+          "backgroundColor": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
