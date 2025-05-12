@@ -2,6 +2,7 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
 using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -52,6 +53,56 @@ public class ValuService : BaseService, IValuService
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
                 AppSettings.ExternalApis.ValuUrl + "GetFeaturedProducts",
+                requestObj,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    products.Add(ProductMappingHelper.MapToBaseProduct(item));
+                }
+
+                return new GenericResponseWithCount<List<BaseProductSearchResultDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = products,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
+            {
+                Data = new List<BaseProductSearchResultDto>(),
+                Status = StaticValues.Error,
+                TotalCount = 0,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+
+    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            GetFeaturedProductByStoreRequestDto requestObj = new GetFeaturedProductByStoreRequestDto
+            {
+                ClientApiId = ClientApiId,
+                Count = product.PageSize,
+                PageNumber = product.PageNumber,
+                IsEnglish = IsEnglish,
+                StoreId = product.StoreId,  
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetFeaturedProductsByStore",
                 requestObj,
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
@@ -165,7 +216,9 @@ public class ValuService : BaseService, IValuService
                             Name = searchResults.Data?.Store.Name,
                             LogoPng = searchResults.Data?.Store.LogoPng,
                             ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + searchResults.Data.Store.Id,
-                        }
+                            BackgroundColor = searchResults.Data?.Store.BackgroundColor,
+                        },
+                        Offers = searchResults.Data.Offers ?? new List<OfferDto>()
                     }
                 };
             }
@@ -434,6 +487,7 @@ public class ValuService : BaseService, IValuService
             throw;
         }
     }
+    
     public async Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId)
     {
         try

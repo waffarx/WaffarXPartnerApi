@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -74,6 +75,13 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> GetStoredCategories(Guid id)
     {
         var result = await _valuService.GetStoreCategories(id);
+        return Ok(result);
+    }
+
+    [HttpPost("getstorefeaturedproducts")]
+    public async Task<IActionResult> GetStoreFeaturedProducts(GetFeaturedProductByStoreDto query)
+    {
+        var result = await _valuService.GetFeaturedProductsByStoreId(query);
         return Ok(result);
     }
 }

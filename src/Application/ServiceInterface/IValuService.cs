@@ -1,4 +1,5 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -19,4 +20,5 @@ public interface IValuService
 
     Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch);
     Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId);
+    Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product);
 }
