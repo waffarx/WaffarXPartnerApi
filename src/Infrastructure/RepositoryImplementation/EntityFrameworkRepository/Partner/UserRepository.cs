@@ -181,11 +181,12 @@ public class UserRepository : IUserRepository
         {
             var isEmptyEmail = string.IsNullOrEmpty(model.Email);
             var users = _context.Users
+                .AsSplitQuery()
+                .AsNoTracking()
                 .Include(x => x.UserTeams)
                     .ThenInclude(x => x.Team)
-                .AsNoTracking()
-                .AsSplitQuery()
                 .Where(x => x.ClientApiId == model.ClientApiId && !isEmptyEmail ? x.Email.Contains(model.Email) : true)
+                .OrderByDescending(u => u.Id)
                 .Select(u => new UserSearchModel
                 {
                     Email = u.Email,
