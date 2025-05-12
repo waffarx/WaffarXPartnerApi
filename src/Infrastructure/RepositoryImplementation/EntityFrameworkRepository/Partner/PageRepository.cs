@@ -16,7 +16,7 @@ public class PageRepository : IPageRepository
         try
         {
             var pages = await _waffarXPartnerDbContext.Pages
-                             .Where(x => x.ClientApiId == clientApiId && x.IsActive)
+                             .Where(x => x.ClientApiId == clientApiId && x.IsActive && !x.IsSuperAdminPage)
                              .Select(x => new PageDetailModel
                              {
                                  Page =
