@@ -42,6 +42,8 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                     Rank = store.Rank,
                     IsFeatured = store.IsFeatured,
                     StoreId = store.StoreId,
+                    BackgroundColor= store.BackgroundColor
+
                 }).ToList()
 
             };
@@ -97,6 +99,8 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                         LogoPng = item.LogoPng,
                         Name = item.Name,
                         Rank = item.Rank,
+                        BackgroundColor = item.BackgroundColor,
+                        IsFeatured = item.IsFeatured,
                     });
                 }
                 return new GenericResponse<List<WhiteListedStoreResonseDto>>
