@@ -184,6 +184,7 @@ public class UserRepository : IUserRepository
                 .Include(x => x.UserTeams)
                     .ThenInclude(x => x.Team)
                 .AsNoTracking()
+                .AsSplitQuery()
                 .Where(x => x.ClientApiId == model.ClientApiId && !isEmptyEmail ? x.Email.Contains(model.Email) : true)
                 .Select(u => new UserSearchModel
                 {
@@ -191,6 +192,7 @@ public class UserRepository : IUserRepository
                     Teams = u.UserTeams.Select(ut => ut.Team.TeamName).ToList(),
                     UserId = u.Id.ToString(),
                     UserName = u.Username,
+                    IsActive = u.IsActive
                 });
             var totalCount = await users.CountAsync();
 
