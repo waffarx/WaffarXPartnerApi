@@ -1,6 +1,8 @@
 ﻿using System.Reflection;
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.PaginationRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
@@ -18,6 +20,8 @@ public static class DependencyInjection
         services.AddScoped<IValidator<ProductSearchRequestDto>, ProductSearchRequestDtoValidator>();
         services.AddScoped<IValidator<GetStoresRequestDto>, GetStoresRequestDtoValidator>();
         services.AddScoped<IValidator<StoreProductSearchRequestDto>, StoreProductSearchRequestDtoValidator>();
+        services.AddScoped<IValidator<GetFeaturedProductByStoreDto>, GetFeaturedProductByStoreDtoValidator>();
+        services.AddScoped<IValidator<GetStoresWithProductsDto>, GetStoresWithProductsDtoValidator>();
         services.AddScoped<RandomGenerator>();
         return services;
     }

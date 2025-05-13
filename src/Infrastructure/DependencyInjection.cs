@@ -42,8 +42,8 @@ public static class DependencyInjection
         services.AddDbContext<WaffarXContext>((sp, options) =>
         {
             options.UseSqlServer(waffarxconnectionString);
-            options.UseSqlServer(waffarxconnectionString, o => o.UseCompatibilityLevel(120))
-                        .LogTo(Console.WriteLine, LogLevel.Information);
+            options.UseSqlServer(waffarxconnectionString, o => o.UseCompatibilityLevel(120));
+                        //.LogTo(Console.WriteLine, LogLevel.Information);
         });
         services.AddMongoDb(configuration);
 
