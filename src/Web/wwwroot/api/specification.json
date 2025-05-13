@@ -798,6 +798,39 @@
         ]
       }
     },
+    "/api/Client/createclient": {
+      "post": {
+        "tags": [
+          "Client"
+        ],
+        "operationId": "Client_Login",
+        "requestBody": {
+          "x-name": "request",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClientInput"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/ProductSetting/getfeaturedproducts": {
       "post": {
         "tags": [
@@ -1290,6 +1323,28 @@
         "properties": {
           "token": {
             "type": "string"
+          }
+        }
+      },
+      "CreateClientInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "clientName": {
+            "type": "string",
+            "nullable": true
+          },
+          "firstName": {
+            "type": "string",
+            "nullable": true
+          },
+          "lastName": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
