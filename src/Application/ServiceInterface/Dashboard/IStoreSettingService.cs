@@ -1,4 +1,5 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Dashboard;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.StoreSetting;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 

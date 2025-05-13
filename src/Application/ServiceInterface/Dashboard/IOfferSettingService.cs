@@ -1,4 +1,6 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 
 namespace WaffarXPartnerApi.Application.ServiceInterface.Dashboard;

@@ -1,4 +1,5 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.Register;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 

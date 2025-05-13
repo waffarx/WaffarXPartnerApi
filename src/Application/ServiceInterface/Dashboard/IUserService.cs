@@ -1,5 +1,9 @@
 ﻿using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.CreateTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.UpdateTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.AssignUserToTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.ResetPassword;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 
 namespace WaffarXPartnerApi.Application.ServiceInterface.Dashboard;

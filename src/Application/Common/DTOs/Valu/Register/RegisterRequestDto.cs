@@ -1,4 +1,4 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs;
+﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Valu.Register;
 public class RegisterRequestDto
 {
     public string Username { get; set; }
@@ -7,5 +7,4 @@ public class RegisterRequestDto
     public string FirstName { get; set; }
     public string LastName { get; set; }
     public List<string> TeamsIds { get; set; }
-
 }

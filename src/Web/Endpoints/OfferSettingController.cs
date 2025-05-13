@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.API.Controllers;
