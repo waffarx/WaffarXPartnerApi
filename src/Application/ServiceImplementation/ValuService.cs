@@ -217,6 +217,7 @@ public class ValuService : BaseService, IValuService
                             Name = searchResults.Data?.Store.Name,
                             LogoPng = searchResults.Data?.Store.LogoPng,
                             ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + searchResults.Data.Store.Id,
+                            ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + searchResults.Data.Store.Id,
                             BackgroundColor = searchResults.Data?.Store.BackgroundColor,
                             Offers = searchResults.Data?.Store.Offers ?? new List<OfferDto>(),
                         },
@@ -633,7 +634,7 @@ public class ValuService : BaseService, IValuService
                         Name = item.Name,
                         ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
                         ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
-                        BackgroundColor = item.BackgroundColor,
+                        BackgroundColor = !string.IsNullOrEmpty(item.BackgroundColor)  ? item.BackgroundColor :  "",
                         Offers = item.Offers ?? new List<OfferDto>(),
                         Products = products ?? new List<BaseProductSearchResultDto>()
                     });

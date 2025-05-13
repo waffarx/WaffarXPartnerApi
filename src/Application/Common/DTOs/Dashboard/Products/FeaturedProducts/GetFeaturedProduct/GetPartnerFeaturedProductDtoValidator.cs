@@ -17,7 +17,7 @@ public class GetPartnerFeaturedProductDtoValidator : AbstractValidator<GetPartne
         RuleFor(x => x.PageSize)
             .NotEmpty()
             .WithMessage("Page size is required.")
-            .LessThanOrEqualTo(50)
+            .LessThanOrEqualTo(10000)
             .WithMessage("Page size must be greater than 0.");
     }
 }
