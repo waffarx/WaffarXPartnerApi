@@ -8,6 +8,7 @@ public class CreateTeamDtoValidator : AbstractValidator<CreateTeamDto>
             .MinimumLength(2).WithMessage("Name at least 2 characters.");
         RuleFor(x => x.Description)
             .NotEmpty().WithMessage("Description is required.")
+            .MinimumLength(2).WithMessage("Name at least 2 characters.")
             .MaximumLength(500).WithMessage("Description must not exceed 500 characters.");
         RuleFor(x => x.PageActionIds)
             .NotEmpty().WithMessage("PageActionIds is required.")
