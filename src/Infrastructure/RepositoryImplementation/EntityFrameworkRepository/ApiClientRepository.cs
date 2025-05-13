@@ -69,4 +69,32 @@ public class ApiClientRepository : IApiClientRepository
             throw;
         }
     }
+
+    public async Task<ApiClient> GetClientByName(string name)
+    {
+        try
+        {
+            return await _context.ApiClients.FirstOrDefaultAsync(x => x.ClientName == name);
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+
+    public async Task<bool> CreateClient(ApiClient entity)
+    {
+        try
+        {
+            _context.ApiClients.Add(entity);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
 }

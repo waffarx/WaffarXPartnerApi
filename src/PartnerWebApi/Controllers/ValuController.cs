@@ -2,6 +2,7 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
 using WaffarXPartnerApi.Application.ServiceInterface;
@@ -82,6 +83,20 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> GetStoreFeaturedProducts(GetFeaturedProductByStoreDto query)
     {
         var result = await _valuService.GetFeaturedProductsByStoreId(query);
+        return Ok(result);
+    }
+
+    [HttpPost("getstoreswithoffers")]
+    public async Task<IActionResult> StoresWithOffers(GetStoresRequestDto model)
+    {
+        var result = await _valuService.GetStoresWithOffers(model);
+        return Ok(result);
+    }
+
+    [HttpPost("getstoreswithproducts")]
+    public async Task<IActionResult> Getstoreswithproducts(GetStoresWithProductsDto model)
+    {
+        var result = await _valuService.GetStoresWithProducts(model);
         return Ok(result);
     }
 }

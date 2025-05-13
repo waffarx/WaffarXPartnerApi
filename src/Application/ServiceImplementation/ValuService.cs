@@ -5,9 +5,11 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto.StoreDetails;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -83,7 +85,6 @@ public class ValuService : BaseService, IValuService
         }
 
     }
-
     public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product)
     {
         try
@@ -209,7 +210,7 @@ public class ValuService : BaseService, IValuService
                     Data = new StoreDetailDto
                     {
                         StoreFeaturedProducts = products,
-                        Store = new StoreResponseDto
+                        Store = new StoreWithOffersResponseDto
                         {
                             Id = (Guid)(searchResults.Data?.Store.Id),
                             Logo = searchResults.Data?.Store.Logo,
@@ -217,8 +218,9 @@ public class ValuService : BaseService, IValuService
                             LogoPng = searchResults.Data?.Store.LogoPng,
                             ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + searchResults.Data.Store.Id,
                             BackgroundColor = searchResults.Data?.Store.BackgroundColor,
+                            Offers = searchResults.Data?.Store.Offers ?? new List<OfferDto>(),
                         },
-                        Offers = searchResults.Data.Offers ?? new List<OfferDto>()
+                        
                     }
                 };
             }
@@ -487,7 +489,6 @@ public class ValuService : BaseService, IValuService
             throw;
         }
     }
-    
     public async Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId)
     {
         try
@@ -534,5 +535,126 @@ public class ValuService : BaseService, IValuService
             throw;
         }
     }
+    public async Task<GenericResponseWithCount<List<StoreWithOffersResponseDto>>> GetStoresWithOffers(GetStoresRequestDto model)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            GetStoresDto requestBody = new GetStoresDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                ItemCount = model.PageSize,
+                PageNumber = model.PageNumber,
 
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDetailsWithOffersDto>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStores",
+                requestBody,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+            {
+                List<StoreWithOffersResponseDto> stores = new List<StoreWithOffersResponseDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    stores.Add(new StoreWithOffersResponseDto
+                    {
+                        Id = item.Id,
+                        Logo = item.Logo,
+                        LogoPng = item.LogoPng,
+                        Name = item.Name,
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        BackgroundColor = item.BackgroundColor,
+                        Offers = item.Offers ?? new List<OfferDto>(),
+                    });
+                }
+                return new GenericResponseWithCount<List<StoreWithOffersResponseDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = stores,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<StoreWithOffersResponseDto>>
+            {
+                Data = new List<StoreWithOffersResponseDto>(),
+                Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    public async Task<GenericResponseWithCount<List<StoreWithProductsResponseDto>>> GetStoresWithProducts(GetStoresWithProductsDto model)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            GetStoresWithProductsRequestDto requestBody = new GetStoresWithProductsRequestDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                ItemCount = model.PageSize,
+                PageNumber = model.PageNumber,
+                ProductLimit = model.ProductsCount
+
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoresWithOffersResponseModel>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoresWithProducts", requestBody,headers);
+
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+            {
+                List<StoreWithProductsResponseDto> stores = new List<StoreWithProductsResponseDto>();
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+              
+                foreach (var item in searchResults.Data)
+                {
+                    products = new List<BaseProductSearchResultDto>();
+                    foreach (var prod in item.StoreFeaturedProducts)
+                    {
+                        products.Add(ProductMappingHelper.MapToBaseProduct(prod));
+                    }
+                    stores.Add(new StoreWithProductsResponseDto
+                    {
+                        Id = item.Id,
+                        Logo = item.Logo,
+                        LogoPng = item.LogoPng,
+                        Name = item.Name,
+                        ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + item.Id,
+                        BackgroundColor = item.BackgroundColor,
+                        Offers = item.Offers ?? new List<OfferDto>(),
+                        Products = products ?? new List<BaseProductSearchResultDto>()
+                    });
+                }
+                return new GenericResponseWithCount<List<StoreWithProductsResponseDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = stores,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<StoreWithProductsResponseDto>>
+            {
+                Data = new List<StoreWithProductsResponseDto>(),
+                Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
 }

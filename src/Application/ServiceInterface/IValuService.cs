@@ -2,6 +2,7 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
@@ -21,4 +22,6 @@ public interface IValuService
     Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch);
     Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId);
     Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product);
+    Task<GenericResponseWithCount<List<StoreWithOffersResponseDto>>> GetStoresWithOffers(GetStoresRequestDto model);
+    Task<GenericResponseWithCount<List<StoreWithProductsResponseDto>>> GetStoresWithProducts(GetStoresWithProductsDto model);
 }

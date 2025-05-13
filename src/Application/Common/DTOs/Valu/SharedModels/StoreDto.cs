@@ -6,4 +6,5 @@ public class StoreDto
     public string Logo { get; set; }
     public string LogoPng { get; set; }
     public string BackgroundColor { get; set; }
+
 }
