@@ -11,20 +11,16 @@ public class OfferSettingRequestDtoValidator : AbstractValidator<OfferSettingReq
         RuleFor(x => x.EndDate)
             .NotEmpty().WithMessage("End Date is required.");
 
-        RuleFor(x => x.IsProductLevel)
-            .Must((x, isProductLevel) => isProductLevel || !x.IsStoreLevel)
-            .WithMessage("Either Product Level or Store Level must be selected, not both.");
-
-        RuleFor(x => x.IsStoreLevel)
-            .Must((x, isStoreLevel) => isStoreLevel || !x.IsProductLevel)
-            .WithMessage("Either Product Level or Store Level must be selected, not both.");
-
+        // Check when IsStoreLevel is true, StoreIds must have at least one item
         RuleFor(x => x.StoreIds)
-            .Must((x, storeIds) => x.IsStoreLevel ? storeIds != null && storeIds.Count > 0 : true)
+            .NotEmpty()
+            .When(x => x.IsStoreLevel)
             .WithMessage("At least one Store ID is required when Store Level is selected.");
 
+        // Check when IsProductLevel is true, ProductIds must have at least one item
         RuleFor(x => x.ProductIds)
-            .Must((x, productIds) => x.IsProductLevel ? productIds != null && productIds.Count > 0 : true)
-            .WithMessage("At least one Product ID is required.");
+            .NotEmpty()
+            .When(x => x.IsProductLevel)
+            .WithMessage("At least one Product ID is required when Product Level is selected.");
     }
 }
