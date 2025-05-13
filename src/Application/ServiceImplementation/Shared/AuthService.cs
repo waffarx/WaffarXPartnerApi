@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using WaffarXPartnerApi.Application.Common.DTOs;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.Register;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;

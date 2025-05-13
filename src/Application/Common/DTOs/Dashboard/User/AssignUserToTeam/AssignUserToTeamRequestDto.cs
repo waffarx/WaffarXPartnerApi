@@ -1,4 +1,4 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
+﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.AssignUserToTeam;
 public class AssignUserToTeamRequestDto
 {
     public string UserId { get; set; }

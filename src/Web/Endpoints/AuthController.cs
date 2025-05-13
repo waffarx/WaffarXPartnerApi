@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WaffarXPartnerApi.Application.Common.DTOs;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.Login;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.Register;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.Web.Endpoints;

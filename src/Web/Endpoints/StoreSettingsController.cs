@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WaffarXPartnerApi.Application.Common.DTOs.Dashboard;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.StoreSetting;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
