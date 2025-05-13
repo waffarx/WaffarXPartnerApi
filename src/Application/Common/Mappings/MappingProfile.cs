@@ -5,6 +5,8 @@ using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
 using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Page;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.CreateTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.UpdateTeam;
 
 namespace WaffarXPartnerApi.Application.Common.Mappings;
 public class MappingProfile : Profile

@@ -1,7 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.CreateTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.UpdateTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.AssignUserToTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.ResetPassword;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.API.Controllers;

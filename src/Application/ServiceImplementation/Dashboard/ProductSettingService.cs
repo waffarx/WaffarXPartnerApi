@@ -141,7 +141,7 @@ public class ProductSettingService : JWTUserBaseService, IProductSettingService
         GenericResponse<bool> response = new GenericResponse<bool>();   
         try
         {
-            if (!ObjectId.TryParse(productDto.productId, out ObjectId objectId))
+            if (!ObjectId.TryParse(productDto.ProductId, out ObjectId objectId))
             {
 
                 response.Status = StaticValues.Error;

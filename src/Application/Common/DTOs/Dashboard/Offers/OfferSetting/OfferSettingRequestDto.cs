@@ -1,4 +1,4 @@
-﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers;
+﻿namespace WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 
 public class OfferSettingRequestDto
 {

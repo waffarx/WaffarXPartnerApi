@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;

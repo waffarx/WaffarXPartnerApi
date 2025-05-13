@@ -6,6 +6,7 @@ using Serilog.Exceptions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
+using FluentValidation.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 AppSettings.Initialize(builder.Configuration);
@@ -20,7 +21,11 @@ builder.Services.AddCors(options =>
             .AllowAnyHeader();
     });
 });
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<ValidationFilter>();
+});
+builder.Services.AddFluentValidationAutoValidation();
 // Add services to the container.
 builder.Services.AddKeyVaultIfConfigured(builder.Configuration);
 
