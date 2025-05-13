@@ -100,7 +100,9 @@ public class PartnerRepository : IPartnerRepository
             if (totalCount > 0)
             {
                 // Build sort 
-                var sortBuilder = Builders<FeaturedProductSetting>.Sort.Ascending(x => x.Product.ProductRank);
+                var sortBuilder = Builders<FeaturedProductSetting>.Sort
+                    .Descending(x => x.Product.EndDate)
+                    .Ascending(x => x.Product.ProductRank);
                 // Build filter 
                 Expression<Func<FeaturedProductSetting, bool>> filter = p => p.ClientApiId == clientApiId && WhiteListIds.Contains(p.Product.StoreId);
                 if (isActive == true)
@@ -108,8 +110,7 @@ public class PartnerRepository : IPartnerRepository
                     // Get the current date
                     DateTime nowDate = DateTime.Now;
 
-                    filter = p => p.ClientApiId == clientApiId
-                    && (p.Product.StartDate <= nowDate && p.Product.EndDate >= nowDate);
+                    filter = p => p.ClientApiId == clientApiId && p.Product.EndDate >= nowDate;
                 }
                 // Get paged data
                 var featuredList = await _featuredProductCollection.Find(filter)
@@ -531,7 +532,6 @@ public class PartnerRepository : IPartnerRepository
         {
             var filter = Builders<FeaturedProductSetting>.Filter.And(
                     Builders<FeaturedProductSetting>.Filter.Eq(x => x.ClientApiId, clientApiId),
-                    Builders<FeaturedProductSetting>.Filter.Lte(x => x.Product.StartDate, DateTime.Now),
                     Builders<FeaturedProductSetting>.Filter.Gte(x => x.Product.EndDate, DateTime.Now)
             );
             var featuredProduct = await _featuredProductCollection.Find(filter).SortByDescending(x => x.Product.ProductRank).FirstOrDefaultAsync();
