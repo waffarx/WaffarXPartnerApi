@@ -77,7 +77,7 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
 
            var disabledStores = await  _advertiserRepository.GetDisabledStores();
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponse<List<WhiteListedStoreResonseDto>>>(
+            var searchResults = await _httpService.PostAsync<GenericResponse<List<WhitelistedStoresResponseModel>>>(
                 AppSettings.ExternalApis.ValuUrl + "GetStoresDetails" + "?apiClientId=" + ClientApiId.ToString(),
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
@@ -87,10 +87,10 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                 {
                     whiteListedstores.Add(new WhiteListedStoreResonseDto
                     {
-                        Id = item.Id,
-                        Logo = item.Logo,
-                        LogoPng = item.LogoPng,
-                        Name = item.Name,
+                        Id = item.StoreGuid,
+                        Logo = item.LogoUrl,
+                        LogoPng = item.LogoPngUrl,
+                        Name = IsEnglish ?  item.NameEn : item.NameAr,
                         Rank = item.Rank,
                         BackgroundColor = item.BackgroundColor,
                         IsFeatured = item.IsFeatured,
