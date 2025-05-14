@@ -166,45 +166,46 @@ public class TeamRepository : ITeamRepository
             throw;
         }
     }
-
     public async Task<TeamDetailsModel> GetTeamDetails(Guid id)
     {
         try
         {
             // by team id get the team and join to the user under this team and map back to the model
             var teamDetails = await _waffarXPartnerDbContext.Teams
-                .Include(x => x.UserTeams)
-                .Include(x => x.TeamPageActions)
-                        .ThenInclude(x => x.PageAction)
-                            .ThenInclude(x => x.Page)
-                .AsSplitQuery()
-                .AsNoTracking()
-                .Where(x => x.Id == id)
-                .Select(x => new TeamDetailsModel
-                {
-                    Id = x.Id,
-                    Name = x.TeamName,
-                    Users = x.UserTeams.Select(u => new UserModel
-                    {
-                        UserId = u.UserId,
-                        UserName = u.User.Username,
-                        Email = u.User.Email,
-                    }).ToList(),
-                    Pages = x.TeamPageActions.Select(p => new PageDetailModel
-                    {
-                        Page = new PageModel
-                        {
-                            Id = p.PageAction.Page.Id,
-                            Name = p.PageAction.Page.PageName,
-                            PageActions = p.PageAction.Page.PageActions.Select(a => new PageActionModel
-                            {
-                                Id = a.Id,
-                                Name = a.ActionName,
-                                Description = a.Description
-                            }).ToList(),
-                        },  
-                    }).ToList(),
-                }).FirstOrDefaultAsync();
+   .Include(x => x.UserTeams)
+   .Include(x => x.TeamPageActions)
+       .ThenInclude(x => x.PageAction)
+           .ThenInclude(x => x.Page)
+   .AsSplitQuery()
+   .AsNoTracking()
+   .Where(x => x.Id == id)
+   .Select(x => new TeamDetailsModel
+   {
+       Id = x.Id,
+       Name = x.TeamName,
+       Users = x.UserTeams.Select(u => new UserModel
+       {
+           UserId = u.UserId,
+           UserName = u.User.Username,
+           Email = u.User.Email,
+       }).ToList(),
+       Pages = x.TeamPageActions
+           .GroupBy(p => p.PageAction.Page)
+           .Select(g => new PageDetailModel
+           {
+               Page = new PageModel
+               {
+                   Id = g.Key.Id,
+                   Name = g.Key.PageName,
+                   PageActions = g.Select(a => new PageActionModel
+                   {
+                       Id = a.PageAction.Id,
+                       Name = a.PageAction.ActionName,
+                       Description = a.PageAction.Description
+                   }).ToList(),
+               },
+           }).ToList(),
+   }).FirstOrDefaultAsync();
 
             return teamDetails;
         }

@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
@@ -71,7 +72,7 @@ public class UserRepository : IUserRepository
         return updated > 0;
     }
 
-    public async Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds)
+    public async Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds, int clientApiId)
     {
         try
         {
@@ -81,7 +82,7 @@ public class UserRepository : IUserRepository
                 .ToList();
             // check all those guids are valid in teams table
             var teams = await _context.Teams
-                .Where(t => teamGuids.Contains(t.Id))
+                .Where(t => teamGuids.Contains(t.Id) && t.ClientApiId == clientApiId )
                 .ToListAsync();
             if (teams.Count != teamGuids.Count)
             {
@@ -119,11 +120,6 @@ public class UserRepository : IUserRepository
         {
             throw;
         }
-    }
-
-    public Task<bool> RemoveUserFromTeam(Guid userId, Guid teamId)
-    {
-        throw new NotImplementedException();
     }
 
     public async Task<List<UserPageActionsModel>> GetUserPageAndPageAction(Guid userId)
@@ -185,7 +181,8 @@ public class UserRepository : IUserRepository
                 .AsNoTracking()
                 .Include(x => x.UserTeams)
                     .ThenInclude(x => x.Team)
-                .Where(x => x.ClientApiId == model.ClientApiId && !isEmptyEmail ? x.Email.Contains(model.Email) : true)
+                .Where(x => x.ClientApiId == model.ClientApiId &&
+          (!isEmptyEmail ? EF.Functions.Like(x.Email, $"%{model.Email}%") : true))
                 .OrderByDescending(u => u.Id)
                 .Select(u => new UserSearchModel
                 {
@@ -207,6 +204,40 @@ public class UserRepository : IUserRepository
                 TotalRecords = totalCount,
             };
 
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<UserDetailModel> GetUserDetails(Guid userId)
+    {
+        try
+        {
+            // Fetch the user along with their teams, team page actions, and related pages
+           var userDetails = await _context.Users
+                .Include(u => u.UserTeams)
+                    .ThenInclude(ut => ut.Team)
+                .AsSplitQuery()
+                .AsNoTracking()
+                .Where(u => u.Id == userId)
+                .Select(u => new UserDetailModel
+                {
+                    Id = u.Id,
+                    FirstName = u.FirstName,
+                    LastName = u.LastName,
+                    Email = u.Email,
+                    UserName = u.Username,
+                    Teams = u.UserTeams != null
+                        ? u.UserTeams.Select(ut => new TeamModel
+                        {
+                            Id = ut.Team.Id,
+                            Name = ut.Team.TeamName,
+                        }).ToList() : new List<TeamModel>()
+                }).FirstOrDefaultAsync();
+
+            return userDetails;
         }
         catch (Exception)
         {

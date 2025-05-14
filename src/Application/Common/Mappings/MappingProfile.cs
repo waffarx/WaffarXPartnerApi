@@ -15,7 +15,7 @@ public class MappingProfile : Profile
     {
         CreateMap<CreateTeamDto, CreateTeamWithActionModel>();
         CreateMap<UpdateTeamDto, UpdateTeamWithActionModel>();
-        CreateMap<TeamModel, TeamDto>();
+        CreateMap<TeamModel, TeamDto>().ReverseMap();
         CreateMap<TeamDetailsModel, TeamDetailsDto>();
         CreateMap<UserModel, TeamUserDto>();
         CreateMap<UpdateFeaturedProductDto, UpdateFeaturedProductModel>();
@@ -24,6 +24,7 @@ public class MappingProfile : Profile
         CreateMap<PageDetailModel, PageDetailDto>().ReverseMap();
         CreateMap<PageModel, PageDto>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
         CreateMap<UserSearchResultDto ,UserSearchModel>().ReverseMap();
+        CreateMap<UserDetailModel, UserDetailDto>();
 
     }
 }

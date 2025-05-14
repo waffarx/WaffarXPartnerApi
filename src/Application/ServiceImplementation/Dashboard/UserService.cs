@@ -33,6 +33,7 @@ public class UserService : JWTUserBaseService, IUserService
         _mapper = mapper;
     }
 
+
     public async Task<GenericResponse<bool>> Logout()
     {
         try
@@ -98,12 +99,76 @@ public class UserService : JWTUserBaseService, IUserService
             throw;
         }
     }
+    #region User Function
+    public async Task<GenericResponseWithCount<List<UserSearchResultDto>>> SearchForUser(UserSearchRequestDto request)
+    {
+        try
+        {
+            UserSearchRequestModel userSearchRequestModel = new UserSearchRequestModel
+            {
+                ClientApiId = ClientApiId,
+                PageSize = request.PageSize,
+                PageNumber = request.PageNumber,
+                Email = request.Email
+            };
+            var result = await _userRepository.SearchUserByEmail(userSearchRequestModel);
+            if (result.Data != null && result.Data.Count == 0)
+            {
+                return new GenericResponseWithCount<List<UserSearchResultDto>>
+                {
+                    Status = StaticValues.Error,
+                    Message = "No users found",
+                    Data = new List<UserSearchResultDto>(),
+                    TotalCount = 0
+                };
+            }
+            return new GenericResponseWithCount<List<UserSearchResultDto>>
+            {
+                Status = StaticValues.Success,
+                Message = "User search completed successfully",
+                Data = _mapper.Map<List<UserSearchResultDto>>(result.Data),
+                TotalCount = result.TotalRecords,
+            };
+
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<GenericResponse<UserDetailDto>> GetUserDetails(string userId)
+    {
+        try
+        {
+            var userGuid = Guid.TryParse(userId, out var userIdGuid) ? userIdGuid : Guid.Empty;
+            var result = await _userRepository.GetUserDetails(userGuid);
+            if (result == null)
+            {
+                return new GenericResponse<UserDetailDto>
+                {
+                    Status = StaticValues.Error,
+                    Message = "User not found",
+                    Data = null
+                };
+            }
+            return new GenericResponse<UserDetailDto>
+            {
+                Status = StaticValues.Success,
+                Message = "User details retrieved successfully",
+                Data =  _mapper.Map<UserDetailDto>(result) 
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
     public async Task<GenericResponse<bool>> AddUserToTeamAsync(AssignUserToTeamRequestDto model)
     {
         try
         {
             var userGuid = Guid.TryParse(model.UserId.ToString(), out var userId) ? userId : Guid.Empty;
-            var result = await _userRepository.AssignUserToTeam(userGuid, model.TeamIds);
+            var result = await _userRepository.AssignUserToTeam(userGuid, model.TeamIds, ClientApiId);
             return new GenericResponse<bool>
             {
                 Status = result ? StaticValues.Success : StaticValues.Error,
@@ -116,6 +181,7 @@ public class UserService : JWTUserBaseService, IUserService
             throw;
         }
     }
+    #endregion
 
     #region Team Function
     public async Task<GenericResponse<bool>> CreateTeamAsync(CreateTeamDto dto)
@@ -216,42 +282,6 @@ public class UserService : JWTUserBaseService, IUserService
         }
     }
 
-    public async Task<GenericResponseWithCount<List<UserSearchResultDto>>> SearchForUser(UserSearchRequestDto request)
-    {
-        try
-        {
-            UserSearchRequestModel userSearchRequestModel = new UserSearchRequestModel
-            {
-                ClientApiId = ClientApiId,
-                PageSize = request.PageSize,
-                PageNumber = request.PageNumber,
-                Email = request.Email
-            };
-            var result = await _userRepository.SearchUserByEmail(userSearchRequestModel);
-            if (result.Data != null && result.Data.Count == 0)
-            {
-                return new GenericResponseWithCount<List<UserSearchResultDto>>
-                {
-                    Status = StaticValues.Error,
-                    Message = "No users found",
-                    Data = new List<UserSearchResultDto>(),
-                    TotalCount = 0
-                };
-            }
-            return new GenericResponseWithCount<List<UserSearchResultDto>>
-            {
-                Status = StaticValues.Success,
-                Message = "User search completed successfully",
-                Data = _mapper.Map<List<UserSearchResultDto>>(result.Data),
-                TotalCount = result.TotalRecords,
-            };
-
-        }
-        catch(Exception)
-        {
-            throw;
-        }
-    }
 
     #endregion
 }
