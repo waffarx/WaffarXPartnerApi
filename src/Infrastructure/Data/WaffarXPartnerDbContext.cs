@@ -21,6 +21,7 @@ public class WaffarXPartnerDbContext : DbContext
     public DbSet<UserTeam> UserTeams { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<PartnerPostback> PartnerPostbacks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {
@@ -33,6 +34,7 @@ public class WaffarXPartnerDbContext : DbContext
         builder.ApplyConfiguration(new UserConfiguration());
         builder.ApplyConfiguration(new UserTeamConfiguration());
         builder.ApplyConfiguration(new RefreshTokenConfigration());
+        builder.ApplyConfiguration(new PartnerPostbackConfiguration());
     }
 }
 public class WaffarXPartnerDbContextFactory : IDesignTimeDbContextFactory<WaffarXPartnerDbContext>
