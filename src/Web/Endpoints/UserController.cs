@@ -54,6 +54,13 @@ public class UserController : ControllerBase
         var response = await _userService.SearchForUser(request);
         return Ok(response);
     }
+
+    [HttpGet("userdetails/{userId}")]
+    public async Task<IActionResult> GetUserDetails(string userId)
+    {
+        var response = await _userService.GetUserDetails(userId);
+        return Ok(response);
+    }
     #region Team Endpoints
 
     /// <summary>

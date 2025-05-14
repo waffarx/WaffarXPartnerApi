@@ -137,7 +137,7 @@ public class AuthService : JWTUserBaseService, IAuthService
         {
             return new GenericResponse<TokenResponseDto> { Data = new TokenResponseDto(), Message = "Failed to create user", Status = StaticValues.Error };
         }
-        await _userRepository.AssignUserToTeam(user.Id, model.TeamsIds);
+        await _userRepository.AssignUserToTeam(user.Id, model.TeamsIds,ClientApiId);
 
         // Generate tokens
         var tokenResult = await GenerateTokensAsync(user);
