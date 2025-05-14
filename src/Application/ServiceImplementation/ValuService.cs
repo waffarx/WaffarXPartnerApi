@@ -37,7 +37,7 @@ public class ValuService : BaseService, IValuService
         _advertiserRepository = advertiserRepository;
     }
 
-    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product)
+    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductByStoreDto product)
     {
         try
         {
@@ -45,65 +45,23 @@ public class ValuService : BaseService, IValuService
             {
                 ["Content-Type"] = "application/json"
             };
-            GetFeaturedProductRequestDto requestObj = new GetFeaturedProductRequestDto
+            Guid? storeId = null;
+            if (product.StoreId != null && !string.IsNullOrEmpty(product.StoreId))
             {
-                ClientApiId = ClientApiId,
-                Count = product.PageSize,
-                PageNumber = product.PageNumber,
-                IsEnglish = IsEnglish,
-            };
-            // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
-                AppSettings.ExternalApis.ValuUrl + "GetFeaturedProducts",
-                requestObj,
-                headers);
-            if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
-            {
-                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
-                foreach (var item in searchResults.Data)
-                {
-                    products.Add(ProductMappingHelper.MapToBaseProduct(item));
-                }
-
-                return new GenericResponseWithCount<List<BaseProductSearchResultDto>>
-                {
-                    Status = StaticValues.Success,
-                    Data = products,
-                    TotalCount = searchResults.TotalCount,
-                };
+                storeId = new Guid(product.StoreId);
             }
-            return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
-            {
-                Data = new List<BaseProductSearchResultDto>(),
-                Status = StaticValues.Error,
-                TotalCount = 0,
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
-
-    }
-    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product)
-    {
-        try
-        {
-            var headers = new Dictionary<string, string>
-            {
-                ["Content-Type"] = "application/json"
-            };
+            string Url = (storeId != null && storeId.HasValue) ? "GetFeaturedProductsByStore" : "GetFeaturedProducts";
             GetFeaturedProductByStoreRequestDto requestObj = new GetFeaturedProductByStoreRequestDto
             {
                 ClientApiId = ClientApiId,
                 Count = product.PageSize,
                 PageNumber = product.PageNumber,
                 IsEnglish = IsEnglish,
-                StoreId = product.StoreId,  
+                StoreId = storeId,  
             };
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
-                AppSettings.ExternalApis.ValuUrl + "GetFeaturedProductsByStore",
+                AppSettings.ExternalApis.ValuUrl + Url,
                 requestObj,
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
@@ -134,7 +92,6 @@ public class ValuService : BaseService, IValuService
         }
 
     }
-
     public async Task<GenericResponse<DetailedProductSearchResultDto>> GetProductDetails(string id)
     {
         try
@@ -175,7 +132,6 @@ public class ValuService : BaseService, IValuService
             throw;
         }
     }
-
     public async Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid storeId)
     {
         try
@@ -554,7 +510,7 @@ public class ValuService : BaseService, IValuService
             };
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<StoreDetailsWithOffersDto>>>(
-                AppSettings.ExternalApis.ValuUrl + "GetStores",
+                AppSettings.ExternalApis.ValuUrl + "GetStoresWithOffers",
                 requestBody,
                 headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)

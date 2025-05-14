@@ -29,16 +29,9 @@ public class ValuController : ControllerBase
     }
 
     [HttpPost("getfeaturedproducts")]
-    public async Task<IActionResult> GetFeaturedProducts(GetFeaturedProductDto query)
+    public async Task<IActionResult> GetFeaturedProducts(GetFeaturedProductByStoreDto query)
     {
         var result = await _valuService.GetFeaturedProducts(query);
-        return Ok(result);
-    }
-
-    [HttpPost("getstores")]
-    public async Task<IActionResult> GetStores(GetStoresRequestDto model)
-    {
-        var result = await _valuService.GetStores(model);
         return Ok(result);
     }
 
@@ -79,14 +72,7 @@ public class ValuController : ControllerBase
         return Ok(result);
     }
 
-    [HttpPost("getstorefeaturedproducts")]
-    public async Task<IActionResult> GetStoreFeaturedProducts(GetFeaturedProductByStoreDto query)
-    {
-        var result = await _valuService.GetFeaturedProductsByStoreId(query);
-        return Ok(result);
-    }
-
-    [HttpPost("getstoreswithoffers")]
+    [HttpPost("getstores")]
     public async Task<IActionResult> StoresWithOffers(GetStoresRequestDto model)
     {
         var result = await _valuService.GetStoresWithOffers(model);
