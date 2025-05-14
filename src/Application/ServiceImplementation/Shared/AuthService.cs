@@ -91,6 +91,7 @@ public class AuthService : JWTUserBaseService, IAuthService
                 AccessTokenExpiresAt = tokenResult.AccessTokenExpiresAt,
                 RefreshTokenExpiresAt = tokenResult.RefreshTokenExpiresAt,
                 UserPages = pagesToReturn,
+                IsSuperAdmin = user.IsSuperAdmin
             },
         };
     }
@@ -333,13 +334,14 @@ public class AuthService : JWTUserBaseService, IAuthService
                     Message = "User not found",
                 };
             }
-            user.IsActive = false;
+            var activeStatus = user.IsActive;
+            user.IsActive = !activeStatus;
             var updateResult = await _userRepository.UpdateAsync(user);
             await _refreshTokenRepository.RevokeAllUserTokensAsync(user.Id);
             return new GenericResponse<bool>
             {
                 Data = updateResult,
-                Message = updateResult ? "User deactivated successfully" : "Error Happen while Save Changes",
+                Message = updateResult ?  (activeStatus ? "User deactivated successfully" : "User Activated successfully") :"Something went wrong" ,
             };
         }
         catch (Exception)

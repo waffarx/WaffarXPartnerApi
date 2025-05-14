@@ -15,7 +15,7 @@ public class TeamRepository : ITeamRepository
         _waffarXPartnerDbContext = waffarXPartnerDbContext;
     }
 
-    public async Task<bool> CreateTeam(CreateTeamWithActionModel model)
+    public async Task<Guid> CreateTeam(CreateTeamWithActionModel model)
     {
         try
         {
@@ -48,17 +48,17 @@ public class TeamRepository : ITeamRepository
                     }
                     await _waffarXPartnerDbContext.TeamPageActions.AddRangeAsync(teamPageActionsToAdd);
                     await _waffarXPartnerDbContext.SaveChangesAsync();
-                    return true;
+                    return teamToCreate.Entity.Id;
                 }
                 else // not all actions are valid
                 {
-                    return false;
+                    return Guid.Empty;
                 }
 
             }
             else // fail to create team
             {
-                return false;
+                return Guid.Empty;
             }
 
         }
@@ -172,40 +172,41 @@ public class TeamRepository : ITeamRepository
         {
             // by team id get the team and join to the user under this team and map back to the model
             var teamDetails = await _waffarXPartnerDbContext.Teams
-   .Include(x => x.UserTeams)
-   .Include(x => x.TeamPageActions)
-       .ThenInclude(x => x.PageAction)
-           .ThenInclude(x => x.Page)
-   .AsSplitQuery()
-   .AsNoTracking()
-   .Where(x => x.Id == id)
-   .Select(x => new TeamDetailsModel
-   {
-       Id = x.Id,
-       Name = x.TeamName,
-       Users = x.UserTeams.Select(u => new UserModel
-       {
-           UserId = u.UserId,
-           UserName = u.User.Username,
-           Email = u.User.Email,
-       }).ToList(),
-       Pages = x.TeamPageActions
-           .GroupBy(p => p.PageAction.Page)
-           .Select(g => new PageDetailModel
-           {
-               Page = new PageModel
-               {
-                   Id = g.Key.Id,
-                   Name = g.Key.PageName,
-                   PageActions = g.Select(a => new PageActionModel
-                   {
-                       Id = a.PageAction.Id,
-                       Name = a.PageAction.ActionName,
-                       Description = a.PageAction.Description
-                   }).ToList(),
-               },
-           }).ToList(),
-   }).FirstOrDefaultAsync();
+                                    .Include(x => x.UserTeams)
+                                    .Include(x => x.TeamPageActions)
+                                        .ThenInclude(x => x.PageAction)
+                                            .ThenInclude(x => x.Page)
+                                    .AsSplitQuery()
+                                    .AsNoTracking()
+                                    .Where(x => x.Id == id)
+                                    .Select(x => new TeamDetailsModel
+                                    {
+                                         Id = x.Id,
+                                         Name = x.TeamName,
+                                         Description = x.Description,
+                                         Users = x.UserTeams.Select(u => new UserModel
+                                         {
+                                             UserId = u.UserId,
+                                             UserName = u.User.Username,
+                                             Email = u.User.Email,
+                                         }).ToList(),
+                                         Pages = x.TeamPageActions
+                                             .GroupBy(p => p.PageAction.Page)
+                                             .Select(g => new PageDetailModel
+                                             {
+                                                 Page = new PageModel
+                                                 {
+                                                     Id = g.Key.Id,
+                                                     Name = g.Key.PageName,
+                                                     PageActions = g.Select(a => new PageActionModel
+                                             {
+                                                 Id = a.PageAction.Id,
+                                                 Name = a.PageAction.ActionName,
+                                                 Description = a.PageAction.Description
+                                             }).ToList(),
+                                         },
+                                     }).ToList(),
+                             }).FirstOrDefaultAsync();
 
             return teamDetails;
         }

@@ -799,7 +799,7 @@
         }
       }
     },
-    "/api/Auth/deactivateuser": {
+    "/api/Auth/setactivateuser": {
       "post": {
         "tags": [
           "Auth"
