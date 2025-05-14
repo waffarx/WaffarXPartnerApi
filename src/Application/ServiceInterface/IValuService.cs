@@ -13,7 +13,7 @@ public interface IValuService
 {
     Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch);
     Task<GenericResponse<DetailedProductSearchResultDto>> GetProductDetails(string id);
-    Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductDto product);
+    Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProducts(GetFeaturedProductByStoreDto product);
     Task<GenericResponse<StoreDetailDto>> GetStoreDetails(Guid StoreId);
     Task<GenericResponseWithCount<List<StoreResponseDto>>> GetStores(GetStoresRequestDto model);
     Task<GenericResponse<string>> CreateExitClick(string section, Guid storeId, string productId = "", string userIdentifier = ""
@@ -21,7 +21,6 @@ public interface IValuService
 
     Task<GenericResponse<ProductSearchResultWithFiltersDto>> StoreSearchProduct(StoreProductSearchRequestDto storeProductSearch);
     Task<GenericResponse<StoreCategoriesDto>> GetStoreCategories(Guid storeId);
-    Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetFeaturedProductsByStoreId(GetFeaturedProductByStoreDto product);
     Task<GenericResponseWithCount<List<StoreWithOffersResponseDto>>> GetStoresWithOffers(GetStoresRequestDto model);
     Task<GenericResponseWithCount<List<StoreWithProductsResponseDto>>> GetStoresWithProducts(GetStoresWithProductsDto model);
 }
