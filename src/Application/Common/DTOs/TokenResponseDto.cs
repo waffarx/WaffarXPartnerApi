@@ -8,4 +8,5 @@ public class TokenResponseDto
     public DateTime AccessTokenExpiresAt { get; set; }
     public DateTime RefreshTokenExpiresAt { get; set; }
     public List<UserPageActionDto> UserPages { get; set; }
+    public bool IsSuperAdmin { get; set; }
 }

@@ -76,6 +76,11 @@ public class UserRepository : IUserRepository
     {
         try
         {
+            var userBelongToClientApiId = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId && x.ClientApiId == clientApiId);
+            if (userBelongToClientApiId == null)
+            {
+                return false;
+            }
             var teamGuids = teamIds
                 .Select(t => Guid.TryParse(t, out var parsedGuid) ? parsedGuid : Guid.Empty)
                 .Where(g => g != Guid.Empty)
@@ -181,8 +186,7 @@ public class UserRepository : IUserRepository
                 .AsNoTracking()
                 .Include(x => x.UserTeams)
                     .ThenInclude(x => x.Team)
-                .Where(x => x.ClientApiId == model.ClientApiId &&
-          (!isEmptyEmail ? EF.Functions.Like(x.Email, $"%{model.Email}%") : true))
+                .Where(x => x.ClientApiId == model.ClientApiId && x.IsSuperAdmin == false && (!isEmptyEmail ? EF.Functions.Like(x.Email, $"%{model.Email}%") : true))
                 .OrderByDescending(u => u.Id)
                 .Select(u => new UserSearchModel
                 {
