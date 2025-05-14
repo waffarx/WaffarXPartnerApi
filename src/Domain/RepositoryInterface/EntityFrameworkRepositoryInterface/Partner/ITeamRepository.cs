@@ -3,7 +3,7 @@
 namespace WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
 public interface ITeamRepository
 {
-    Task<bool> CreateTeam(CreateTeamWithActionModel model);
+    Task<Guid> CreateTeam(CreateTeamWithActionModel model);
     Task<bool> UpdateTeam(UpdateTeamWithActionModel model);
     Task<bool> DeleteTeam(Guid id);
     Task<List<TeamModel>> GetAllTeams(int clientApiId);

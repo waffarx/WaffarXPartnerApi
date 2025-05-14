@@ -63,7 +63,7 @@ public class AuthController : ControllerBase
     }
 
     [Authorize]
-    [HttpPost("deactivateuser")]
+    [HttpPost("setactivateuser")]
     public async Task<IActionResult> DeactivateUser(string userId)
     {
         var result = await _authService.DeactivateUser(userId);

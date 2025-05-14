@@ -9,6 +9,8 @@ using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.TeamModel;
 using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
@@ -24,13 +26,16 @@ public class UserService : JWTUserBaseService, IUserService
     private readonly ITeamRepository _teamRepository;
     private readonly IMapper _mapper;
 
-    public UserService(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IPasswordHasher passwordHasher, IRefreshTokenRepository refreshTokenRepository, ITeamRepository teamRepository, IMapper mapper) : base(httpContextAccessor)
+    private readonly IAuditService _auditService;
+
+    public UserService(IHttpContextAccessor httpContextAccessor, IUserRepository userRepository, IPasswordHasher passwordHasher, IRefreshTokenRepository refreshTokenRepository, ITeamRepository teamRepository, IMapper mapper, IAuditService auditService) : base(httpContextAccessor)
     {
         _userRepository = userRepository;
         _passwordHasher = passwordHasher;
         _refreshTokenRepository = refreshTokenRepository;
         _teamRepository = teamRepository;
         _mapper = mapper;
+        _auditService = auditService;
     }
 
 
@@ -80,6 +85,8 @@ public class UserService : JWTUserBaseService, IUserService
                     Message = "Invalid password"
                 };
             }
+            var oldUser = user;
+          
 
             // Hash password
             var (hashedPassword, hashKey) = _passwordHasher.HashPassword(model.NewPassword);
@@ -87,6 +94,16 @@ public class UserService : JWTUserBaseService, IUserService
             user.HashKey = hashKey;
 
             await _userRepository.UpdateAsync(user);
+
+            await _auditService.LogUpdateAsync(new AuditUpdateParams<User>
+            {
+                OldEntity = oldUser,
+                NewEntity = user,
+                EntityType = EntityTypeEnum.User,
+                ClientApiId = ClientApiId,
+                EntityId = user.Id
+            });
+
             return new GenericResponse<bool>
             {
                 Status = StaticValues.Success,
@@ -192,11 +209,29 @@ public class UserService : JWTUserBaseService, IUserService
             model.CreatedBy = UserId;
             model.ClientApiId = ClientApiId;
             var result = await _teamRepository.CreateTeam(model);
+            if (result != Guid.Empty)
+            {
+                await _auditService.LogCreationAsync(new AuditCreationParams<Team>
+                {
+                    EntityType = EntityTypeEnum.Team,
+                    ClientApiId = ClientApiId,
+                    UserId = UserId,
+                    EntityId = result,
+                    Entity = new Team 
+                    {
+                        ClientApiId = ClientApiId,
+                        Description = dto.Description,
+                        TeamName = dto.Name,
+                        
+                    },
+            });
+            }
+
             return new GenericResponse<bool>
             {
-                Status = result ? StaticValues.Success : StaticValues.Error,
-                Message = result ? "Team created successfully" : "Failed to create team",
-                Data = result
+                Status =  result != Guid.Empty ?  StaticValues.Success : StaticValues.Error,
+                Message = result != Guid.Empty ? "Team created successfully" : "Failed to create team",
+                Data = result != Guid.Empty ? true : false
             };
         }
         catch (Exception)
