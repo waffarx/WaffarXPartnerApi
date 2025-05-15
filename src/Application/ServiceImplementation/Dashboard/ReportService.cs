@@ -86,13 +86,13 @@ public class ReportService : JWTUserBaseService, IReportService
                 return new GenericResponse<string>
                 {
                     Data = "",
-                    Message = StaticValues.Success
+                    Status = StaticValues.Success
                 };
             }
             return new GenericResponse<string>
             {
                 Data = result.PostbackUrl,
-                Message = StaticValues.Success
+                Status = StaticValues.Success
             };
         }
         catch (Exception)

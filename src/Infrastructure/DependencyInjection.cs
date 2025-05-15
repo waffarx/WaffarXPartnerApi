@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IAuditRepository, AuditRepository>();
         services.AddScoped<IResourceService, ResourceService>();
         services.AddScoped<ICacheService, CacheService>();
+        services.AddScoped<IPartnerPostbackRepository, PartnerPostbackRepository>();
         #endregion
 
         #region Services
@@ -82,6 +83,7 @@ public static class DependencyInjection
         services.AddScoped<ISearchService, SearchService>();
         services.AddScoped<ICommonService, CommenService>();
         services.AddScoped<IAuditService, AuditService>();
+        services.AddScoped<IReportService, ReportService>();
         #endregion
 
 
