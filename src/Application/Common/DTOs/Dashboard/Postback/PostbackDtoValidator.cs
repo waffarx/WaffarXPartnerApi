@@ -3,6 +3,6 @@ public class PostbackDtoValidator : AbstractValidator<PostbackDto>
 {
     public PostbackDtoValidator()
     {
-        RuleFor(x => x.postbackUrl).NotNull().NotEmpty().WithMessage("ValuPostbackUrl");
+        RuleFor(x => x.PostbackUrl).NotNull().NotEmpty().WithMessage("ValuPostbackUrl");
     }
 }
