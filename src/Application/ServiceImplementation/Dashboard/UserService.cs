@@ -224,7 +224,7 @@ public class UserService : JWTUserBaseService, IUserService
                         TeamName = dto.Name,
                         
                     },
-            });
+                });
             }
 
             return new GenericResponse<bool>

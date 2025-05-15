@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Postback;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
@@ -10,21 +11,30 @@ namespace WaffarXPartnerApi.Web.Endpoints;
 public class SharedController : ControllerBase
 {
     private readonly ICommonService _commenService;
-    public SharedController(ICommonService commenService)
+    private readonly IReportService _reportService;
+    public SharedController(ICommonService commenService, IReportService reportService)
     {
         _commenService = commenService;
+        _reportService = reportService; 
     }
     [HttpGet("pages")]
     public async Task<IActionResult> GetPagesWithAction()
     {
-        try
-        {
-            var pages = await _commenService.GetPages();
-            return Ok(pages);
-        }
-        catch (Exception ex)
-        {
-            return BadRequest(ex.Message);
-        }
+        var pages = await _commenService.GetPages();
+        return Ok(pages);
+    }
+
+    [HttpGet("partnerurl")]
+    public async Task<IActionResult> GetPartnerPostbacks()
+    {
+        var Url = await _reportService.GetPartnerPostbackUrl();
+        return Ok(Url);
+    }
+
+    [HttpPost("savepostback")]
+    public async Task<IActionResult> SavePostback(PostbackDto dto)
+    {
+        var Url = await _reportService.AddOrUpdatePostback(dto);
+        return Ok(Url);
     }
 }

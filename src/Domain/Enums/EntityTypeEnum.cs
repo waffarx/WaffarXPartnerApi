@@ -5,4 +5,5 @@ public enum EntityTypeEnum
     UserTeam,
     Team, 
     TeamPageAction, 
+    PartnerPostback
 }

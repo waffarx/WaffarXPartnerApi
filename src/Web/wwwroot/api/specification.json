@@ -1127,6 +1127,70 @@
           }
         ]
       }
+    },
+    "/api/Shared/partnerurl": {
+      "get": {
+        "tags": [
+          "Shared"
+        ],
+        "operationId": "Shared_GetPartnerPostbacks",
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/Shared/savepostback": {
+      "post": {
+        "tags": [
+          "Shared"
+        ],
+        "operationId": "Shared_SavePostback",
+        "requestBody": {
+          "x-name": "dto",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PostbackDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
     }
   },
   "components": {
@@ -1559,6 +1623,16 @@
           "pageNumber": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "PostbackDto": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "postbackUrl": {
+            "type": "string",
+            "nullable": true
           }
         }
       }
