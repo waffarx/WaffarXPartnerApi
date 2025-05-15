@@ -33,7 +33,7 @@ public class ReportService : JWTUserBaseService, IReportService
                 var postback = new PartnerPostback
                 {
                     ClientApiId = ClientApiId,
-                    PostbackUrl = postbackDto.postbackUrl,
+                    PostbackUrl = postbackDto.PostbackUrl,
                     UpdatedAt = DateTime.Now,  
                     PostbackMethod = (int)PostbackMethodEnum.POST,
                     CreatedAt = DateTime.Now,
@@ -54,7 +54,7 @@ public class ReportService : JWTUserBaseService, IReportService
             else
             {
                 PartnerPostback oldData = result;
-                result.PostbackUrl = postbackDto.postbackUrl;
+                result.PostbackUrl = postbackDto.PostbackUrl;
                 isUpdated = await _partnerPostbackRepository.UpdateAsync(result);
                 await _auditService.LogUpdateAsync(new AuditUpdateParams<PartnerPostback>
                 {
@@ -68,7 +68,7 @@ public class ReportService : JWTUserBaseService, IReportService
             return new GenericResponse<bool>
             {
                 Data = isUpdated,
-                Message = StaticValues.Success
+                Status = StaticValues.Success
             };
         }
         catch (Exception)
