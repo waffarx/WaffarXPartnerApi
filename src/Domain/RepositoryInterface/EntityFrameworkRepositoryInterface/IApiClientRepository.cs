@@ -9,5 +9,5 @@ public interface IApiClientRepository
     Task<Guid> GetClientGuidById(int Id);
     Task<ApiClient> GetClientByName(string name);
     Task<bool> CreateClient(ApiClient entity);
-
+    Task<long> GetUserIdByClientId(int ClientId);
 }

@@ -7,6 +7,7 @@ using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Page;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.CreateTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.UpdateTeam;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Report;
 
 namespace WaffarXPartnerApi.Application.Common.Mappings;
 public class MappingProfile : Profile
@@ -25,6 +26,7 @@ public class MappingProfile : Profile
         CreateMap<PageModel, PageDto>().ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id.ToString()));
         CreateMap<UserSearchResultDto ,UserSearchModel>().ReverseMap();
         CreateMap<UserDetailModel, UserDetailDto>();
+        CreateMap<GetParterOrderStatisticsModel, GetParterOrderStatisticsDto>();
 
     }
 }
