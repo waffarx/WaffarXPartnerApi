@@ -94,16 +94,13 @@ public class UserRepository : IUserRepository
                 // not all guids are valid
                 return false;
             }
-            // check if user already exists in those teams
+            // get teams user in 
             var existingUserTeams = await _context.UserTeams
-                .Where(ut => ut.UserId == userId && teamGuids.Contains(ut.TeamId))
+                .Where(ut => ut.UserId == userId)
                 .ToListAsync();
             if (existingUserTeams.Count > 0)
             {
-                // remove from list the teams ids that already exist
-                teamGuids = teamGuids
-                    .Where(t => !existingUserTeams.Any(ut => ut.TeamId == t))
-                    .ToList();
+                 _context.RemoveRange(existingUserTeams);
             }
 
             List<UserTeam> userTeamsToAdd = new List<UserTeam>();
