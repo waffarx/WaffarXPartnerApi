@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
-using WaffarXPartnerApi.Domain.Enums;
+using WaffarXPartnerApi.Domain.Constants;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
 
@@ -17,7 +17,7 @@ public class ReportsController : ControllerBase
     }
     
     [HttpGet("partnerordersdata")]
-    [RequiresPermission(nameof(AdminPageEnum.Reports), nameof(AdminActionEnum.ListReportCards))]
+    [RequiresPermission(AdminPageConstants.Reports, AdminActionConstants.ListReportCards)]
 
     public async Task<IActionResult> GetPartnerOrdersData()
     {

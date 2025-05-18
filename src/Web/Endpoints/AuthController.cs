@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.Login;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.Register;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
-using WaffarXPartnerApi.Domain.Enums;
+using WaffarXPartnerApi.Domain.Constants;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
 
@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("register")]
-    [RequiresPermission(nameof(AdminPageEnum.AddMember), nameof(AdminActionEnum.AddMember))]
+    [RequiresPermission(AdminPageConstants.AddMember, AdminActionConstants.AddMember)]
     public async Task<IActionResult> Register(RegisterRequestDto request)
     {
         var result = await _authService.RegisterAsync(request);
@@ -43,7 +43,7 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("setactivateuser")]
-    [RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.DeactivateMember))]
+    [RequiresPermission(AdminPageConstants.Members, AdminActionConstants.DeactivateMember)]
     public async Task<IActionResult> DeactivateUser(string userId)
     {
         var result = await _authService.DeactivateUser(userId);

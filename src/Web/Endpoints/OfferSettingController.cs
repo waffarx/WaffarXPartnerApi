@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.API.Controllers;
@@ -25,7 +26,7 @@ public class OfferSettingController : ControllerBase
     /// <param name="model">The offer setting request data.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("addoffer")]
-    [RequiresPermission(nameof(AdminPageEnum.AddEditOffer), nameof(AdminActionEnum.AssignOfferToProductsOrStores))]
+    [RequiresPermission(AdminPageConstants.AddEditOffer, AdminActionConstants.AssignOfferToProductsOrStores)]
     public async Task<IActionResult> AddOffer(OfferSettingRequestDto model)
     {
         var response = await _offerSettingService.AddOrUpdateOffer(model);
@@ -33,7 +34,7 @@ public class OfferSettingController : ControllerBase
 
     }
     [HttpPost("updateoffer")]
-    [RequiresPermission(nameof(AdminPageEnum.AddEditOffer), nameof(AdminActionEnum.UpdateOfferProductsOrStoresListing))]
+    [RequiresPermission(AdminPageConstants.AddEditOffer, AdminActionConstants.UpdateOfferProductsOrStores)]
     public async Task<IActionResult> UpdateOffer(OfferSettingRequestDto model)
     {
         var response = await _offerSettingService.AddOrUpdateOffer(model);
@@ -46,7 +47,7 @@ public class OfferSettingController : ControllerBase
     /// <returns>GenericResponse containing a list of offers.</returns>
     /// 
     [HttpGet("getoffer")]
-    [RequiresPermission(nameof(AdminPageEnum.OffersListing), nameof(AdminActionEnum.ListOffers))]
+    [RequiresPermission(AdminPageConstants.OffersListing, AdminActionConstants.ListOffers)]
     public async Task<IActionResult> GetOffers()
     {
         var response = await _offerSettingService.GetOffers();
@@ -60,7 +61,7 @@ public class OfferSettingController : ControllerBase
     /// <returns>GenericResponse containing the offer details.</returns>
 
     [HttpGet("getofferdetail/{id}")]
-    [RequiresPermission(nameof(AdminPageEnum.OffersListing), nameof(AdminActionEnum.ListOffers))]
+    [RequiresPermission(AdminPageConstants.OffersListing, AdminActionConstants.ListOffers)]
     public async Task<IActionResult> GetOfferDetails(string id)
     {
         var response = await _offerSettingService.GetOfferDetails(id);
@@ -73,7 +74,7 @@ public class OfferSettingController : ControllerBase
     /// <param name="model">The offer lookup request data.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("addlookup")]
-    [RequiresPermission(nameof(AdminPageEnum.OffersLookups), nameof(AdminActionEnum.CreateOffer))]
+    [RequiresPermission(AdminPageConstants.OffersLookups, AdminActionConstants.CreateOffer)]
     public async Task<IActionResult> AddOfferLookUp(OfferLookUpRequestDto model)
     {
         var response = await _offerSettingService.AddOrUpdateOfferLookUp(model);
@@ -81,7 +82,7 @@ public class OfferSettingController : ControllerBase
     }
 
     [HttpPost("updatelookup")]
-    [RequiresPermission(nameof(AdminPageEnum.OffersLookups), nameof(AdminActionEnum.UpdateOffer))]
+    [RequiresPermission(AdminPageConstants.OffersLookups, AdminActionConstants.UpdateOffer)]
     public async Task<IActionResult> UpdateOfferLookUp(OfferLookUpRequestDto model)
     {
         var response = await _offerSettingService.AddOrUpdateOfferLookUp(model);
@@ -92,7 +93,7 @@ public class OfferSettingController : ControllerBase
     /// </summary>
     /// <returns>GenericResponse containing a list of offer lookups.</returns>
     [HttpGet("getofferlookup")]
-    [RequiresPermission(nameof(AdminPageEnum.OffersLookups), nameof(AdminActionEnum.ListAllOffers))]
+    [RequiresPermission(AdminPageConstants.OffersLookups, AdminActionConstants.ListAllOffers)]
     public async Task<IActionResult> GetOffersLookup()
     {
         var response = await _offerSettingService.GetOffersLookup();
