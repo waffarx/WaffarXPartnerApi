@@ -69,6 +69,7 @@ public static class DependencyInjection
         services.AddScoped<IResourceService, ResourceService>();
         services.AddScoped<ICacheService, CacheService>();
         services.AddScoped<IPartnerPostbackRepository, PartnerPostbackRepository>();
+        services.AddScoped<ICashBackRepository, CashBackRepository>();
         #endregion
 
         #region Services

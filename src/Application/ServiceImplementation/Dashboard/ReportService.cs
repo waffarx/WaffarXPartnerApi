@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Postback;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Report;
 using WaffarXPartnerApi.Application.Common.Interfaces;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
@@ -8,19 +9,28 @@ using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
 using WaffarXPartnerApi.Domain.Enums;
 using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
+using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
 public class ReportService : JWTUserBaseService, IReportService
 {
     private readonly IPartnerPostbackRepository _partnerPostbackRepository;
     private readonly IAuditService _auditService;
+    private readonly IApiClientRepository _apiClientRepository;
+    private readonly ICashBackRepository _cashBackRepository;
+    private readonly IMapper _mapper;
     public ReportService(IPartnerPostbackRepository partnerPostbackRepository
-    , IAuditService auditService
+    , IAuditService auditService, IApiClientRepository apiClientRepository
+    , ICashBackRepository cashBackRepository, IMapper mapper
     , IHttpContextAccessor httpContextAccessor) : base(httpContextAccessor)
     {
         _partnerPostbackRepository = partnerPostbackRepository;
         _auditService = auditService;
+        _apiClientRepository = apiClientRepository;
+        _cashBackRepository = cashBackRepository;
+        _mapper = mapper;   
     }
     public async Task<GenericResponse<bool>> AddOrUpdatePostback(PostbackDto postbackDto)
     {
@@ -95,6 +105,32 @@ public class ReportService : JWTUserBaseService, IReportService
             {
                 Data = result.PostbackUrl,
                 Status = StaticValues.Success
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+    public async Task<GenericResponse<GetParterOrderStatisticsDto>> GetPartnerOrdersStatistics()
+    {
+        GetParterOrderStatisticsDto dto = new GetParterOrderStatisticsDto();
+        try
+        {
+            var userId = await _apiClientRepository.GetUserIdByClientId(ClientApiId);
+            if (userId > 0)
+            {
+                var cashBacks = await _cashBackRepository.GetParterOrderStatistics(userId);
+                return new GenericResponse<GetParterOrderStatisticsDto>
+                {
+                    Data = _mapper.Map<GetParterOrderStatisticsDto>(cashBacks),
+                    Status = StaticValues.Success
+                };
+            }
+            return new GenericResponse<GetParterOrderStatisticsDto>
+            {
+                Data = new GetParterOrderStatisticsDto(),
+                Status = StaticValues.Error
             };
         }
         catch (Exception)

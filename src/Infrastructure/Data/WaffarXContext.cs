@@ -18,7 +18,9 @@ public  class WaffarXContext : DbContext
     public virtual DbSet<Vadvertiser> Vadvertisers { get; set; }
     public virtual DbSet<Advertiser> Advertisers { get; set; }
     public virtual DbSet<Resource> Resources { get; set; }
-
+    public virtual DbSet<ApiClientExitClick> ApiClientExitClicks { get; set; }
+    public virtual DbSet<CashBack> CashBacks { get; set; }
+    public virtual DbSet<ExitClick> ExitClicks { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("SQL_Latin1_General_CP1_CI_AS");
@@ -316,6 +318,288 @@ public  class WaffarXContext : DbContext
             entity.HasKey(e => e.Id);
             entity.ToTable("Resources");
             entity.Property(e => e.ValueSa).HasColumnName("ValueSA");
+        });
+
+        modelBuilder.Entity<ApiClientExitClick>(entity =>
+        {
+            entity.Property(e => e.ApiClientId).HasComment("ClientId In ApiClient Table");
+            entity.Property(e => e.AppUserId).HasComment("Id of Client AppUser");
+            entity.Property(e => e.HasCashback).HasComment("Just Flag Setted by partner to tell if the ExitClick has cashback or not");
+            entity.Property(e => e.SubId1).HasMaxLength(100);
+            entity.Property(e => e.SubId2).HasMaxLength(100);
+            entity.Property(e => e.Uid)
+                .HasMaxLength(100)
+                .HasComment("Identifier Sent From Partner")
+                .HasColumnName("UID");
+        });
+
+        modelBuilder.Entity<CashBack>(entity =>
+        {
+            entity.ToTable(tb =>
+            {
+                tb.HasComment("Marks the state of the exit click; 0 = Unresolved - 1 = Pending - 2 = Accepted - 3 = Rejected(Cancelled) - 4 = Has Error (Ticket)");
+                tb.HasTrigger("TRGUpdateColumns");
+                tb.HasTrigger("TRG_CashBack");
+                tb.HasTrigger("TRG_CashBackLog");
+                tb.HasTrigger("TRG_CashOutUpdate");
+                tb.HasTrigger("TRG_DINO");
+                tb.HasTrigger("TRG_FBOfflineConversion");
+                tb.HasTrigger("TRG_FBPixel");
+                tb.HasTrigger("TRG_SendAdjustData");
+            });
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.IsResolved, e.StatusId }, "CashBackTypeID_IsResolved_StatusID");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.AdvertiserId }, "CashBackTypeId&AdvertiserID");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.UserId }, "CashBackTypeId&UserId");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.StatusId, e.Date, e.UserId }, "CashBackTypeId_StatusId_Date_UserId+all");
+
+            entity.HasIndex(e => e.Date, "Date");
+
+            entity.HasIndex(e => new { e.Date, e.UserId }, "Date&UserID").HasFillFactor(90);
+
+            entity.HasIndex(e => e.ExitClickId, "ExitClickID");
+
+            entity.HasIndex(e => e.Id, "ID")
+                .IsDescending()
+                .HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.Id, e.ConversionId }, "ID&ConversionID")
+                .IsDescending()
+                .HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.AdvertiserId, e.StatusId, e.UserId }, "IDX_AdvertiserID_StatusId_UserId+Date+UserConvertedValue+OrderValueUSD");
+
+            entity.HasIndex(e => e.CashBackTypeId, "IDX_CashBackTypeId+AllUserValues");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.AdvertiserId, e.StatusId }, "IDX_CashBackTypeId_AdvertiserID_StatusId");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.Date }, "IDX_CashBackTypeId_Date");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.IsResolved, e.StatusId }, "IDX_CashBackTypeId_IsResolved_StatusId+Id+Date+ConvertedValue+UserConvertedValue");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.StatusId }, "IDX_CashBackTypeId_StatusId+Date+UserId+IsResolved+UserConvertedValue");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.StatusId, e.Date }, "IDX_CashBackTypeId_StatusId_Date+UserId+ExitClickID+UserConvertedValue+WaffarXConvertedValue+OrderValueUSD+ConvertedValueUSD");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.StatusId, e.Date, e.UserId, e.AdvertiserId }, "IDX_CashBackTypeId_StatusId_Date_UserId_AdvertiserID+UserConvertedValue+WaffarXConvertedValue+OrderValueUSD+ConvertedValueUSD");
+
+            entity.HasIndex(e => e.Date, "IDX_Date+UserId+AdvertiserID+OrderValueEGP");
+
+            entity.HasIndex(e => new { e.ProviderId, e.ConvertedValue }, "IDX_ProviderID_ConvertedValue+OrderID");
+
+            entity.HasIndex(e => new { e.StatusId, e.UserId }, "IDX_StatusID_UserID+Id");
+
+            entity.HasIndex(e => new { e.StatusId, e.CashBackTypeId, e.AdvertiserId }, "IDX_StatusId_CashBackTypeId_AdvertiserID+UserId");
+
+            entity.HasIndex(e => new { e.StatusId, e.IsResolved, e.CashBackTypeId }, "IDX_StatusId_IsResolved_CashBackTypeId");
+
+            entity.HasIndex(e => e.UserId, "IDX_UserID+UserConvertedValues");
+
+            entity.HasIndex(e => e.ApiconversionId, "IX_ApiConversionID");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.AdvertiserId }, "IX_CashBackTypeId_AdvertiserID");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.Date, e.ExitClickId }, "IX_CashBackTypeId_Date_ExitClickID");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.ProviderId, e.IsResolved }, "IX_CashBackTypeId_ProviderID_IsResolved");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.StatusId, e.Date }, "IX_CashBackTypeId_StatusId_Date");
+
+            entity.HasIndex(e => e.Date, "IX_Date");
+
+            entity.HasIndex(e => new { e.Date, e.UserId }, "IX_Date_UserIDWithCols");
+
+            entity.HasIndex(e => new { e.StatusId, e.UserId }, "IX_StatusID_UserID+Id");
+
+            entity.HasIndex(e => new { e.UserId, e.AdvertiserId }, "IX_UserID_AdvertiserID");
+
+            entity.HasIndex(e => e.ReferalLogId, "ReferalLogID");
+
+            entity.HasIndex(e => new { e.StatusId, e.AdvertiserId }, "Status&StoreWithUser");
+
+            entity.HasIndex(e => e.UserId, "UserID");
+
+            entity.HasIndex(e => e.UserId, "UserIDDESC").IsDescending();
+
+            entity.HasIndex(e => new { e.Id, e.CashBackTypeId, e.UserId }, "_dta_index_CashBacks_5_1489878580__K1_K12_K7");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.Date, e.UserId, e.StatusId }, "_dta_index_CashBacks_7_1489878580__K12_K6_K7_K5_1_29_30_33");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.AdvertiserId }, "_dta_index_CashBacks_7_2117180818__K12_K15_f110").HasFilter("([CashBacks].[AdvertiserID]>(0))");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.Date, e.StatusId, e.UserId }, "_dta_index_CashBacks_7_2117180818__K12_K6_K5_K7_4_9_10_20");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.Date, e.UserId }, "_dta_index_CashBacks_7_2117180818__K12_K6_K7");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.UserId, e.Date }, "_dta_index_CashBacks_7_2117180818__K12_K7_K6");
+
+            entity.HasIndex(e => new { e.CashBackTypeId, e.UserId, e.Date, e.StatusId }, "_dta_index_CashBacks_7_2117180818__K12_K7_K6_K5");
+
+            entity.HasIndex(e => e.AdvertiserId, "_dta_index_CashBacks_7_2117180818__K15");
+
+            entity.HasIndex(e => new { e.ConversionId, e.AdvertiserId, e.ExitClickId, e.ProviderId, e.Id }, "_dta_index_CashBacks_7_2117180818__K17_K15_K16_K13_K1_2_3_4_5_6_7_8_9_10_11_12_14_18_19_20_21_22_23");
+
+            entity.HasIndex(e => new { e.UserId, e.AdvertiserId }, "ix_UserId_AdvertiserId+StatusId");
+
+            entity.Property(e => e.AdvertiserId).HasColumnName("AdvertiserID");
+            entity.Property(e => e.AdvertiserName).HasMaxLength(150);
+            entity.Property(e => e.ApiconversionId).HasColumnName("APIConversionID");
+            entity.Property(e => e.BankId).HasColumnName("BankID");
+            entity.Property(e => e.Bonus)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.Cdate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("CDate");
+            entity.Property(e => e.CommissionType).HasDefaultValue(0);
+            entity.Property(e => e.ConversionId).HasColumnName("ConversionID");
+            entity.Property(e => e.ConvertedValue)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.ConvertedValueUsd)
+                .HasColumnType("money")
+                .HasColumnName("ConvertedValueUSD");
+            entity.Property(e => e.CurrencySymbol)
+                .HasMaxLength(50)
+                .HasColumnName("currency_symbol");
+            entity.Property(e => e.Date).HasColumnType("datetime");
+            entity.Property(e => e.ExitClickId).HasColumnName("ExitClickID");
+            entity.Property(e => e.Gclid)
+                .HasMaxLength(1000)
+                .HasColumnName("GCLID");
+            entity.Property(e => e.IsFixed).HasDefaultValue(false);
+            entity.Property(e => e.IsMailSent).HasDefaultValue(true);
+            entity.Property(e => e.NetworkCommision).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.OrderCurrencySymbol)
+                .HasMaxLength(50)
+                .HasColumnName("order_currency_symbol");
+            entity.Property(e => e.OrderId)
+                .HasMaxLength(100)
+                .HasColumnName("Order_ID");
+            entity.Property(e => e.OrderValue)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.OrderValueEgp)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("OrderValueEGP");
+            entity.Property(e => e.OrderValueSar)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("OrderValueSAR");
+            entity.Property(e => e.OrderValueUsd)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("OrderValueUSD");
+            entity.Property(e => e.OrginalValue)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.PaymentCycleId).HasColumnName("PaymentCycleID");
+            entity.Property(e => e.PendingValue)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.ProviderId).HasColumnName("ProviderID");
+            entity.Property(e => e.ReferalLogId).HasColumnName("ReferalLogID");
+            entity.Property(e => e.UserBonusCommission)
+                .HasDefaultValue(100m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.UserConvertedValue).HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.UserConvertedValueEgp)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("UserConvertedValueEGP");
+            entity.Property(e => e.UserConvertedValueSar)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("UserConvertedValueSAR");
+            entity.Property(e => e.UserId).HasDefaultValue(0);
+            entity.Property(e => e.WaffarXconvertedValue)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("WaffarXConvertedValue");
+            entity.Property(e => e.WaffarXconvertedValueEgp)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("WaffarXConvertedValueEGP");
+            entity.Property(e => e.WaffarxConvertedValueSar)
+                .HasColumnType("decimal(18, 6)")
+                .HasColumnName("WaffarxConvertedValueSAR");
+        });
+
+        modelBuilder.Entity<ExitClick>(entity =>
+        {
+            entity.ToTable("ExitClick", tb => tb.HasComment("Marks the state of the exit click; 0 = Unresolved - 1 = Pending - 2 = Accepted - 3 = Rejected(Cancelled) - 4 = Has Error (Ticket)"));
+
+            entity.HasIndex(e => new { e.ClickSource, e.UserId }, "ClickSource_UserID");
+
+            entity.HasIndex(e => e.AdvertiserId, "IX_AdvertiserID&UserID");
+
+            entity.HasIndex(e => e.Cdate, "IX_ExitClick_Cdate_UserID");
+
+            entity.HasIndex(e => e.UserId, "IX_ExitClick_UserID").HasFillFactor(90);
+
+            entity.HasIndex(e => e.UserId, "IX_ExitClick_UserID2").HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.UserId, e.AdvertiserId }, "IX_ExitClick_UserID_AdvertiserID").HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.Id, e.UserId, e.AdvertiserId, e.ProviderId, e.CategoryId, e.ProductId }, "NonClusteredAll")
+                .IsDescending(true, false, true, false, false, true)
+                .HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.Id, e.Cdate }, "NonClusteredDate")
+                .IsDescending()
+                .HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.UserId, e.HasTransaction }, "NonClusteredIndex-UserID-HasTransaction").IsDescending(false, true);
+
+            entity.HasIndex(e => new { e.Cdate, e.HasTransaction }, "NonClusteredIndex_HasTransactionAndCDate").IsDescending();
+
+            entity.HasIndex(e => e.UserId, "NonClusteredUserID")
+                .IsDescending()
+                .HasFillFactor(90);
+
+            entity.HasIndex(e => new { e.ClickSource, e.UserId }, "_dta_index_ExitClick_7_1510036600__K15_K2_3_11");
+
+            entity.HasIndex(e => e.Cdate, "_dta_index_ExitClick_7_1510036600__K3");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.AdvertiserCommision).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.AdvertiserId).HasColumnName("AdvertiserID");
+            entity.Property(e => e.AdvertiserPayout).HasColumnType("decimal(18, 2)");
+            entity.Property(e => e.BankId).HasColumnName("BankID");
+            entity.Property(e => e.Bonus)
+                .HasDefaultValue(0m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.CategoryId)
+                .HasDefaultValue(0)
+                .HasColumnName("CategoryID");
+            entity.Property(e => e.Cdate)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime");
+            entity.Property(e => e.ClickSource)
+                .HasDefaultValue((short)0)
+                .HasComment("0 =WaffarX, 1 = MobileApiAndroid, 2 = MobileApiIOS, 3 = BrowserExtension, 7 = Client Api");
+            entity.Property(e => e.DeeplinkIos).HasColumnName("DeeplinkIOS");
+            entity.Property(e => e.ExitType).HasMaxLength(50);
+            entity.Property(e => e.Fbc)
+                .HasMaxLength(150)
+                .HasColumnName("fbc");
+            entity.Property(e => e.Fbp)
+                .HasMaxLength(50)
+                .HasColumnName("fbp");
+            entity.Property(e => e.HasTransaction).HasDefaultValue(false);
+            entity.Property(e => e.IsFixed).HasDefaultValue(false);
+            entity.Property(e => e.IsMobile).HasDefaultValue(false);
+            entity.Property(e => e.IsResolved).HasDefaultValue(0);
+            entity.Property(e => e.MobileType)
+                .HasMaxLength(10)
+                .IsFixedLength();
+            entity.Property(e => e.ProductId)
+                .HasDefaultValue(0)
+                .HasColumnName("ProductID");
+            entity.Property(e => e.ProviderId).HasColumnName("ProviderID");
+            entity.Property(e => e.UserBonusCommission)
+                .HasDefaultValue(100m)
+                .HasColumnType("decimal(18, 6)");
+            entity.Property(e => e.UserId).HasColumnName("UserID");
+            entity.Property(e => e.Xclid).HasColumnName("XCLID");
         });
 
         base.OnModelCreating(modelBuilder);
