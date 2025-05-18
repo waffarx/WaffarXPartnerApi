@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.StoreSetting;
-using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.API.Controllers;
@@ -26,7 +26,7 @@ public class StoreSettingsController : ControllerBase
     /// <param name="stores">List of store settings to update.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("update")]
-    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.AddUpdateWhitelistStores))]
+    [RequiresPermission(AdminPageConstants.WhitelistedStores, AdminActionConstants.AddUpdateWhitelistStores)]
     public async Task<IActionResult> UpdateStoreSettingList(List<StoreSettingRequestDto> stores)
     {
         var response = await _storeSettingService.UpdateStoreSettingList(stores);
@@ -38,7 +38,7 @@ public class StoreSettingsController : ControllerBase
     /// </summary>
     /// <returns>GenericResponse containing a list of store settings.</returns>
     [HttpGet("getwhitelistedstores")]
-    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.ListWhitelistStores))]
+    [RequiresPermission(AdminPageConstants.WhitelistedStores, AdminActionConstants.ListWhitelistStores)]
 
     public async Task<IActionResult> GetWhiteListedStores()
     {
@@ -49,7 +49,7 @@ public class StoreSettingsController : ControllerBase
     }
 
     [HttpGet("getallstore")]
-    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.AddUpdateWhitelistStores))]
+    [RequiresPermission(AdminPageConstants.WhitelistedStores, AdminActionConstants.AddUpdateWhitelistStores)]
 
     public async Task<IActionResult> GetStoreLookUp()
     {

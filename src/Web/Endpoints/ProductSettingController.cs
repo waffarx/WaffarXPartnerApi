@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.FeaturedProdu
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.RankFeaturedProducts;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Products.UpdateFeatured;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
@@ -24,7 +25,7 @@ public class ProductSettingController : ControllerBase
     }
 
     [HttpPost("getfeaturedproducts")]
-    [RequiresPermission(nameof(AdminPageEnum.FeaturedProducts), nameof(AdminActionEnum.ListFeaturedProducts))]
+    [RequiresPermission(AdminPageConstants.FeaturedProducts, AdminActionConstants.ListFeaturedProducts)]
     public async Task<IActionResult> GetFeaturedProducts(GetPartnerFeaturedProductDto featuredProductDto)
     {
         var response = await _productSettingService.GetFeaturedProducts(featuredProductDto);
@@ -33,7 +34,7 @@ public class ProductSettingController : ControllerBase
     }
 
     [HttpPost("deletefeaturedproducts")]
-    [RequiresPermission(nameof(AdminPageEnum.FeaturedProducts), nameof(AdminActionEnum.DeleteFeaturedProduct))]
+    [RequiresPermission(AdminPageConstants.FeaturedProducts, AdminActionConstants.DeleteFeaturedProduct)]
 
     public async Task<IActionResult> DeleteFeaturedProducts(DeleteFeaturedProductDto featuredProductDto)
     {
@@ -43,7 +44,7 @@ public class ProductSettingController : ControllerBase
     }
 
     [HttpPost("updatefeaturedproduct")]
-    [RequiresPermission(nameof(AdminPageEnum.FeaturedProducts), nameof(AdminActionEnum.UpdateFeaturedProduct))]
+    [RequiresPermission(AdminPageConstants.FeaturedProducts, AdminActionConstants.UpdateFeaturedProduct)]
 
     public async Task<IActionResult> UpdateFeaturedProduct(UpdateFeaturedProductDto featuredProductDto)
     {
@@ -53,7 +54,7 @@ public class ProductSettingController : ControllerBase
     }
 
     [HttpPost("addfeaturedproducts")]
-    [RequiresPermission(nameof(AdminPageEnum.FeaturedProducts), nameof(AdminActionEnum.AddFeaturedProducts))]
+    [RequiresPermission(AdminPageConstants.FeaturedProducts, AdminActionConstants.AddFeaturedProducts)]
 
     public async Task<IActionResult> UpdateFeaturedProduct(List<AddFeaturedProductDto> products)
     {
@@ -63,7 +64,7 @@ public class ProductSettingController : ControllerBase
     }
     
     [HttpPost("saveproductranks")]
-    [RequiresPermission(nameof(AdminPageEnum.RankFeaturedProducts), nameof(AdminActionEnum.RankFeaturedProducts))]
+    [RequiresPermission(AdminPageConstants.RankFeaturedProducts, AdminActionConstants.RankFeaturedProducts)]
 
     public async Task<IActionResult> UpdateProductRanks(List<RankProductsDto> products)
     {

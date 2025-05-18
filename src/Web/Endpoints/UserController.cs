@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.AssignUserToTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.User.ResetPassword;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.API.Controllers;
@@ -50,7 +51,7 @@ public class UserController : ControllerBase
     }
 
     [HttpPost("searchuser")]
-    [RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.ListMembers))]
+    [RequiresPermission(AdminPageConstants.Members, AdminActionConstants.ListMembers)]
     public async Task<IActionResult> SearchUser(UserSearchRequestDto request)
     {
         var response = await _userService.SearchForUser(request);
@@ -58,7 +59,7 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("userdetails/{userId}")]
-    [RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.ListMembers))]
+    [RequiresPermission(AdminPageConstants.Members, AdminActionConstants.ListMembers)]
     public async Task<IActionResult> GetUserDetails(string userId)
     {
         var response = await _userService.GetUserDetails(userId);
@@ -72,7 +73,7 @@ public class UserController : ControllerBase
     /// <param name="dto">The team creation data.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("createteam")]
-    [RequiresPermission(nameof(AdminPageEnum.Teams), nameof(AdminActionEnum.CreateTeam))]
+    [RequiresPermission(AdminPageConstants.Teams, AdminActionConstants.CreateTeam)]
     public async Task<IActionResult> CreateTeam(CreateTeamDto dto)
     {
         var response = await _userService.CreateTeamAsync(dto);
@@ -85,7 +86,7 @@ public class UserController : ControllerBase
     /// <param name="dto">The team update data.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("updateteam")]
-    [RequiresPermission(nameof(AdminPageEnum.Teams), nameof(AdminActionEnum.EditTeam))]
+    [RequiresPermission(AdminPageConstants.Teams, AdminActionConstants.EditTeam)]
     public async Task<IActionResult> UpdateTeam(UpdateTeamDto dto)
     {
         var response = await _userService.UpdateTeamAsync(dto);
@@ -98,7 +99,7 @@ public class UserController : ControllerBase
     /// <param name="id">The ID of the team to delete.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpDelete("deleteteam/{id:guid}")]
-    [RequiresPermission(nameof(AdminPageEnum.Teams), nameof(AdminActionEnum.DeleteTeam))]
+    [RequiresPermission(AdminPageConstants.Teams, AdminActionConstants.DeleteTeam)]
     public async Task<IActionResult> DeleteTeam(Guid id)
     {
         var response = await _userService.DeleteTeamAsync(id);
@@ -111,7 +112,7 @@ public class UserController : ControllerBase
     /// <param name="clientApiId">The client API ID.</param>
     /// <returns>GenericResponse containing a list of teams.</returns>
     [HttpGet("allteam")]
-    [RequiresPermission(nameof(AdminPageEnum.Teams), nameof(AdminActionEnum.ListTeams))]
+    [RequiresPermission(AdminPageConstants.Teams, AdminActionConstants.ListTeams)]
     public async Task<IActionResult> GetAllTeams()
     {
         var response = await _userService.GetAllTeamsAsync();
@@ -124,14 +125,14 @@ public class UserController : ControllerBase
     /// <param name="id">The ID of the team.</param>
     /// <returns>GenericResponse containing the team details.</returns>
     [HttpGet("teamdetails/{id:guid}")]
-    [RequiresPermission(nameof(AdminPageEnum.Teams), nameof(AdminActionEnum.ListTeams))]
+    [RequiresPermission(AdminPageConstants.Teams, AdminActionConstants.ListTeams)]
     public async Task<IActionResult> GetTeamDetails(Guid id)
     {
         var response = await _userService.GetTeamDetailsAsync(id);
         return Ok(response);
     }
     [HttpPost("addupdateusertoteam")]
-    [RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.ListMembers))]
+    [RequiresPermission(AdminPageConstants.Members, AdminActionConstants.ListMembers)]
 
     public async Task<IActionResult> AddUserToTeam(AssignUserToTeamRequestDto model)
     {

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Postback;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
@@ -26,7 +27,7 @@ public class SharedController : ControllerBase
     }
 
     [HttpGet("partnerurl")]
-    [RequiresPermission(nameof(AdminPageEnum.PostbackUrl), nameof(AdminActionEnum.GetPostbackUrl))]
+    [RequiresPermission(AdminPageConstants.PostbackUrl, AdminActionConstants.GetPostbackUrl)]
 
     public async Task<IActionResult> GetPartnerPostbacks()
     {
@@ -35,7 +36,7 @@ public class SharedController : ControllerBase
     }
 
     [HttpPost("savepostback")]
-    [RequiresPermission(nameof(AdminPageEnum.PostbackUrl), nameof(AdminActionEnum.SavePostbackUrl))]
+    [RequiresPermission(AdminPageConstants.PostbackUrl, AdminActionConstants.SavePostbackUrl)]
     public async Task<IActionResult> SavePostback(PostbackDto dto)
     {
         var Url = await _reportService.AddOrUpdatePostback(dto);
