@@ -74,7 +74,8 @@ public class ClientService : IClientService
                 IsActive = false,
                 Email = input.Email,
                 TokenType = "Bearer",
-                ExpiresIn = 3600
+                ExpiresIn = 3600,
+
             };
 
             var client = await _apiClientRepository.CreateClient(apiClient);

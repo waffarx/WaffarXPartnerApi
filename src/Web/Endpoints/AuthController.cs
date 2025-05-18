@@ -27,6 +27,7 @@ public class AuthController : ControllerBase
 
     [Authorize]
     [HttpPost("register")]
+    [RequiresPermission(nameof(AdminPageEnum.AddMember), nameof(AdminActionEnum.AddMember))]
     public async Task<IActionResult> Register(RegisterRequestDto request)
     {
         var result = await _authService.RegisterAsync(request);
@@ -37,38 +38,12 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> RefreshToken(TokenDto model)
     {
         var result = await _authService.RefreshTokenAsync(model.Token);
-        if (result.Success)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result.Message);
-    }
-
-    [HttpPost("revoketoken")]
-    public async Task<IActionResult> RevokeToken(TokenDto model)
-    {
-        var result = await _authService.RevokeTokenAsync(model.Token);
-        if (result)
-        {
-            return Ok(new { Message = "Token revoked successfully." });
-        }
-        return BadRequest("Failed to revoke token.");
-    }
-
-    [HttpPost("validatetoken")]
-    public async Task<IActionResult> ValidateToken(TokenDto model)
-    {
-        var result = await _authService.ValidateJwtTokenAsync(model.Token);
-        if (result.Success)
-        {
-            return Ok(result);
-        }
-        return BadRequest(result.Message);
+        return Ok(result);
     }
 
     [Authorize]
-    //[RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.DeactivateMember))]
     [HttpPost("setactivateuser")]
+    [RequiresPermission(nameof(AdminPageEnum.Members), nameof(AdminActionEnum.DeactivateMember))]
     public async Task<IActionResult> DeactivateUser(string userId)
     {
         var result = await _authService.DeactivateUser(userId);

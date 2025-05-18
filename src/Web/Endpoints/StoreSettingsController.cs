@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.StoreSetting;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.API.Controllers;
 
@@ -25,25 +26,11 @@ public class StoreSettingsController : ControllerBase
     /// <param name="stores">List of store settings to update.</param>
     /// <returns>GenericResponse indicating success or failure.</returns>
     [HttpPost("update")]
+    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.AddUpdateWhitelistStores))]
     public async Task<IActionResult> UpdateStoreSettingList(List<StoreSettingRequestDto> stores)
     {
-        if (stores == null || !stores.Any())
-        {
-            return BadRequest(new GenericResponse<bool>
-            {
-                Data = false,
-                Message = "Invalid input. The list of stores cannot be empty."
-            });
-        }
-
         var response = await _storeSettingService.UpdateStoreSettingList(stores);
-
-        if (response.Data)
-        {
-            return Ok(response);
-        }
-
-        return StatusCode(500, response);
+        return Ok(response);
     }
 
     /// <summary>
@@ -51,6 +38,8 @@ public class StoreSettingsController : ControllerBase
     /// </summary>
     /// <returns>GenericResponse containing a list of store settings.</returns>
     [HttpGet("getwhitelistedstores")]
+    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.ListWhitelistStores))]
+
     public async Task<IActionResult> GetWhiteListedStores()
     {
         var response = await _storeSettingService.GetWhiteListedStores();
@@ -60,6 +49,8 @@ public class StoreSettingsController : ControllerBase
     }
 
     [HttpGet("getallstore")]
+    [RequiresPermission(nameof(AdminPageEnum.WhitelistedStores), nameof(AdminActionEnum.AddUpdateWhitelistStores))]
+
     public async Task<IActionResult> GetStoreLookUp()
     {
         var response = await _storeSettingService.GetStoreLookUp();

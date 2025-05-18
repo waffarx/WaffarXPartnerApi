@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
+using WaffarXPartnerApi.Domain.Enums;
 
 namespace WaffarXPartnerApi.Web.Endpoints;
 
@@ -17,6 +18,7 @@ public class SearchController : ControllerBase
     }
 
     [HttpPost("productsearch")]
+    [RequiresPermission(nameof(AdminPageEnum.FeaturedProducts), nameof(AdminActionEnum.SearchProductWithStoreAndTerm))]
     public async Task<IActionResult> SearchProduct(ProductSearchRequestDto searchDto)
     {
         var response = await _searchService.SearchProduct(searchDto);
