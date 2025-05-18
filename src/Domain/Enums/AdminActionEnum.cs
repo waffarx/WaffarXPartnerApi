@@ -2,7 +2,6 @@
 public enum AdminActionEnum
 {
     // Whitelisted Stores actions
-    ListAllStores,
     ListWhitelistStores,
     AddUpdateWhitelistStores,
 
@@ -10,8 +9,12 @@ public enum AdminActionEnum
     SearchProductWithStoreAndTerm,
     AddFeaturedProducts,
     DeleteFeaturedProduct,
-    UpdateFeaturedProductDates,
+    UpdateFeaturedProduct,
+    ListFeaturedProducts,
+
+    // Rank Featured Products actions
     RankFeaturedProducts,
+
 
     // Offers Lookups actions
     CreateOffer,
@@ -47,5 +50,11 @@ public enum AdminActionEnum
     DeactivateMember,
 
     // Add Member action (Super admin)
-    AddMember
+    AddMember,
+
+    // Reports Screen
+    ListReportCards,
+    // Postback URL actions
+    GetPostbackUrl,
+    SavePostbackUrl,
 }
