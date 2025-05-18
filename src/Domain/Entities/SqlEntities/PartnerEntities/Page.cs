@@ -6,7 +6,7 @@ public class Page
     public string Description { get; set; }
     public bool IsActive { get; set; }
     public DateTime CreatedAt { get; set; }
-    public int ClientApiId { get; set; }
+   // public int ClientApiId { get; set; }
     public bool IsSuperAdminPage { get; set; }
 
     // Navigation properties

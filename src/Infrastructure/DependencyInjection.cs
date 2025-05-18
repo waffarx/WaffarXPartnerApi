@@ -85,6 +85,7 @@ public static class DependencyInjection
         services.AddScoped<ICommonService, CommenService>();
         services.AddScoped<IAuditService, AuditService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IPermissionService, PermissionService>();
         #endregion
 
 

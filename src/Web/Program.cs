@@ -24,6 +24,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ValidationFilter>();
+    options.Filters.Add<PermissionAuthorizationFilter>();
 });
 builder.Services.AddFluentValidationAutoValidation();
 // Add services to the container.

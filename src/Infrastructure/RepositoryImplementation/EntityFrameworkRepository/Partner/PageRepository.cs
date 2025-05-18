@@ -17,7 +17,7 @@ public class PageRepository : IPageRepository
         {
             var pages = await _waffarXPartnerDbContext.ClientPages
                                 .Include(x => x.Page)
-                                    .ThenInclude(x=>x.PageActions)
+                                    .ThenInclude(x => x.PageActions)
                              .Where(x => x.ClientApiId == clientApiId && x.IsActive && !x.Page.IsSuperAdminPage)
                              .Select(x => new PageDetailModel
                              {
@@ -44,5 +44,41 @@ public class PageRepository : IPageRepository
             throw;
         }
 
+    }
+
+    public async Task<PageModel> GetPageAsync(string pageName, int clientApiId)
+    {
+        try
+        {
+            var page = await _waffarXPartnerDbContext.ClientPages
+                .Include(x => x.Page)
+                    .ThenInclude(x => x.PageActions)
+                .FirstOrDefaultAsync(x => x.Page.PageName == pageName 
+                    && x.ClientApiId == clientApiId
+                    && x.IsActive);
+            if (page == null)
+            {
+                return null;
+            }
+            return new PageModel
+            {
+                Id = page.Page.Id,
+                Name = page.Page.PageName,
+                Description = page.Page.Description,
+                IsActive = page.IsActive,
+                IsSuperAdminPage = page.Page.IsSuperAdminPage,
+                PageActions = page.Page.PageActions.Select(a => new PageActionModel
+                {
+                    Id = a.Id,
+                    Name = a.ActionName,
+                    Description = a.Description,
+                }).ToList()
+            };
+
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
