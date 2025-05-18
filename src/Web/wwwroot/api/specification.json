@@ -16,12 +16,50 @@
         }
       }
     },
-    "/api/OfferSetting/addupdateoffer": {
+    "/api/OfferSetting/addoffer": {
       "post": {
         "tags": [
           "OfferSetting"
         ],
-        "operationId": "OfferSetting_AddOrUpdateOffer",
+        "operationId": "OfferSetting_AddOffer",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferSettingRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/updateoffer": {
+      "post": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_UpdateOffer",
         "requestBody": {
           "x-name": "model",
           "content": {
@@ -117,12 +155,50 @@
         ]
       }
     },
-    "/api/OfferSetting/addupdatelookup": {
+    "/api/OfferSetting/addlookup": {
       "post": {
         "tags": [
           "OfferSetting"
         ],
-        "operationId": "OfferSetting_AddOrUpdateOfferLookUp",
+        "operationId": "OfferSetting_AddOfferLookUp",
+        "requestBody": {
+          "x-name": "model",
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OfferLookUpRequestDto"
+              }
+            }
+          },
+          "required": true,
+          "x-position": 1
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/octet-stream": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "JWT": []
+          }
+        ]
+      }
+    },
+    "/api/OfferSetting/updatelookup": {
+      "post": {
+        "tags": [
+          "OfferSetting"
+        ],
+        "operationId": "OfferSetting_UpdateOfferLookUp",
         "requestBody": {
           "x-name": "model",
           "content": {
@@ -706,72 +782,6 @@
           "Auth"
         ],
         "operationId": "Auth_RefreshToken",
-        "requestBody": {
-          "x-name": "model",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TokenDto"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Auth/revoketoken": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "operationId": "Auth_RevokeToken",
-        "requestBody": {
-          "x-name": "model",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/TokenDto"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/Auth/validatetoken": {
-      "post": {
-        "tags": [
-          "Auth"
-        ],
-        "operationId": "Auth_ValidateToken",
         "requestBody": {
           "x-name": "model",
           "content": {

@@ -19,6 +19,12 @@ public class TeamRepository : ITeamRepository
     {
         try
         {
+            // check if the team name already exists for this client api id
+            var teamNameExists = await _waffarXPartnerDbContext.Teams.AnyAsync(x => x.TeamName == model.Name && x.ClientApiId == model.ClientApiId);
+            if (teamNameExists)
+            {
+                return null; // team name already exists
+            }
             var teamToCreate = await _waffarXPartnerDbContext.Teams.AddAsync(new Team
             {
                 TeamName = model.Name,
@@ -75,6 +81,13 @@ public class TeamRepository : ITeamRepository
             var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == model.TeamId && x.ClientApiId == model.ClientApiId);
             if(team != null)
             {
+                //chech the team name not exists before 
+                var teamNameExists = await _waffarXPartnerDbContext.Teams.AnyAsync(x => x.TeamName == model.Name && x.ClientApiId == model.ClientApiId && x.Id != model.TeamId);
+                if (teamNameExists)
+                {
+                    return (null, null); // team name already exists
+                }
+
                 var copiedTeam = new Team
                 {
                     Id = team.Id,
