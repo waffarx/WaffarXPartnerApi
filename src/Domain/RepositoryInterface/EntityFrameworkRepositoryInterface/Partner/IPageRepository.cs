@@ -4,5 +4,6 @@ namespace WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepository
 public interface IPageRepository
 {
     Task<List<PageDetailModel>> GetPagesWithAction(int clientApiId);
+    Task<PageModel> GetPageAsync(string pageName, int clientApiId);
 
 }
