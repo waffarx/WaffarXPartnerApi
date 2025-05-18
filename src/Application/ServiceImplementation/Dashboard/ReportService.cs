@@ -62,7 +62,9 @@ public class ReportService : JWTUserBaseService, IReportService
                     NewEntity = result,
                     EntityType = EntityTypeEnum.PartnerPostback,
                     ClientApiId = ClientApiId,
-                    EntityId = result.Id
+                    EntityId = result.Id,
+                    UserId = UserId,
+                    
                 });
             }
             return new GenericResponse<bool>

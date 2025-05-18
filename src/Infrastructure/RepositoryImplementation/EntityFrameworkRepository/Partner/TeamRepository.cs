@@ -15,7 +15,7 @@ public class TeamRepository : ITeamRepository
         _waffarXPartnerDbContext = waffarXPartnerDbContext;
     }
 
-    public async Task<Guid> CreateTeam(CreateTeamWithActionModel model)
+    public async Task<Team> CreateTeam(CreateTeamWithActionModel model) 
     {
         try
         {
@@ -48,17 +48,17 @@ public class TeamRepository : ITeamRepository
                     }
                     await _waffarXPartnerDbContext.TeamPageActions.AddRangeAsync(teamPageActionsToAdd);
                     await _waffarXPartnerDbContext.SaveChangesAsync();
-                    return teamToCreate.Entity.Id;
+                    return teamToCreate.Entity;
                 }
                 else // not all actions are valid
                 {
-                    return Guid.Empty;
+                    return null;
                 }
 
             }
             else // fail to create team
             {
-                return Guid.Empty;
+                return null;
             }
 
         }
@@ -67,7 +67,7 @@ public class TeamRepository : ITeamRepository
             throw;
         }
     }
-    public async Task<bool> UpdateTeam(UpdateTeamWithActionModel model)
+    public async Task<(Team,Team)> UpdateTeam(UpdateTeamWithActionModel model)
     {
         try
         {
@@ -75,7 +75,17 @@ public class TeamRepository : ITeamRepository
             var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == model.TeamId && x.ClientApiId == model.ClientApiId);
             if(team != null)
             {
-                // update the team 
+                var copiedTeam = new Team
+                {
+                    Id = team.Id,
+                    TeamName = team.TeamName,
+                    Description = team.Description,
+                    CreatedAt = team.CreatedAt,
+                    UpdatedAt = team.UpdatedAt,
+                    ClientApiId = team.ClientApiId,
+                    UserTeams = team.UserTeams,
+                    TeamPageActions = team.TeamPageActions,
+                };
                 team.TeamName = model.Name;
                 team.Description = model.Description;
                 team.UpdatedAt = new DateTime();
@@ -100,11 +110,11 @@ public class TeamRepository : ITeamRepository
                 }
                 await _waffarXPartnerDbContext.TeamPageActions.AddRangeAsync(teamPageActionsToAdd);
                 await _waffarXPartnerDbContext.SaveChangesAsync();
-                return true; // team updated successfully
+                return (copiedTeam,team); // team updated successfully
             }
             else
             {
-                return false;
+                return (null,null);
             }
 
         }
@@ -113,7 +123,7 @@ public class TeamRepository : ITeamRepository
             throw;
         }
     }
-    public async Task<bool> DeleteTeam(Guid id)
+    public async Task<Team> DeleteTeam(Guid id)
     {
         try
         {
@@ -121,25 +131,37 @@ public class TeamRepository : ITeamRepository
             var userTeam = await _waffarXPartnerDbContext.UserTeams.FirstOrDefaultAsync(x => x.TeamId == id);
             if (userTeam != null) 
             {
-                return false; // user is assigned to this team
+                return null; // user is assigned to this team
             }
             // remove page actions for this team first 
             var pageActions = await _waffarXPartnerDbContext.TeamPageActions.Where(x => x.TeamId == id).ToListAsync();
+           
+            // remove the team
+            var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == id);
+            var copiedTeam = new Team
+            {
+                Id = team.Id,
+                TeamName = team.TeamName,
+                Description = team.Description,
+                CreatedAt = team.CreatedAt,
+                UpdatedAt = team.UpdatedAt,
+                ClientApiId = team.ClientApiId,
+                UserTeams = team.UserTeams,
+                TeamPageActions = team.TeamPageActions,
+            };
             if (pageActions != null)
             {
                 _waffarXPartnerDbContext.TeamPageActions.RemoveRange(pageActions);
             }
-            // remove the team
-            var team = await _waffarXPartnerDbContext.Teams.FirstOrDefaultAsync(x => x.Id == id);
             if (team != null) 
             {
                 _waffarXPartnerDbContext.Teams.Remove(team);
                 await _waffarXPartnerDbContext.SaveChangesAsync();
-                return true; // team removed successfully
+                return copiedTeam; // team removed successfully
             }
             else
             {
-                return false; // team not found
+                return null; // team not found
             }
 
         }
