@@ -9,7 +9,7 @@ public interface IUserRepository
     Task<User> GetByEmailAsync(string email);
     Task<bool> CreateAsync(User user);
     Task<bool> UpdateAsync(User user);
-    Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds, int clientApiId);
+    Task<(User, User)> AssignUserToTeam(Guid userId, List<string> teamIds, int clientApiId);
     Task<List<UserPageActionsModel>> GetUserPageAndPageAction(Guid userId);
     Task<PaginationResultModel<List<UserSearchModel>>> SearchUserByEmail(UserSearchRequestModel model);
     Task<UserDetailModel> GetUserDetails(Guid userId);

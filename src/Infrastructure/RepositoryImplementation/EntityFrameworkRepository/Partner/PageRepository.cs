@@ -15,18 +15,20 @@ public class PageRepository : IPageRepository
     {
         try
         {
-            var pages = await _waffarXPartnerDbContext.Pages
-                             .Where(x => x.ClientApiId == clientApiId && x.IsActive && !x.IsSuperAdminPage)
+            var pages = await _waffarXPartnerDbContext.ClientPages
+                                .Include(x => x.Page)
+                                    .ThenInclude(x=>x.PageActions)
+                             .Where(x => x.ClientApiId == clientApiId && x.IsActive && !x.Page.IsSuperAdminPage)
                              .Select(x => new PageDetailModel
                              {
                                  Page =
 
                                      new PageModel
                                      {
-                                         Id = x.Id,
-                                         Name = x.PageName,
-                                         Description = x.Description,
-                                         PageActions = x.PageActions.Select(a => new PageActionModel
+                                         Id = x.Page.Id,
+                                         Name = x.Page.PageName,
+                                         Description = x.Page.Description,
+                                         PageActions = x.Page.PageActions.Select(a => new PageActionModel
                                          {
                                              Id = a.Id,
                                              Name = a.ActionName,

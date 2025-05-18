@@ -7,6 +7,8 @@ using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
 using WaffarXPartnerApi.Domain.Entities.SqlEntities.PartnerEntities;
+using WaffarXPartnerApi.Domain.Enums;
+using WaffarXPartnerApi.Domain.Models.PartnerSqlModels;
 using WaffarXPartnerApi.Domain.Models.SharedModels;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.Partner;
@@ -21,19 +23,23 @@ public class AuthService : JWTUserBaseService, IAuthService
     private readonly IPasswordHasher _passwordHasher;
     private readonly IMapper _mapper;
 
+    private readonly IAuditService _auditService;
+
     public AuthService(
         IHttpContextAccessor httpContextAccessor,
         IUserRepository userRepository,
         IRefreshTokenRepository refreshTokenRepository,
         IJwtService jwtService,
         IPasswordHasher passwordHasher,
-        IMapper mapper) : base(httpContextAccessor)
+        IMapper mapper,
+        IAuditService auditService) : base(httpContextAccessor)
     {
         _userRepository = userRepository;
         _refreshTokenRepository = refreshTokenRepository;
         _jwtService = jwtService;
         _passwordHasher = passwordHasher;
         _mapper = mapper;
+        _auditService = auditService;
     }
 
     public async Task<GenericResponse<TokenResponseDto>> LoginAsync(string Email, string password)
@@ -138,6 +144,16 @@ public class AuthService : JWTUserBaseService, IAuthService
         {
             return new GenericResponse<TokenResponseDto> { Data = new TokenResponseDto(), Message = "Failed to create user", Status = StaticValues.Error };
         }
+        await _auditService.LogCreationAsync(new AuditCreationParams<User> 
+        {
+            ClientApiId = ClientApiId,
+            Entity = user,
+            EntityId = user.Id,
+            EntityType = EntityTypeEnum.User,
+            UserId = UserId,
+            
+        });
+        
         await _userRepository.AssignUserToTeam(user.Id, model.TeamsIds,ClientApiId);
 
         // Generate tokens
@@ -267,11 +283,68 @@ public class AuthService : JWTUserBaseService, IAuthService
             return new TokenValidationResult { Success = false, Message = $"Token validation error: {ex.Message}" };
         }
     }
-
+    public async Task<GenericResponse<bool>> DeactivateUser(string userId)
+    {
+        try
+        {
+            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
+            if (user == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Data = false,
+                    Message = "User not found",
+                };
+            }
+            var copiedUser = new User
+            {
+                ClientApiId = user.ClientApiId,
+                CreatedAt = user.CreatedAt,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                HashKey = user.HashKey,
+                Id = user.Id,
+                IsActive = user.IsActive,
+                IsSuperAdmin = user.IsSuperAdmin,
+                LastLogin = user.LastLogin,
+                LastName = user.LastName,
+                Password = user.Password,
+                RefreshTokens = user.RefreshTokens,
+                TeamPageActions = user.TeamPageActions,
+                UpdatedAt = user.UpdatedAt,
+                UserId = user.UserId,
+                UserTeams = user.UserTeams
+            };
+            var activeStatus = user.IsActive;
+            user.IsActive = !activeStatus;
+            var updateResult = await _userRepository.UpdateAsync(user);
+            await _refreshTokenRepository.RevokeAllUserTokensAsync(user.Id);
+            await _auditService.LogUpdateAsync(new AuditUpdateParams<User> 
+            {
+                ClientApiId = ClientApiId,
+                EntityId = user.Id,
+                EntityType = EntityTypeEnum.User,
+                OldEntity = copiedUser,
+                NewEntity = user,
+                UserId = UserId,
+                
+              
+            });
+            return new GenericResponse<bool>
+            {
+                Data = updateResult,
+                Message = updateResult ?  (activeStatus ? "User deactivated successfully" : "User Activated successfully") :"Something went wrong" ,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
     private async Task<TokenResponse> GenerateTokensAsync(User user)
     {
         var accessToken = await _jwtService.GenerateAccessTokenAsync(user);
-        var accessTokenExpiry = DateTime.UtcNow.AddMinutes(15); // Short lived token - 15 minutes
+        var accessTokenExpiry = DateTime.UtcNow.AddMinutes(AppSettings.JwtSettings.ExpiryInMinutes); // Short lived token - 15 minutes
 
         var refreshToken = await GenerateRefreshTokenAsync(user);
 
@@ -282,19 +355,9 @@ public class AuthService : JWTUserBaseService, IAuthService
             RefreshToken = refreshToken.Token,
             AccessTokenExpiresAt = accessTokenExpiry,
             RefreshTokenExpiresAt = refreshToken.ExpiryDate,
-            //User = new UserDto
-            //{
-            //    Id = user.Id,
-            //    Username = user.Username,
-            //    Email = user.Email,
-            //    FirstName = user.FirstName,
-            //    LastName = user.LastName,
-            //    IsSuperAdmin = user.IsSuperAdmin,
-            //    ClientApiId = user.ClientApiId
-            //}
+
         };
     }
-
     private async Task<RefreshToken> GenerateRefreshTokenAsync(User user)
     {
         var refreshToken = new RefreshToken
@@ -312,41 +375,11 @@ public class AuthService : JWTUserBaseService, IAuthService
 
         return refreshToken;
     }
-
     private string GenerateRandomTokenString()
     {
         using var rng = System.Security.Cryptography.RandomNumberGenerator.Create();
         var randomBytes = new byte[40];
         rng.GetBytes(randomBytes);
         return Convert.ToBase64String(randomBytes);
-    }
-
-    public async Task<GenericResponse<bool>> DeactivateUser(string userId)
-    {
-        try
-        {
-            var user = await _userRepository.GetByIdAsync(Guid.Parse(userId));
-            if (user == null)
-            {
-                return new GenericResponse<bool>
-                {
-                    Data = false,
-                    Message = "User not found",
-                };
-            }
-            var activeStatus = user.IsActive;
-            user.IsActive = !activeStatus;
-            var updateResult = await _userRepository.UpdateAsync(user);
-            await _refreshTokenRepository.RevokeAllUserTokensAsync(user.Id);
-            return new GenericResponse<bool>
-            {
-                Data = updateResult,
-                Message = updateResult ?  (activeStatus ? "User deactivated successfully" : "User Activated successfully") :"Something went wrong" ,
-            };
-        }
-        catch (Exception)
-        {
-            throw;
-        }
     }
 }

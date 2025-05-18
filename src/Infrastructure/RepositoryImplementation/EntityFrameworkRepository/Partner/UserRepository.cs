@@ -72,14 +72,14 @@ public class UserRepository : IUserRepository
         return updated > 0;
     }
 
-    public async Task<bool> AssignUserToTeam(Guid userId, List<string> teamIds, int clientApiId)
+    public async Task<(User,User)> AssignUserToTeam(Guid userId, List<string> teamIds, int clientApiId)
     {
         try
         {
             var userBelongToClientApiId = await _context.Users.FirstOrDefaultAsync(x => x.Id == userId && x.ClientApiId == clientApiId);
             if (userBelongToClientApiId == null)
             {
-                return false;
+                return (null,null);
             }
             var teamGuids = teamIds
                 .Select(t => Guid.TryParse(t, out var parsedGuid) ? parsedGuid : Guid.Empty)
@@ -92,7 +92,7 @@ public class UserRepository : IUserRepository
             if (teams.Count != teamGuids.Count)
             {
                 // not all guids are valid
-                return false;
+                return (null,null);
             }
             // get teams user in 
             var existingUserTeams = await _context.UserTeams
@@ -116,7 +116,15 @@ public class UserRepository : IUserRepository
             }
             await _context.UserTeams.AddRangeAsync(userTeamsToAdd);
             var added = await _context.SaveChangesAsync();
-            return added > 0;
+            if (added == 0)
+            {
+                return (null, null);
+            }
+            var updatedUser = await _context.Users
+                .Include(u => u.UserTeams)
+                .Include(u => u.TeamPageActions)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+            return (userBelongToClientApiId, updatedUser);
         }
         catch (Exception)
         {

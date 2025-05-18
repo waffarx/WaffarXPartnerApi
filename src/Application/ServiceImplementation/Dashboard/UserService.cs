@@ -85,7 +85,25 @@ public class UserService : JWTUserBaseService, IUserService
                     Message = "Invalid password"
                 };
             }
-            var oldUser = user;
+            var oldUser = new User
+            {
+                UserTeams = user.UserTeams,
+                UserId = user.UserId,
+                Username = user.Username,
+                TeamPageActions = user.TeamPageActions,
+                ClientApiId = user.ClientApiId,
+                CreatedAt = user.CreatedAt,
+                Email = user.Email,
+                FirstName = user.FirstName,
+                HashKey = user.HashKey,
+                Id = user.Id,
+                IsActive = user.IsActive,
+                IsSuperAdmin = user.IsSuperAdmin,
+                LastLogin = user.LastLogin,
+                LastName = user.LastName,
+                Password = user.Password,
+                UpdatedAt = user.UpdatedAt,
+            };
           
 
             // Hash password
@@ -101,7 +119,8 @@ public class UserService : JWTUserBaseService, IUserService
                 NewEntity = user,
                 EntityType = EntityTypeEnum.User,
                 ClientApiId = ClientApiId,
-                EntityId = user.Id
+                EntityId = user.Id,
+                UserId =UserId,
             });
 
             return new GenericResponse<bool>
@@ -185,12 +204,32 @@ public class UserService : JWTUserBaseService, IUserService
         try
         {
             var userGuid = Guid.TryParse(model.UserId.ToString(), out var userId) ? userId : Guid.Empty;
-            var result = await _userRepository.AssignUserToTeam(userGuid, model.TeamIds, ClientApiId);
+            var resultTuble = await _userRepository.AssignUserToTeam(userGuid, model.TeamIds, ClientApiId);
+            if(resultTuble.Item1 == null || resultTuble.Item2 == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Status = StaticValues.Error,
+                    Message = "Failed to add user to team",
+                    Data = false
+                };
+            }
+            await _auditService.LogUpdateAsync(new AuditUpdateParams<User>
+            {
+                OldEntity = resultTuble.Item1,
+                NewEntity = resultTuble.Item2,
+                EntityType = EntityTypeEnum.User,
+                ClientApiId = ClientApiId,
+                EntityId = resultTuble.Item2.Id,
+                UserId = UserId,
+                
+                
+            });
             return new GenericResponse<bool>
             {
-                Status = result ? StaticValues.Success : StaticValues.Error,
-                Message = result ? "User added to team successfully" : "Failed to add user to team",
-                Data = result
+                Status =  StaticValues.Success ,
+                Message =  "User added to team successfully" ,
+                Data = true
             };
         }
         catch (Exception)
@@ -209,29 +248,24 @@ public class UserService : JWTUserBaseService, IUserService
             model.CreatedBy = UserId;
             model.ClientApiId = ClientApiId;
             var result = await _teamRepository.CreateTeam(model);
-            if (result != Guid.Empty)
+            if (result != null)
             {
                 await _auditService.LogCreationAsync(new AuditCreationParams<Team>
                 {
                     EntityType = EntityTypeEnum.Team,
                     ClientApiId = ClientApiId,
                     UserId = UserId,
-                    EntityId = result,
-                    Entity = new Team 
-                    {
-                        ClientApiId = ClientApiId,
-                        Description = dto.Description,
-                        TeamName = dto.Name,
-                        
-                    },
+                    EntityId = result.Id,
+                    Entity = result,
+                    
                 });
             }
 
             return new GenericResponse<bool>
             {
-                Status =  result != Guid.Empty ?  StaticValues.Success : StaticValues.Error,
-                Message = result != Guid.Empty ? "Team created successfully" : "Failed to create team",
-                Data = result != Guid.Empty ? true : false
+                Status =  result != null ?  StaticValues.Success : StaticValues.Error,
+                Message = result != null ? "Team created successfully" : "Failed to create team",
+                Data = result != null ? true : false
             };
         }
         catch (Exception)
@@ -247,12 +281,31 @@ public class UserService : JWTUserBaseService, IUserService
             var model = _mapper.Map<UpdateTeamWithActionModel>(dto);
             model.UpdatedBy = UserId;
             model.ClientApiId = ClientApiId;
-            var result = await _teamRepository.UpdateTeam(model);
+            var resultTuple = await _teamRepository.UpdateTeam(model);
+            if(resultTuple.Item1 == null || resultTuple.Item2 == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Status = StaticValues.Error,
+                    Message = "Failed to update team",
+                    Data = false
+                };
+            }
+            await _auditService.LogUpdateAsync(new AuditUpdateParams<Team>
+            {
+                OldEntity = resultTuple.Item1,
+                NewEntity = resultTuple.Item2,
+                EntityType = EntityTypeEnum.Team,
+                ClientApiId = ClientApiId,
+                EntityId = resultTuple.Item2.Id,
+                UserId = UserId,
+                
+            });
             return new GenericResponse<bool>
             {
-                Status = result ? StaticValues.Success : StaticValues.Error,
-                Message = result ? "Team updated successfully" : "Failed to update team",
-                Data = result
+                Status = StaticValues.Success ,
+                Message =  "Team updated successfully",
+                Data = true
             };
         }
         catch (Exception)
@@ -266,11 +319,28 @@ public class UserService : JWTUserBaseService, IUserService
         try
         {
             var result = await _teamRepository.DeleteTeam(id);
+            if(result == null)
+            {
+                return new GenericResponse<bool>
+                {
+                    Status = StaticValues.Error,
+                    Message = "Failed to delete team",
+                    Data = false
+                };
+            }
+            await _auditService.LogDeletionAsync(new AuditDeletionParams<Team>
+            {
+                EntityType = EntityTypeEnum.Team,
+                ClientApiId = ClientApiId,
+                EntityId = id,
+                UserId = UserId,
+                Entity = result,
+            });
             return new GenericResponse<bool>
             {
-                Status = result ? StaticValues.Success : StaticValues.Error,
-                Message = result ? "Team deleted successfully" : "Failed to delete team",
-                Data = result
+                Status = StaticValues.Success ,
+                Message = "Team deleted successfully" ,
+                Data = true
             };
         }
         catch (Exception)
