@@ -1,0 +1,12 @@
+﻿using WaffarXPartnerApi.Application.Common.DTOs.Shared;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
+namespace WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetProductsOffersRequest;
+public class GetProductsByOffersDto : PaginationRequestDto
+{
+}
+
+public class GetProductsByOffersRequestDto : BaseSharedDto
+{
+    public int? PageNumber { get; set; } = 1;
+    public int? Count { get; set; } = 50;
+}

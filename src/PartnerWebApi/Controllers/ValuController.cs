@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetProductsOffersRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -83,6 +84,13 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> Getstoreswithproducts(GetStoresWithProductsDto model)
     {
         var result = await _valuService.GetStoresWithProducts(model);
+        return Ok(result);
+    }
+
+    [HttpPost("getoffersproducts")]
+    public async Task<IActionResult> GetProductsByOffers(GetProductsByOffersDto model)
+    {
+        var result = await _valuService.GetProductsByOffers(model);
         return Ok(result);
     }
 }
