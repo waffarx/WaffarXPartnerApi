@@ -22,14 +22,17 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
     private readonly IPartnerRepository _partnerRepository;
     private readonly IAdvertiserRepository _advertiserRepository;
 
+    private readonly ICacheService _cacheService;
 
-    public StoreSettingService(IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService, ICacheRepository cacheRepository, IPartnerRepository partnerRepository, IAdvertiserRepository advertiserRepository) : base(httpContextAccessor)
+
+    public StoreSettingService(IHttpContextAccessor httpContextAccessor, IApiClientRepository apiClientRepository, IHttpService httpService, ICacheRepository cacheRepository, IPartnerRepository partnerRepository, IAdvertiserRepository advertiserRepository, ICacheService cacheService) : base(httpContextAccessor)
     {
         _apiClientRepository = apiClientRepository;
         _httpService = httpService;
         _cacheRepository = cacheRepository;
         _partnerRepository = partnerRepository;
         _advertiserRepository = advertiserRepository;
+        _cacheService = cacheService;
     }
     public async Task<GenericResponse<bool>> UpdateStoreSettingList(List<StoreSettingRequestDto> stores)
     {
@@ -128,7 +131,15 @@ public class StoreSettingService : JWTUserBaseService, IStoreSettingService
                     Message = StaticValues.Success,
                 };
             }
+
             // Map the result to the response DTO
+            string disabledStoresCacheKey = "DisabledStores";
+
+            var disabledStores = await _cacheService.GetOrSetCacheValueAsync(
+                disabledStoresCacheKey,
+                () => _advertiserRepository.GetDisabledStores(), TimeSpan.FromHours(12));
+            // filter from the result  the stores that are not in the disabled stores
+            result = result.Where(store => !disabledStores.Any(d => d == store.StoreId)).ToList();
             List<StoreLookUpResponseDto> storeLookUpResponse = result.Select(store => new StoreLookUpResponseDto
             {
                 LogoPngUrl = store.LogoPng,

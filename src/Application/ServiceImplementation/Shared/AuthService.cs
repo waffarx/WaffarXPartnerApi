@@ -97,7 +97,9 @@ public class AuthService : JWTUserBaseService, IAuthService
                 AccessTokenExpiresAt = tokenResult.AccessTokenExpiresAt,
                 RefreshTokenExpiresAt = tokenResult.RefreshTokenExpiresAt,
                 UserPages = pagesToReturn,
-                IsSuperAdmin = user.IsSuperAdmin
+                IsSuperAdmin = user.IsSuperAdmin,
+                Firstname = user.FirstName,
+                Lastname = user.LastName
             },
         };
     }
