@@ -2,6 +2,7 @@
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Postback;
 using WaffarXPartnerApi.Application.Common.DTOs.Helper;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetProductsOffersRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.PaginationRequest;
@@ -24,6 +25,7 @@ public static class DependencyInjection
         services.AddScoped<IValidator<GetFeaturedProductByStoreDto>, GetFeaturedProductByStoreDtoValidator>();
         services.AddScoped<IValidator<GetStoresWithProductsDto>, GetStoresWithProductsDtoValidator>();
         services.AddScoped<IValidator<PostbackDto>, PostbackDtoValidator>();
+        services.AddScoped<IValidator<GetProductsByOffersDto>, GetProductsByOffersDtoValidators>();
         services.AddScoped<RandomGenerator>();
         return services;
     }

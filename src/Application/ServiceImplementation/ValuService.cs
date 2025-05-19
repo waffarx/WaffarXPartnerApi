@@ -4,6 +4,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Shared.ExitClick;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetProductsOffersRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -606,6 +607,55 @@ public class ValuService : BaseService, IValuService
             {
                 Data = new List<StoreWithProductsResponseDto>(),
                 Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    public async Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetProductsByOffers(GetProductsByOffersDto offersDto)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            string Url = "GetProductsByOffers";
+            GetProductsByOffersRequestDto requestObj = new GetProductsByOffersRequestDto
+            {
+                ClientApiId = ClientApiId,
+                Count = offersDto.PageSize,
+                PageNumber = offersDto.PageNumber,
+                IsEnglish = IsEnglish
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
+                AppSettings.ExternalApis.ValuUrl + Url,
+                requestObj,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    products.Add(ProductMappingHelper.MapToBaseProduct(item));
+                }
+
+                return new GenericResponseWithCount<List<BaseProductSearchResultDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = products,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<BaseProductSearchResultDto>>()
+            {
+                Data = new List<BaseProductSearchResultDto>(),
+                Status = StaticValues.Error,
+                TotalCount = 0,
             };
         }
         catch (Exception)
