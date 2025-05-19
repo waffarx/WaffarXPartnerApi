@@ -356,6 +356,7 @@ public class PartnerRepository : IPartnerRepository
                 response.Add(new StoreLookUpModel
                 {
                     Id = store.StoreGuid,
+                    StoreId = store.StoreId,
                     NameEn = store.NameEn,
                     NameAr = store.NameAr,
                     Logo = store.LogoUrl,
