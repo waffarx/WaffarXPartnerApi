@@ -111,6 +111,7 @@ public class PartnerRepository : IPartnerRepository
                     DateTime nowDate = DateTime.Now;
 
                     filter = p => p.ClientApiId == clientApiId && p.Product.EndDate >= nowDate;
+                    sortBuilder = Builders<FeaturedProductSetting>.Sort.Ascending(x => x.Product.ProductRank);
                 }
                 // Get paged data
                 var featuredList = await _featuredProductCollection.Find(filter)
