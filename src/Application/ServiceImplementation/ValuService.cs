@@ -287,6 +287,7 @@ public class ValuService : BaseService, IValuService
                 PageNumber = productSearch.PageNumber,
                 ItemCount = productSearch.PageSize,
                 SearchText = productSearch.SearchText,
+                SortByPriceDsc = productSearch.SortByPriceDsc,
                 Filter = filterModel
 
             };

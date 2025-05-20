@@ -1582,6 +1582,9 @@
                     "$ref": "#/components/schemas/ProductSearchFilterDto"
                   }
                 ]
+              },
+              "sortByPriceDsc": {
+                "type": "boolean"
               }
             }
           }
