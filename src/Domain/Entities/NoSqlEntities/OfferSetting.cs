@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 
 namespace WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
+
+[BsonIgnoreExtraElements]
 public class OfferSetting
 {
     [BsonId]
@@ -28,4 +30,5 @@ public class OfferSetting
     public List<ObjectId> ProductIds { get; set; }
 
     public List<int> StoreIds { get; set; }
+    public ObjectId OfferTypeId { get; set; }
 }

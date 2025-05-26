@@ -7,5 +7,5 @@ public class StoreProductSearchRequestDto : FilterBase
     public int PageNumber { get; set; }
     public int PageSize { get; set; }
     public string Category { get; set; }
-
+    public bool SortByPriceDsc { get; set; } = true;
 }

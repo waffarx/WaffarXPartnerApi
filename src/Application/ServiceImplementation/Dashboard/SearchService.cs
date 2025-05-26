@@ -10,6 +10,7 @@ using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInte
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using Microsoft.AspNetCore.Http;
 using WaffarXPartnerApi.Application.ServiceInterface.Shared;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoreBrands;
 
 
 namespace WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;
@@ -64,7 +65,8 @@ public class SearchService : JWTUserBaseService, ISearchService
                 PageNumber = productSearch.PageNumber,
                 ItemCount = productSearch.PageSize,
                 SearchText = productSearch.SearchText,
-                Filter = filterModel
+                Filter = filterModel,
+                SortByPriceDsc = productSearch.SortByPriceDsc
 
             };
 
@@ -110,5 +112,46 @@ public class SearchService : JWTUserBaseService, ISearchService
         {
             throw;
         }
+    }
+    public async Task<GenericResponse<List<string>>> SearchBrandsByStore(GetStoreBrandsDto model)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            var clientGuid = await _apiClientRepository.GetClientGuidById(ClientApiId);
+            GetStoreBrandsRequestDto requestBody = new GetStoreBrandsRequestDto
+            {
+                ClientApiId = clientGuid,
+                IsEnglish = IsEnglish,
+                SearchText = model.SearchText,
+                StoreId = new Guid(model.StoreId)
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<string>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoresBrands", requestBody, headers);
+
+            if (searchResults.Status == StaticValues.Success && searchResults.Data?.Count > 0)
+            {
+                return new GenericResponse<List<string>>
+                {
+                    Status = StaticValues.Success,
+                    Data = searchResults.Data,
+                };
+            }
+            return new GenericResponse<List<string>>
+            {
+                Status = StaticValues.Error,
+                Data = searchResults.Data,
+                Errors = new List<string> { "No brands found for the given store." }
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
     }
 }

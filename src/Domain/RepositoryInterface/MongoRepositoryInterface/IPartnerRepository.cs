@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
+using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 
@@ -24,4 +25,7 @@ public interface IPartnerRepository
     Task<bool> AddFeaturedProductList(List<AddFeaturedProductModel> products);
     Task<bool> SaveProductsRank(int clientApiId, int userId, List<FeaturedProductsBase> products);
     Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds, List<int> disabledStores = null);
+    Task<OfferType> GetOfferType(int clientApiId, ObjectId offerTypeId);
+    Task<bool> AddOfferType(OfferTypeModel model);
+    Task<List<OfferTypeModel>> GetOfferTypes(int clientApiId);
 }

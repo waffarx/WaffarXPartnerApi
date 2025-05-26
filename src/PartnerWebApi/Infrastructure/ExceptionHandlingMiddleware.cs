@@ -20,9 +20,6 @@ public class ExceptionHandlingMiddleware
 
     public async Task InvokeAsync(HttpContext context)
     {
-        // Store the original body stream
-        var originalBodyStream = context.Response.Body;
-
         // Capture the request body
         string requestBody = await GetRequestBodyAsync(context.Request);
 
@@ -44,7 +41,6 @@ public class ExceptionHandlingMiddleware
             await HandleExceptionAsync(context, ex);
         }
     }
-
     private async Task<string> GetRequestBodyAsync(HttpRequest request)
     {
         // Ensure the request body can be read multiple times
@@ -67,6 +63,20 @@ public class ExceptionHandlingMiddleware
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
+
+        // Check if response has already started
+        if (context.Response.HasStarted)
+        {
+            // Cannot modify response headers/status after response has started
+            // Log this situation and return
+            var logger = context.RequestServices.GetService<ILogger<ExceptionHandlingMiddleware>>();
+            logger?.LogWarning("Cannot handle exception - response has already started. Exception: {Exception}", exception.Message);
+            return Task.CompletedTask;
+        }
+
+        // Clear any existing response data
+        context.Response.Clear();
+
         // Your existing code...
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = exception switch

@@ -89,7 +89,7 @@ public static class ProductMappingHelper
                 Feature = model.Features,
                 SKU = model.SKU,
                 Warranty = model.Warranty,
-                Specification = model.Specification?.ToDictionary(k => k.Key, v => (object)v),
+                Specification = model.Specification?.ToDictionary(k => k.Key, v => v.Value),
                 Options = (model.options as IEnumerable<OptionDto>)?.Select(o => new OptionDto
                 {
                     Name = o.Name,

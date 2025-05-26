@@ -8,6 +8,7 @@ using System.Linq.Expressions;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 using WaffarXPartnerApi.Domain.Models.PartnerMongoModels.FeaturedProducts;
 using MongoDB.Bson.Serialization;
+using System.Linq;
 
 namespace WaffarXPartnerApi.Infrastructure.RepositoryImplementation.MongoRepository;
 public class PartnerRepository : IPartnerRepository
@@ -18,13 +19,17 @@ public class PartnerRepository : IPartnerRepository
     private readonly IMongoCollection<OfferSetting> _offerSettingsCollection;
     private readonly IMongoCollection<OfferLookUp> _offerLookupsCollection;
     private readonly IMongoCollection<StoreLookUp> _storeLookUpCollection;
+    private readonly IMongoCollection<OfferType> _offertypesCollection;
     private readonly IMongoCollection<StoreSearchSettingAudit> _storeSearchSettingAuditCollection;
-    public PartnerRepository(IMongoDatabase database, IMongoCollection<OfferLookUp> offerLookupsCollection, IMongoCollection<StoreLookUp> storeLookUpCollection, IMongoCollection<StoreSearchSettingAudit> storeSearchSettingAuditCollection)
+    public PartnerRepository(IMongoDatabase database, IMongoCollection<OfferLookUp> offerLookupsCollection,
+        IMongoCollection<StoreLookUp> storeLookUpCollection, 
+        IMongoCollection<StoreSearchSettingAudit> storeSearchSettingAuditCollection)
     {
         _featuredProductCollection = database.GetCollection<FeaturedProductSetting>("FeaturedProductSetting");
         _storeSearchSettingsCollection = database.GetCollection<StoreSearchSetting>("StoreSearchSetting");
         _featuredProductSettingAuditCollection = database.GetCollection<FeaturedProductSettingAudit>("FeaturedProductSettingAudit");
         _offerSettingsCollection = database.GetCollection<OfferSetting>("OfferSetting");
+        _offertypesCollection = database.GetCollection<OfferType>("OfferTypes");
         _offerLookupsCollection = offerLookupsCollection;
         _storeLookUpCollection = storeLookUpCollection;
         _storeSearchSettingAuditCollection = storeSearchSettingAuditCollection;
@@ -40,6 +45,7 @@ public class PartnerRepository : IPartnerRepository
                 {
                     ClientApiId = model.ClientApiId,
                     OfferLookUpId = new ObjectId(model.OfferLookUpId),
+                    OfferTypeId = new ObjectId(model.OfferTypeId),
                     StartDate = model.StartDate,
                     EndDate = model.EndDate,
                     IsProductLevel = model.IsProductLevel,
@@ -58,6 +64,7 @@ public class PartnerRepository : IPartnerRepository
                 // Create a base update definition
                 var updateDefinition = Builders<OfferSetting>.Update
                     .Set(s => s.OfferLookUpId, new ObjectId(model.OfferLookUpId))
+                    .Set(s => s.OfferTypeId, new ObjectId(model.OfferTypeId))
                     .Set(s => s.StartDate, model.StartDate)
                     .Set(s => s.EndDate, model.EndDate)
                     .Set(s => s.IsProductLevel, model.IsProductLevel)
@@ -154,6 +161,20 @@ public class PartnerRepository : IPartnerRepository
         }
     }
 
+    public async Task<OfferType> GetOfferType(int clientApiId, ObjectId offerTypeId)
+    {
+        try
+        {
+            var filter = Builders<OfferType>.Filter.Eq(s => s.ClientApiId, clientApiId) &
+                         Builders<OfferType>.Filter.Eq(s => s.Id, offerTypeId);
+            return await _offertypesCollection.Find(filter).FirstOrDefaultAsync();
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
     public async Task<List<int>> GetWhiteListStores(int apiClientId, List<int> disabledStores)
     {
         try
@@ -218,12 +239,19 @@ public class PartnerRepository : IPartnerRepository
                 return new List<OfferSettingListingModel>();
             }
 
+            var offerLookupIds = offerSettings.Select(x => x.OfferLookUpId).Distinct().ToList();
+            var offerLookups = await _offerLookupsCollection.Find(l => offerLookupIds.Contains(l.Id)).ToListAsync();
+
+            var offerTypeIds = offerSettings.Select(x => x.OfferTypeId).Distinct().ToList();
+            var offerTypes = await _offertypesCollection.Find(l => offerTypeIds.Contains(l.Id)).ToListAsync();
+
             var result = new List<OfferSettingListingModel>();
 
             foreach (var offerSetting in offerSettings)
             {
                 // Fetch the associated OfferLookUp  
-                var offerLookup = await _offerLookupsCollection.Find(l => l.Id == offerSetting.OfferLookUpId).FirstOrDefaultAsync();
+                var offerLookup = offerLookups.Where(l => l.Id == offerSetting.OfferLookUpId).FirstOrDefault();
+                var offerType = offerTypes.Where(l => l.Id == offerSetting.OfferTypeId).FirstOrDefault();
 
                 result.Add(new OfferSettingListingModel
                 {
@@ -233,6 +261,7 @@ public class PartnerRepository : IPartnerRepository
                     EndDate = offerSetting.EndDate,
                     IsProductLevel = offerSetting.IsProductLevel,
                     IsStoreLevel = offerSetting.IsStoreLevel,
+                    OfferTypeId = offerSetting.OfferTypeId.ToString(),
                 });
             }
             return result;
@@ -288,6 +317,8 @@ public class PartnerRepository : IPartnerRepository
                     ClientApiId = model.ClientApiId,
                     NameAr = model.NameAr,
                     NameEn = model.NameEn,
+                    DescriptionEn = model.DescriptionEn,
+                    DescriptionAr = model.DescriptionAr,
                     CreatedAt = DateTime.UtcNow,
                     CreatedBy = model.UserId,
                     UniqueKey = model.NameEn.ToUpper() + model.NameAr.ToUpper(),
@@ -301,6 +332,8 @@ public class PartnerRepository : IPartnerRepository
                 var update = Builders<OfferLookUp>.Update
                     .Set(s => s.NameAr, model.NameAr)
                     .Set(s => s.NameEn, model.NameEn)
+                    .Set(s => s.DescriptionAr, model.DescriptionAr)
+                    .Set(s => s.DescriptionEn, model.DescriptionEn)
                     .Set(s => s.UpdatedBy, model.UserId);
                 await _offerLookupsCollection.UpdateOneAsync(filter, update);
             }
@@ -330,6 +363,8 @@ public class PartnerRepository : IPartnerRepository
                     Id = offer.Id.ToString(),
                     NameEn = offer.NameEn,
                     NameAr = offer.NameAr,
+                    DescriptionEn = offer.DescriptionEn,   
+                    DescriptionAr = offer.DescriptionAr,
                 });
             }
             return response;
@@ -629,7 +664,7 @@ public class PartnerRepository : IPartnerRepository
         }
     }
 
-public async Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds, List<int> disabledStores = null)
+    public async Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds, List<int> disabledStores = null)
     {
         List<DetailedStoreModel> storeList = new List<DetailedStoreModel>();
         try
@@ -661,6 +696,68 @@ public async Task<List<DetailedStoreModel>> GetStoresDetails(List<int> storeIds,
                 }
             }
             return storeList;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<bool> AddOfferType(OfferTypeModel model)
+    {
+        try
+        {
+            if (model.Id == null)
+            {
+                await _offertypesCollection.InsertOneAsync(new OfferType
+                {
+                    ClientApiId = model.ClientApiId,
+                    NameAr = model.NameAr,
+                    NameEn = model.NameEn,
+                    CreatedAt = DateTime.UtcNow,
+                    CreatedBy = model.UserId,
+                });
+            }
+            else
+            {
+                var filter = Builders<OfferType>.Filter.Eq(s => s.ClientApiId, model.ClientApiId) &
+                             Builders<OfferType>.Filter.Eq(s => s.Id, new ObjectId(model.Id));
+
+                var update = Builders<OfferType>.Update
+                    .Set(s => s.NameAr, model.NameAr)
+                    .Set(s => s.NameEn, model.NameEn)
+                    .Set(s => s.UpdatedBy, model.UserId);
+                await _offertypesCollection.UpdateOneAsync(filter, update);
+            }
+            return true;
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
+
+    public async Task<List<OfferTypeModel>> GetOfferTypes(int clientApiId)
+    {
+        try
+        {
+            var filter = Builders<OfferType>.Filter.Eq(s => s.ClientApiId, clientApiId);
+            var offerTypes = await _offertypesCollection.Find(filter).ToListAsync();
+            if (offerTypes == null || !offerTypes.Any())
+            {
+                return new List<OfferTypeModel>();
+            }
+            var response = new List<OfferTypeModel>();
+            foreach (var type in offerTypes)
+            {
+                response.Add(new OfferTypeModel
+                {
+                    Id = type.Id.ToString(),
+                    NameEn = type.NameEn,
+                    NameAr = type.NameAr
+                });
+            }
+            return response;
         }
         catch (Exception)
         {

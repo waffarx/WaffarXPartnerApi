@@ -50,7 +50,6 @@ public class StoreSettingsController : ControllerBase
 
     [HttpGet("getallstore")]
     [RequiresPermission(AdminPageConstants.WhitelistedStores, AdminActionConstants.AddUpdateWhitelistStores)]
-
     public async Task<IActionResult> GetStoreLookUp()
     {
         var response = await _storeSettingService.GetStoreLookUp();
@@ -58,4 +57,6 @@ public class StoreSettingsController : ControllerBase
         return Ok(response);
 
     }
+
+
 }

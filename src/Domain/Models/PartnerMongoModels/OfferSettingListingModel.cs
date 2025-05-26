@@ -7,4 +7,5 @@ public class OfferSettingListingModel
     public DateTime EndDate { get; set; }
     public bool IsProductLevel { get; set; }
     public bool IsStoreLevel { get; set; }
+    public string OfferTypeId { get; set; }
 }
