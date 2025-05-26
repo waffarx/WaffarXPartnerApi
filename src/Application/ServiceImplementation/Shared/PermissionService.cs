@@ -26,7 +26,7 @@ public class PermissionService : JWTUserBaseService, IPermissionService
             return true;
 
         // Find the page and action by name
-        var page = await _pageRepository.GetPageAsync(pageName,ClientApiId);
+        var page = await _pageRepository.GetPageAsync(pageName, ClientApiId);
         if (page == null)
             return false;
 

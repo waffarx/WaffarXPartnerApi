@@ -15,4 +15,5 @@ public static class AdminPageConstants
     public const string Members = "Members";
     public const string AddMember = "Add member";
     public const string RankStore = "Rank Store";
+    public const string OffersTypes = "Offers types";
 }

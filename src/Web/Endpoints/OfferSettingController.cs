@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferType;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Domain.Constants;
 using WaffarXPartnerApi.Domain.Enums;
@@ -97,6 +98,30 @@ public class OfferSettingController : ControllerBase
     public async Task<IActionResult> GetOffersLookup()
     {
         var response = await _offerSettingService.GetOffersLookup();
+        return Ok(response);
+    }
+   
+    [HttpPost("addtype")]
+    [RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.CreateOfferType)]
+    public async Task<IActionResult> AddOfferType(OfferTypeRequestDto model)
+    {
+        var response = await _offerSettingService.AddOrUpdateOfferType(model);
+        return Ok(response);
+    }
+
+    [HttpPost("updatetype")]
+    [RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.UpdateOfferType)]
+    public async Task<IActionResult> UpdateOfferType(OfferTypeRequestDto model)
+    {
+        var response = await _offerSettingService.AddOrUpdateOfferType(model);
+        return Ok(response);
+    }
+   
+    [HttpGet("getoffertypes")]
+    [RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.ListOfferTypes)]
+    public async Task<IActionResult> GetOffersTypes()
+    {
+        var response = await _offerSettingService.GetOfferTypes();
         return Ok(response);
     }
 }

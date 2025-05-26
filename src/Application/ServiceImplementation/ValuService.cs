@@ -5,6 +5,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedByStoreRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetFeaturedProductRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetProductsOffersRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoreBrands;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
@@ -189,7 +190,9 @@ public class ValuService : BaseService, IValuService
             };
         }
         catch (Exception)
-        { throw; }
+        { 
+            throw; 
+        }
 
     }
 
@@ -395,11 +398,12 @@ public class ValuService : BaseService, IValuService
 
             filterModel = new SearchFilterModel
             {
-                Brands = "",
                 Stores = storeIds,
                 MinPrice = storeProductSearch?.MinPrice,
                 MaxPrice = storeProductSearch?.MaxPrice,
                 Category = storeProductSearch?.Category,
+                Brands = storeProductSearch?.Brand ?? "",
+                
             };
 
             ProductSearchDto requestBody = new ProductSearchDto
@@ -409,7 +413,8 @@ public class ValuService : BaseService, IValuService
                 PageNumber = storeProductSearch.PageNumber,
                 ItemCount = storeProductSearch.PageSize,
                 SearchText = "",
-                Filter = filterModel
+                Filter = filterModel,
+                SortByPriceDsc = storeProductSearch.SortByPriceDsc,
             };
 
             // Make the POST request using our generic HTTP service
@@ -657,6 +662,108 @@ public class ValuService : BaseService, IValuService
                 Data = new List<BaseProductSearchResultDto>(),
                 Status = StaticValues.Error,
                 TotalCount = 0,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    public async Task<GenericResponseWithCount<List<OfferStoresResponseDto>>> GetStoresByActiveOffers(GetProductsByOffersDto model)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            GetProductsByOffersRequestDto requestBody = new GetProductsByOffersRequestDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                Count = model.PageSize,
+                PageNumber = model.PageNumber,
+
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<OfferStoresResponseDto>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoresByOffers",
+                requestBody,
+                headers);
+            if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+            {
+                List<OfferStoresResponseDto> offers = new List<OfferStoresResponseDto>();
+                foreach (var item in searchResults.Data)
+                {
+                    offers.Add(new OfferStoresResponseDto
+                    {
+                        Id = item.Id.ToString(),
+                        Name = item.Name,
+                        Description = item.Description,
+                        Stores = item.Stores.Select(s => new StoreResponseDto
+                        {
+                            Id = s.Id,
+                            Logo = s.Logo,
+                            LogoPng = s.LogoPng,
+                            Name = s.Name,
+                            ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + s.Id,
+                            ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + s.Id
+                        }).ToList(),
+                    });
+
+                }
+                return new GenericResponseWithCount<List<OfferStoresResponseDto>>
+                {
+                    Status = StaticValues.Success,
+                    Data = offers,
+                    TotalCount = searchResults.TotalCount,
+                };
+            }
+            return new GenericResponseWithCount<List<OfferStoresResponseDto>>
+            {
+                Data = new List<OfferStoresResponseDto>(),
+                Status = StaticValues.Error,
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    public async Task<GenericResponse<List<string>>> SearchBrandsByStore(GetStoreBrandsDto model)
+    {
+        try
+        {
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            GetStoreBrandsRequestDto requestBody = new GetStoreBrandsRequestDto
+            {
+                ClientApiId = ClientApiId,
+                IsEnglish = IsEnglish,
+                SearchText = model.SearchText, 
+                StoreId = new Guid(model.StoreId)
+            };
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<string>>>(
+                AppSettings.ExternalApis.ValuUrl + "GetStoresBrands", requestBody,headers);
+
+            if (searchResults.Status == StaticValues.Success && searchResults.Data?.Count > 0)
+            {
+                return new GenericResponse<List<string>>
+                {
+                    Status = StaticValues.Success,
+                    Data = searchResults.Data,
+                };
+            }
+            return new GenericResponse<List<string>>
+            {
+                Status = StaticValues.Error,
+                Data = searchResults.Data,
+                Errors = new List<string> { "No brands found for the given store." }    
             };
         }
         catch (Exception)

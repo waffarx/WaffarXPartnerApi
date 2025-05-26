@@ -51,7 +51,7 @@ public class DetailedProductSearchResultDto : BaseProductSearchResultDto
     public string Description { get; set; }
     public string SKU { get; set; }
     public string Warranty { get; set; }
-    public Dictionary<string, object> Specification { get; set; }
+    public Dictionary<string, string> Specification { get; set; }
     public FeatureDTO Feature { get; set; }
     public List<PriceVariantDto> PriceVariants { get; set; }
     public List<OptionDto> Options { get; set; }

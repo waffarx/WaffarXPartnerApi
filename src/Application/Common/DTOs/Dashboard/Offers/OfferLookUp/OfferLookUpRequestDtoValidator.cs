@@ -13,5 +13,8 @@ public class OfferLookUpRequestDtoValidator :AbstractValidator<OfferLookUpReques
             .WithMessage("Name in English is required.")
             .MinimumLength(2)
             .WithMessage("Name in English must at least 2 characters.");
+
+
+      
     }
 }

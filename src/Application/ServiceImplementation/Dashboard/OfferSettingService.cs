@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferLookUp;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferType;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
@@ -24,12 +26,16 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
 
     private readonly IApiClientRepository _apiClientRepository;
     private readonly IPartnerRepository _partnerRepository;
+    private readonly IMapper _mapper;
 
-    public OfferSettingService(IHttpContextAccessor httpContextAccessor, IHttpService httpService, IApiClientRepository apiClientRepository, IPartnerRepository partnerRepository) : base(httpContextAccessor)
+    public OfferSettingService(IHttpContextAccessor httpContextAccessor, IHttpService httpService
+        , IApiClientRepository apiClientRepository, IPartnerRepository partnerRepository
+        , IMapper mapper) : base(httpContextAccessor)
     {
         _httpService = httpService;
         _apiClientRepository = apiClientRepository;
         _partnerRepository = partnerRepository;
+        _mapper = mapper;   
     }
 
     #region Offer Setting
@@ -50,6 +56,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 Id = model.Id,
                 ProductIds = model.ProductIds,
                 StoreIds = storesList,
+                OfferTypeId = model.OfferTypeId
             };
             var result = await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
             return new GenericResponse<bool>
@@ -119,12 +126,15 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                     Message = StaticValues.Success
                 };
             }
+            var offerType = await _partnerRepository.GetOfferType(ClientApiId, offerSetting.OfferTypeId);
             OfferDetailResponseDto response = new OfferDetailResponseDto();
             response.StartDate = offerSetting.StartDate;
             response.EndDate = offerSetting.EndDate;
             response.IsProductLevel = offerSetting.IsProductLevel;
             response.IsStoreLevel = offerSetting.IsStoreLevel;
             response.OfferLookupId = offerSetting.OfferLookUpId.ToString();
+            response.OfferTypeId = offerSetting.OfferTypeId.ToString();
+            response.OfferTypeName = offerType?.NameEn ?? "";
             if (offerSetting.IsProductLevel)
             {
                 var headers = new Dictionary<string, string>
@@ -198,6 +208,8 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 NameAr = model.NameAr,
                 NameEn = model.NameEn,
                 UserId = UserIdInt,
+                DescriptionAr = model.DescriptionAr,
+                DescriptionEn = model.DescriptionEn,
 
             };
             await _partnerRepository.AddOfferLookUp(offerLookUp);
@@ -213,7 +225,6 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
         }
 
     }
-
     public async Task<GenericResponse<List<OfferLookUpResponsetDto>>> GetOffersLookup()
     {
         try
@@ -227,6 +238,8 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                     Id = offer.Id,
                     NameEn = offer.NameEn,
                     NameAr = offer.NameAr,
+                    DescriptionAr = offer.DescriptionAr,
+                    DescriptionEn = offer.DescriptionEn,    
                 });
             }
             return new GenericResponse<List<OfferLookUpResponsetDto>>
@@ -242,6 +255,57 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
         }
     }
 
+    #endregion
+
+    #region Offer Types
+
+    public async Task<GenericResponse<bool>> AddOrUpdateOfferType(OfferTypeRequestDto model)
+    {
+        try
+        {
+            OfferTypeModel offerType = new OfferTypeModel
+            {
+                ClientApiId = ClientApiId,
+                Id = model.Id,
+                NameAr = model.NameAr,
+                NameEn = model.NameEn,
+                UserId = UserIdInt,
+            };
+            await _partnerRepository.AddOfferType(offerType);
+            return new GenericResponse<bool>
+            {
+                Data = true,
+                Status = StaticValues.Success
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+
+    }
+    public async Task<GenericResponse<List<OfferTypeResponsetDto>>> GetOfferTypes()
+    {
+        List<OfferTypeResponsetDto> response = new List<OfferTypeResponsetDto>();
+        try
+        {
+            var offerTypes = await _partnerRepository.GetOfferTypes(ClientApiId);
+            if (offerTypes?.Count > 0)
+            {
+                response = _mapper.Map<List<OfferTypeResponsetDto>>(offerTypes);
+            }
+            return new GenericResponse<List<OfferTypeResponsetDto>>
+            {
+                Data = response,
+                Status = StaticValues.Success
+            };
+
+        }
+        catch (Exception)
+        {
+            throw;
+        }
+    }
     #endregion
 
 }

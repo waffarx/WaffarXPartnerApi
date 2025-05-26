@@ -11,4 +11,5 @@ public class OfferSettingModel
     public List<string> ProductIds { get; set; }
     public int ClientApiId { get; set; }
     public int UserId { get; set; }
+    public string OfferTypeId { get; set; }
 }

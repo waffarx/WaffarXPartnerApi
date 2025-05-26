@@ -8,6 +8,7 @@ public static class AdminActionConstants
     public const string UpdateFeaturedProduct = "Update featured product";
     public const string RankFeaturedProducts = "Rank featured products";
     public const string SearchProductWithStoreAndTerm = "Search product with store name & search term";
+    public const string SearchStoreBrands = "Search Store Brands";
 
     // Offers
     public const string CreateOffer = "Create offer";
@@ -16,6 +17,10 @@ public static class AdminActionConstants
     public const string ListOffers = "List offers";
     public const string AssignOfferToProductsOrStores = "Assign offer to products/stores";
     public const string UpdateOfferProductsOrStores = "Update offer products/offer stores";
+
+    public const string CreateOfferType = "Create offer type";
+    public const string UpdateOfferType = "Update offer type";
+    public const string ListOfferTypes = "List offers types"; 
 
     // Members
     public const string AddMember = "Add member";

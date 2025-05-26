@@ -8,6 +8,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Page;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.CreateTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Team.UpdateTeam;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Report;
+using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferType;
 
 namespace WaffarXPartnerApi.Application.Common.Mappings;
 public class MappingProfile : Profile
@@ -27,6 +28,7 @@ public class MappingProfile : Profile
         CreateMap<UserSearchResultDto ,UserSearchModel>().ReverseMap();
         CreateMap<UserDetailModel, UserDetailDto>();
         CreateMap<GetParterOrderStatisticsModel, GetParterOrderStatisticsDto>();
+        CreateMap<OfferTypeModel, OfferTypeResponsetDto>();
 
     }
 }

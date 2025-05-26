@@ -4,6 +4,7 @@ public class OfferSettingRequestDto
 {
     public string Id { get; set; }
     public string OfferLookUpId { get; set; }
+    public string OfferTypeId { get; set; }
     public DateTime StartDate { get; set; }
     public DateTime EndDate { get; set; }
     public bool IsProductLevel { get; set; }
