@@ -54,6 +54,8 @@ public class PartnerRepository : IPartnerRepository
                     CreatedBy = model.UserId,
                     StoreIds = model.IsStoreLevel ? model.StoreIds : new List<int>(),
                     ProductIds = model.IsProductLevel ? model.ProductIds?.Select(id => new ObjectId(id)).ToList() : new List<ObjectId>(),
+                    IsFixed = model.IsFixed,   
+                    Amount = model.Amount
                 });
             }
             else
@@ -69,7 +71,9 @@ public class PartnerRepository : IPartnerRepository
                     .Set(s => s.EndDate, model.EndDate)
                     .Set(s => s.IsProductLevel, model.IsProductLevel)
                     .Set(s => s.IsStoreLevel, model.IsStoreLevel)
-                    .Set(s => s.UpdatedBy, model.UserId);
+                    .Set(s => s.UpdatedBy, model.UserId)
+                    .Set(s => s.IsFixed, model.IsFixed)
+                    .Set(s => s.Amount, model.Amount);
 
                 // Handle product level update
                 if (model.IsProductLevel)
@@ -262,6 +266,8 @@ public class PartnerRepository : IPartnerRepository
                     IsProductLevel = offerSetting.IsProductLevel,
                     IsStoreLevel = offerSetting.IsStoreLevel,
                     OfferTypeId = offerSetting.OfferTypeId.ToString(),
+                    IsFixed = offerSetting.IsFixed,
+                    Amount = offerSetting.Amount,   
                 });
             }
             return result;
@@ -754,7 +760,8 @@ public class PartnerRepository : IPartnerRepository
                 {
                     Id = type.Id.ToString(),
                     NameEn = type.NameEn,
-                    NameAr = type.NameAr
+                    NameAr = type.NameAr,
+                    IsReward = type.IsReward 
                 });
             }
             return response;

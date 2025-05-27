@@ -89,6 +89,7 @@ public class OfferSettingController : ControllerBase
         var response = await _offerSettingService.AddOrUpdateOfferLookUp(model);
         return Ok(response);
     }
+    
     /// <summary>
     /// Retrieves all offer lookups for the current client.
     /// </summary>
@@ -101,13 +102,13 @@ public class OfferSettingController : ControllerBase
         return Ok(response);
     }
    
-    [HttpPost("addtype")]
-    [RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.CreateOfferType)]
-    public async Task<IActionResult> AddOfferType(OfferTypeRequestDto model)
-    {
-        var response = await _offerSettingService.AddOrUpdateOfferType(model);
-        return Ok(response);
-    }
+    //[HttpPost("addtype")]
+    //[RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.CreateOfferType)]
+    //public async Task<IActionResult> AddOfferType(OfferTypeRequestDto model)
+    //{
+    //    var response = await _offerSettingService.AddOrUpdateOfferType(model);
+    //    return Ok(response);
+    //}
 
     [HttpPost("updatetype")]
     [RequiresPermission(AdminPageConstants.OffersTypes, AdminActionConstants.UpdateOfferType)]

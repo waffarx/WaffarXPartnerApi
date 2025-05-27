@@ -13,6 +13,7 @@ public class OfferDetailResponseDto
     public DateTime EndDate { get; set; }
     public List<StoreDto> Stores { get; set; }
     public List<BaseProductSearchResultDto> Products { get; set; }
-
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 
 }
