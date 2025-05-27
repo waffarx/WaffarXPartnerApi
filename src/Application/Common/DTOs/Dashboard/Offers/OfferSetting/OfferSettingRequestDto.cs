@@ -11,4 +11,6 @@ public class OfferSettingRequestDto
     public bool IsStoreLevel { get; set; }
     public List<string> StoreIds { get; set; }
     public List<string> ProductIds { get; set; }
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 }

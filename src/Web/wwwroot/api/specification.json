@@ -257,44 +257,6 @@
         ]
       }
     },
-    "/api/OfferSetting/addtype": {
-      "post": {
-        "tags": [
-          "OfferSetting"
-        ],
-        "operationId": "OfferSetting_AddOfferType",
-        "requestBody": {
-          "x-name": "model",
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/OfferTypeRequestDto"
-              }
-            }
-          },
-          "required": true,
-          "x-position": 1
-        },
-        "responses": {
-          "200": {
-            "description": "",
-            "content": {
-              "application/octet-stream": {
-                "schema": {
-                  "type": "string",
-                  "format": "binary"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "JWT": []
-          }
-        ]
-      }
-    },
     "/api/OfferSetting/updatetype": {
       "post": {
         "tags": [
@@ -1414,6 +1376,13 @@
             "items": {
               "type": "string"
             }
+          },
+          "isFixed": {
+            "type": "boolean"
+          },
+          "amount": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },

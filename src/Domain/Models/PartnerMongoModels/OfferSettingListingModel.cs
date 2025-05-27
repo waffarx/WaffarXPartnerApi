@@ -8,4 +8,6 @@ public class OfferSettingListingModel
     public bool IsProductLevel { get; set; }
     public bool IsStoreLevel { get; set; }
     public string OfferTypeId { get; set; }
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 }

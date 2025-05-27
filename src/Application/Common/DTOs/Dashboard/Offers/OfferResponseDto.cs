@@ -10,4 +10,6 @@ public class OfferResponseDto
     public DateTime EndDate { get; set; }
     public bool IsProductLevel { get; set; }
     public bool IsStoreLevel { get; set; }
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 }

@@ -56,13 +56,15 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 Id = model.Id,
                 ProductIds = model.ProductIds,
                 StoreIds = storesList,
-                OfferTypeId = model.OfferTypeId
+                OfferTypeId = model.OfferTypeId,
+                IsFixed = model.IsFixed,
+                Amount = model.Amount   
             };
             var result = await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
             return new GenericResponse<bool>
             {
                 Data = true,
-                Message = StaticValues.Success
+                Status = StaticValues.Success
             };
         }
         catch (Exception)
@@ -81,7 +83,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 return new GenericResponse<List<OfferResponseDto>>
                 {
                     Data = new List<OfferResponseDto>(),
-                    Message = StaticValues.Success
+                    Status = StaticValues.Success
                 };
             }
             List<OfferResponseDto> response = new List<OfferResponseDto>();
@@ -95,13 +97,15 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                     OfferId = item.OfferId,
                     OfferName = item.OfferName,
                     StartDate = item.StartDate,
+                    Amount = item.Amount,
+                    IsFixed = item.IsFixed
                 });
 
             }
             return new GenericResponse<List<OfferResponseDto>>
             {
                 Data = response,
-                Message = StaticValues.Success
+                Status = StaticValues.Success
             };
         }
         catch (Exception)
@@ -123,7 +127,7 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                         Products = new List<BaseProductSearchResultDto>(),
                         Stores = new List<StoreDto>()
                     },
-                    Message = StaticValues.Success
+                    Status = StaticValues.Success
                 };
             }
             var offerType = await _partnerRepository.GetOfferType(ClientApiId, offerSetting.OfferTypeId);
@@ -135,6 +139,9 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
             response.OfferLookupId = offerSetting.OfferLookUpId.ToString();
             response.OfferTypeId = offerSetting.OfferTypeId.ToString();
             response.OfferTypeName = offerType?.NameEn ?? "";
+            response.Amount = offerSetting.Amount;
+            response.IsFixed = offerSetting.IsFixed;
+
             if (offerSetting.IsProductLevel)
             {
                 var headers = new Dictionary<string, string>

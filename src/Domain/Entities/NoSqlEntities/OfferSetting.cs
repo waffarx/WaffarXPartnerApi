@@ -31,4 +31,6 @@ public class OfferSetting
 
     public List<int> StoreIds { get; set; }
     public ObjectId OfferTypeId { get; set; }
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 }

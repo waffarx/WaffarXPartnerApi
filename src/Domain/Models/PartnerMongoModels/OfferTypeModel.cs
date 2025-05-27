@@ -6,4 +6,5 @@ public class OfferTypeModel
     public string NameEn { get; set; }
     public int ClientApiId { get; set; }
     public int UserId { get; set; }
+    public bool IsReward { get; set; }
 }

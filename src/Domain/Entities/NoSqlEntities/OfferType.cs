@@ -2,6 +2,8 @@
 using MongoDB.Bson;
 
 namespace WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
+
+[BsonIgnoreExtraElements]
 public class OfferType
 {
     [BsonId]
@@ -12,4 +14,5 @@ public class OfferType
     public int CreatedBy { get; set; }
     public int UpdatedBy { get; set; }
     public DateTime CreatedAt { get; set; }
+    public bool IsReward { get; set; }
 }

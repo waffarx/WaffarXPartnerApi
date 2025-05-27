@@ -12,4 +12,6 @@ public class OfferSettingModel
     public int ClientApiId { get; set; }
     public int UserId { get; set; }
     public string OfferTypeId { get; set; }
+    public bool IsFixed { get; set; }
+    public int Amount { get; set; }
 }
