@@ -19,8 +19,10 @@ public class OfferSetting
 
     public ObjectId OfferLookUpId { get; set; }
 
+   // [BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime StartDate { get; set; }
 
+    //[BsonDateTimeOptions(Kind = DateTimeKind.Local)]
     public DateTime EndDate { get; set; }
 
     public bool IsProductLevel { get; set; }
@@ -30,6 +32,7 @@ public class OfferSetting
     public List<ObjectId> ProductIds { get; set; }
 
     public List<int> StoreIds { get; set; }
+    public List<int> ProductStoreIds { get; set; }
     public ObjectId OfferTypeId { get; set; }
     public bool IsFixed { get; set; }
     public int Amount { get; set; }

@@ -55,7 +55,8 @@ public class PartnerRepository : IPartnerRepository
                     StoreIds = model.IsStoreLevel ? model.StoreIds : new List<int>(),
                     ProductIds = model.IsProductLevel ? model.ProductIds?.Select(id => new ObjectId(id)).ToList() : new List<ObjectId>(),
                     IsFixed = model.IsFixed,   
-                    Amount = model.Amount
+                    Amount = model.Amount,
+                    ProductStoreIds = model.IsProductLevel ? model.ProductStoreIds : new List<int>()
                 });
             }
             else
@@ -73,21 +74,24 @@ public class PartnerRepository : IPartnerRepository
                     .Set(s => s.IsStoreLevel, model.IsStoreLevel)
                     .Set(s => s.UpdatedBy, model.UserId)
                     .Set(s => s.IsFixed, model.IsFixed)
-                    .Set(s => s.Amount, model.Amount);
+                    .Set(s => s.Amount, model.Amount)
+                    .Set(s => s.ProductStoreIds, model.ProductStoreIds);
 
                 // Handle product level update
                 if (model.IsProductLevel)
                 {
                     updateDefinition = updateDefinition
                         .Set(s => s.ProductIds, model.ProductIds?.Select(id => new ObjectId(id)).ToList())
-                        .Set(s => s.StoreIds, new List<int>());
+                        .Set(s => s.StoreIds, new List<int>())
+                        .Set(s => s.ProductStoreIds, model.ProductStoreIds);
                 }
                 // Handle store level update
                 else if (model.IsStoreLevel)
                 {
                     updateDefinition = updateDefinition
                         .Set(s => s.StoreIds, model.StoreIds)
-                        .Set(s => s.ProductIds, new List<ObjectId>());
+                        .Set(s => s.ProductIds, new List<ObjectId>())
+                        .Set(s => s.ProductStoreIds, new List<int>());
                 }
 
                 // Execute the update with the complete update definition
@@ -771,4 +775,5 @@ public class PartnerRepository : IPartnerRepository
             throw;
         }
     }
+
 }

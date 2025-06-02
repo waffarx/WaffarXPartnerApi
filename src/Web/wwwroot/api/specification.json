@@ -1748,6 +1748,9 @@
                 "items": {
                   "type": "string"
                 }
+              },
+              "discounted": {
+                "type": "boolean"
               }
             }
           }

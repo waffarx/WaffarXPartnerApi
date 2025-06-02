@@ -26,7 +26,7 @@ public static class RequestDataHelper
             partnerUserIdentifier = userIdentifier,
             subId1 = shoppingTripIdentifier,   
             subId2 = "",
-            variant = variant   
+            variant = variant
         };
     }
 }

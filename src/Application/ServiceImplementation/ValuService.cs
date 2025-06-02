@@ -63,9 +63,8 @@ public class ValuService : BaseService, IValuService
             };
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
-                AppSettings.ExternalApis.ValuUrl + Url,
-                requestObj,
-                headers);
+                AppSettings.ExternalApis.ValuUrl + Url, requestObj, headers);
+
             if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
             {
                 List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
@@ -152,9 +151,7 @@ public class ValuService : BaseService, IValuService
 
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponse<StoreDetailModel>>(
-                AppSettings.ExternalApis.ValuUrl + "GetStoreDetails",
-                store,
-                headers);
+                AppSettings.ExternalApis.ValuUrl + "GetStoreDetails", store, headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
             {
                 List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
@@ -251,7 +248,6 @@ public class ValuService : BaseService, IValuService
         }
 
     }
-
     public async Task<GenericResponse<ProductSearchResultWithFiltersDto>> SearchProduct(ProductSearchRequestDto productSearch)
     {
         try
@@ -278,9 +274,9 @@ public class ValuService : BaseService, IValuService
                     Stores = storeIds,
                     MinPrice = productSearch?.Filter?.MinPrice,
                     MaxPrice = productSearch?.Filter?.MaxPrice,
-                    OfferId = productSearch?.Filter?.OfferId
+                    OfferId = productSearch?.Filter?.OfferId,
+                    Discounted = productSearch?.Filter?.Discounted ?? false,
                 };
-
             }
             ProductSearchDto requestBody = new ProductSearchDto
             {
@@ -292,14 +288,10 @@ public class ValuService : BaseService, IValuService
                 SearchText = productSearch.SearchText,
                 SortByPriceDsc = productSearch.SortByPriceDsc,
                 Filter = filterModel
-
             };
 
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponse<ValuSearchResponseDto>>(
-                AppSettings.ExternalApis.ValuUrl + "search",
-                requestBody,
-                headers);
+            var searchResults = await _httpService.PostAsync<GenericResponse<ValuSearchResponseDto>>(AppSettings.ExternalApis.ValuUrl + "search", requestBody, headers);
             if (searchResults.Data != null && searchResults.Data.Products.Any())
             {
                 List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
@@ -359,9 +351,8 @@ public class ValuService : BaseService, IValuService
 
             // Make the POST request using our generic HTTP service
             var searchResults = await _httpService.PostAsync<GenericResponse<ExitClickResponseDto>>(
-                AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick",
-                requestBody,
-                headers);
+                AppSettings.ExternalApis.SharedApiUrl + "ExitClick/CreateExitClick", requestBody, headers);
+
             if (searchResults != null && searchResults.Data != null && searchResults.Status == StaticValues.Success
                  && !string.IsNullOrEmpty(searchResults.Data.RedirectUrl))
             {
@@ -403,7 +394,6 @@ public class ValuService : BaseService, IValuService
                 MaxPrice = storeProductSearch?.MaxPrice,
                 Category = storeProductSearch?.Category,
                 Brands = storeProductSearch?.Brand ?? "",
-                
             };
 
             ProductSearchDto requestBody = new ProductSearchDto
@@ -638,10 +628,7 @@ public class ValuService : BaseService, IValuService
                 IsEnglish = IsEnglish
             };
             // Make the POST request using our generic HTTP service
-            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(
-                AppSettings.ExternalApis.ValuUrl + Url,
-                requestObj,
-                headers);
+            var searchResults = await _httpService.PostAsync<GenericResponseWithCount<List<ProductSearchResponseModel>>>(AppSettings.ExternalApis.ValuUrl + Url, requestObj, headers);
             if (searchResults.Status == StaticValues.Success && searchResults.Data.Any())
             {
                 List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
@@ -701,6 +688,10 @@ public class ValuService : BaseService, IValuService
                         Id = item.Id.ToString(),
                         Name = item.Name,
                         Description = item.Description,
+                        TypeName = item.TypeName,
+                        IsRewardOffer = item.IsRewardOffer,
+                        IsProductLevel = item.IsProductLevel,
+                        IsStoreLevel = item.IsStoreLevel,
                         Stores = item.Stores.Select(s => new StoreResponseDto
                         {
                             Id = s.Id,

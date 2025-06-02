@@ -8,6 +8,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferSetting;
 using WaffarXPartnerApi.Application.Common.DTOs.Dashboard.Offers.OfferType;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.SharedModels;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto;
+using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
 using WaffarXPartnerApi.Application.Helper;
@@ -41,9 +42,14 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
     #region Offer Setting
     public async Task<GenericResponse<bool>> AddOrUpdateOffer(OfferSettingRequestDto model)
     {
+        List<int> ProductStores = new List<int>();
         try
         {
             List<int> storesList =  await _partnerRepository.GetStoreIdsByStoreGuids(model.StoreIds);
+            if (model.IsProductLevel == true && model.ProductIds?.Count > 0)
+            { 
+                ProductStores = await GetStoreIdsByProducts(model.ProductIds);
+            }
             OfferSettingModel offerSettingModel = new OfferSettingModel
             {
                 ClientApiId = ClientApiId,
@@ -58,7 +64,8 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
                 StoreIds = storesList,
                 OfferTypeId = model.OfferTypeId,
                 IsFixed = model.IsFixed,
-                Amount = model.Amount   
+                Amount = model.Amount,
+                ProductStoreIds = ProductStores 
             };
             var result = await _partnerRepository.AddUpdateOfferSetting(offerSettingModel);
             return new GenericResponse<bool>
@@ -314,5 +321,27 @@ public class OfferSettingService : JWTUserBaseService, IOfferSettingService
         }
     }
     #endregion
+
+    private async Task<List<int>> GetStoreIdsByProducts(List<string> productIds)
+    {
+        var headers = new Dictionary<string, string>
+        {
+            ["Content-Type"] = "application/json"
+        };
+        GetStoreIdsByProductsDto product = new GetStoreIdsByProductsDto
+        {
+            ProductIds = productIds,
+        };
+
+        // Make the POST request using our generic HTTP service
+        var searchResults = await _httpService.PostAsync<GenericResponse<List<int>>>(
+            AppSettings.ExternalApis.ValuUrl + "GetStoresIds", product, headers);
+
+        if (searchResults.Status == StaticValues.Success && searchResults.Data != null)
+        {
+            return searchResults.Data;
+        }
+        return new List<int>();
+    }
 
 }
