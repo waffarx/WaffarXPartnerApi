@@ -1,6 +1,5 @@
 ﻿using WaffarXPartnerApi.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository;
@@ -10,7 +9,6 @@ using WaffarXPartnerApi.Application.ServiceImplementation.Shared;
 using WaffarXPartnerApi.Infrastructure.RepositoryImplementation.EntityFrameworkRepository.WaffarX;
 using WaffarXPartnerApi.Domain.RepositoryInterface.EntityFrameworkRepositoryInterface.WaffarX;
 using StackExchange.Redis;
-using Microsoft.Extensions.Logging;
 using WaffarXPartnerApi.Application.Helper;
 using WaffarXPartnerApi.Application.ServiceInterface.Dashboard;
 using WaffarXPartnerApi.Application.ServiceImplementation.Dashboard;

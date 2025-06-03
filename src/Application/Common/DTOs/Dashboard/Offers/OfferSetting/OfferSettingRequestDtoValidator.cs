@@ -5,9 +5,11 @@ public class OfferSettingRequestDtoValidator : AbstractValidator<OfferSettingReq
     {
         RuleFor(x => x.OfferLookUpId)
             .NotEmpty().WithMessage("Offer LookUp ID is required.");
+
         RuleFor(x => x.StartDate)
             .NotEmpty().WithMessage("Start Date is required.")
             .LessThan(x => x.EndDate).WithMessage("Start Date must be before End Date.");
+
         RuleFor(x => x.EndDate)
             .NotEmpty().WithMessage("End Date is required.");
 

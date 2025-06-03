@@ -33,6 +33,8 @@ public class BaseProductSearchResultDto
     public string PriceText { get; set; }
     public decimal OldPrice { get; set; }
     public string OldPriceText { get; set; }
+    public bool Discounted { get; set; }
+    public string DiscountedText { get; set; }
     public string Category { get; set; }
     public string Brand { get; set; }
     public string Currency { get; set; }
@@ -46,8 +48,7 @@ public class BaseProductSearchResultDto
 }
 public class DetailedProductSearchResultDto : BaseProductSearchResultDto
 {
-    public bool Discounted { get; set; }
-    public string DiscountedText { get; set; }
+    
     public string Description { get; set; }
     public string SKU { get; set; }
     public string Warranty { get; set; }

@@ -27,6 +27,8 @@ public static class ProductMappingHelper
                 OldPrice = model.OldPrice,
                 OldPriceText = model.OldPriceText,
                 PriceText = model.PriceText,
+                Discounted = model.Discounted,
+                DiscountedText = model.DiscountedText,
                 Store = model.Store == null ? new StoreResponseDto() :
                 new StoreResponseDto
                 {
@@ -38,7 +40,7 @@ public static class ProductMappingHelper
                     ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Store + model.Store.Id,
                 },
                 Offers = model?.Offers,
-                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id,
+                ShoppingUrl = AppSettings.ExternalApis.ExitClickBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id,
                 ShoppingUrlBase = AppSettings.ExternalApis.EClickAuthBaseUrl.Replace("{Partner}", "valu") + StaticValues.Product + model.Store.Id + "/" + model.Id
             };
             return res;
