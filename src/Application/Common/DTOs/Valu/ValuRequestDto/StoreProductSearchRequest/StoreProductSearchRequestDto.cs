@@ -8,4 +8,5 @@ public class StoreProductSearchRequestDto : FilterBase
     public int PageSize { get; set; }
     public string Category { get; set; }
     public bool SortByPriceDsc { get; set; } = true;
+    public bool Discounted { get; set; } 
 }
