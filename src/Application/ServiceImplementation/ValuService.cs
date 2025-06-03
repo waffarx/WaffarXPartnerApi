@@ -394,6 +394,7 @@ public class ValuService : BaseService, IValuService
                 MaxPrice = storeProductSearch?.MaxPrice,
                 Category = storeProductSearch?.Category,
                 Brands = storeProductSearch?.Brand ?? "",
+                Discounted = storeProductSearch?.Discounted ?? false,
             };
 
             ProductSearchDto requestBody = new ProductSearchDto
