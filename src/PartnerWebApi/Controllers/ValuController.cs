@@ -7,6 +7,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresReq
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreSearchWithFiltersRequest;
 using WaffarXPartnerApi.Application.ServiceInterface;
 
 namespace PartnerWebApi.Controllers;
@@ -106,6 +107,14 @@ public class ValuController : ControllerBase
     public async Task<IActionResult> GetBrandsByStore(GetStoreBrandsDto brandsDto)
     {
         var result = await _valuService.SearchBrandsByStore(brandsDto);
+        return Ok(result);
+    }
+
+    [HttpPost("storesearchwithfilters")]
+    [CompressResponse]
+    public async Task<IActionResult> SearchByStore(StoreSearchWithFiltersDto query)
+    {
+        var result = await _valuService.SearchByStoreWithFilter(query);
         return Ok(result);
     }
 }

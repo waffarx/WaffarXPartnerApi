@@ -10,6 +10,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresReq
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreSearchWithFiltersRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto.StoreDetails;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuRequestDto;
@@ -763,5 +764,84 @@ public class ValuService : BaseService, IValuService
             throw;
         }
 
+    }
+    public async Task<GenericResponse<StoreSearchResponseWithFiltersDto>> SearchByStoreWithFilter(StoreSearchWithFiltersDto searchByStore)
+    {
+        try
+        {
+            StoreSearchResponseWithFiltersDto response = new StoreSearchResponseWithFiltersDto();
+
+            // Set up any headers you need
+            var headers = new Dictionary<string, string>
+            {
+                ["Content-Type"] = "application/json"
+            };
+            ValuStoreSearchFilterDto filterModel = null;
+
+            List<Guid> guids = new List<Guid>() { searchByStore.StoreId };
+            List<int> storeIds = await _advertiserRepository.GetStoreIds(guids);
+
+            filterModel = new ValuStoreSearchFilterDto
+            {
+                MinPrice = searchByStore.Filter?.MinPrice,
+                MaxPrice = searchByStore.Filter?.MaxPrice,
+                Category = searchByStore.Filter?.Category,
+                Brands = searchByStore.Filter?.Brands ?? "",
+                Discounted = searchByStore.Filter?.Discounted ?? false,
+            };
+
+            ValuStoreSearchQueryDto requestBody = new ValuStoreSearchQueryDto
+            {
+                StoreId = storeIds.FirstOrDefault(),
+                ClientApiId = ClientApiId.Value,
+                IsEnglish = IsEnglish,
+                PageNumber = searchByStore.PageNumber,
+                ItemCount = searchByStore.PageSize,
+                Filter = filterModel,
+                SortByPriceDsc = searchByStore.SortByPriceDsc,
+            };
+
+            // Make the POST request using our generic HTTP service
+            var searchResults = await _httpService.PostAsync<GenericResponse<StoreSearchResultWithFiltersDto>>(
+                AppSettings.ExternalApis.ValuUrl + "SearchByStore",
+                requestBody,
+                headers);
+            if (searchResults.Data != null && searchResults.Data.Products.Any())
+            {
+                List<BaseProductSearchResultDto> products = new List<BaseProductSearchResultDto>();
+
+                foreach (var product in searchResults.Data.Products)
+                {
+                    products.Add(ProductMappingHelper.MapToBaseProduct(product));
+                }
+
+                return new GenericResponse<StoreSearchResponseWithFiltersDto>
+                {
+                    Status = StaticValues.Success,
+                    Data = new StoreSearchResponseWithFiltersDto
+                    {
+                        Products = products,
+                        Filters = new StoreSearchFilterDto
+                        {
+                            Brands = searchResults.Data.Filters?.Brands,
+                            Categories = searchResults.Data.Filters?.Categories,
+                            MinPrice = searchResults.Data.Filters?.MinPrice,
+                            MaxPrice = searchResults.Data.Filters?.MaxPrice,
+                            Offers = searchResults.Data.Filters?.Offers,
+                        }
+                    }
+                };
+
+            }
+            return new GenericResponse<StoreSearchResponseWithFiltersDto>
+            {
+                Data = new StoreSearchResponseWithFiltersDto(),
+                Status = StaticValues.Error
+            };
+        }
+        catch (Exception)
+        {
+            throw;
+        }
     }
 }
