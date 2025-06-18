@@ -6,6 +6,7 @@ using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresReq
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.GetStoresWithProductsRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.ProductSearchRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreProductSearchRequest;
+using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuRequestDto.StoreSearchWithFiltersRequest;
 using WaffarXPartnerApi.Application.Common.DTOs.Valu.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.DTOs.ValuResponseDto;
 using WaffarXPartnerApi.Application.Common.Models.SharedModels;
@@ -27,4 +28,5 @@ public interface IValuService
     Task<GenericResponseWithCount<List<BaseProductSearchResultDto>>> GetProductsByOffers(GetProductsByOffersDto offersDto);
     Task<GenericResponseWithCount<List<OfferStoresResponseDto>>> GetStoresByActiveOffers(GetProductsByOffersDto model);
     Task<GenericResponse<List<string>>> SearchBrandsByStore(GetStoreBrandsDto model);
+    Task<GenericResponse<StoreSearchResponseWithFiltersDto>> SearchByStoreWithFilter(StoreSearchWithFiltersDto searchByStore);
 }
