@@ -3,6 +3,7 @@ using MongoDB.Bson;
 using WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
 
 namespace WaffarXPartnerApi.Domain.Entities.NoSqlEnitities;
+[BsonIgnoreExtraElements]
 public class StoreSearchSetting
 {
     [BsonId]
@@ -22,3 +23,5 @@ public class StoreSearchSetting
 
     public int ClientApiId { get; set; }
 }
+
+

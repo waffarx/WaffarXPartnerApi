@@ -1,4 +1,8 @@
-﻿namespace WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace WaffarXPartnerApi.Domain.Entities.NoSqlEntities;
+
+[BsonIgnoreExtraElements]
 public class StoreSettings
 {
     public int StoreId { get; set; }
