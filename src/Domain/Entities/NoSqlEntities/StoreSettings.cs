@@ -9,5 +9,6 @@ public class StoreSettings
     public bool IsFeatured { get; set; }
     public int Rank { get; set; }
     public string BackgroundColor { get; set; }
+    public int CommissionTypeId { get; set; }
 
 }
