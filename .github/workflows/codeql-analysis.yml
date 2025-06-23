@@ -1,0 +1,32 @@
+name: "CodeQL Static Analysis"
+
+on:
+  push:
+    branches: [ main ]        # ← change to master if that’s your default
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:          # ← allows manual runs
+
+jobs:
+  analyze:
+    name: Analyze with CodeQL
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'csharp' ]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
