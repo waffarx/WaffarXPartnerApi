@@ -35,8 +35,9 @@ public class ExceptionHandlingMiddleware
             using (LogContext.PushProperty("UserAgent", context.Request.Headers["User-Agent"].ToString()))
             using (LogContext.PushProperty("RequestBody", requestBody)) // Add the request body to logs
             {
+                var sanitizedPath = context.Request.Path.ToString().Replace("\n", "").Replace("\r", "");
                 // This error will be sent to Seq
-                _logger.LogError(ex, "Unhandled exception in {EndpointPath}", context.Request.Path);
+                _logger.LogError(ex, "Unhandled exception in {EndpointPath}", sanitizedPath);
             }
             await HandleExceptionAsync(context, ex);
         }
