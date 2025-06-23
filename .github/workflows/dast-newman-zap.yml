@@ -1,3 +1,4 @@
+# .github/workflows/dast-newman-zap.yml
 name: "DAST: Newman + ZAP Proxy"
 
 on:
@@ -8,60 +9,52 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout everything
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Pull ZAP image
       - name: Pull OWASP ZAP Docker image
-        run: docker pull owasp/zap2docker-stable
+        run: docker pull zaproxy/zap2docker-stable:2.14.0
 
-      # 3) Start ZAP in daemon mode with your script
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
             -p 8080:8080 \
             -v $PWD/zap-scripts:/zap/scripts:ro \
-            owasp/zap2docker-stable \
+            zaproxy/zap2docker-stable:2.14.0 \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 4) Wait for ZAP to be ready
       - name: Wait for ZAP to start
         run: |
           for i in {1..10}; do
             curl --fail http://localhost:8080 || sleep 3
           done
 
-      # 5) Install Node.js & Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
       - name: Install Newman
         run: npm install -g newman
 
-      # 6) Run your Postman collection through the ZAP proxy
       - name: Run Postman collection via ZAP proxy
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json \
             --proxy http://127.0.0.1:8080
 
-      # 7) Run an active ZAP scan against your API
       - name: Run ZAP active scan
         run: |
-          ZAP_CID=$(docker ps --filter ancestor=owasp/zap2docker-stable -q)
+          ZAP_CID=$(docker ps --filter ancestor=zaproxy/zap2docker-stable:2.14.0 -q)
           docker exec $ZAP_CID zap-full-scan.py \
             -t https://partners.waffarx.com \
             -z "script=add-signature;type=httpsender;engine=ECMAScript;file=/zap/scripts/add-signature.js" \
             -r zap-active-report.html
 
-      # 8) Stop ZAP container
       - name: Stop ZAP
         run: docker stop zap
 
-      # 9) Upload the resulting HTML report
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
