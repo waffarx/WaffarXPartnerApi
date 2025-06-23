@@ -9,61 +9,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out everything
+      # 1) Check out your code, Postman files, and ZAP script
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2) Pull the ZAP Docker image (from GHCR, which is public)
+      # 2) Pull the official ZAP stable image from Docker Hub
       - name: Pull OWASP ZAP image
-        run: |
-          docker pull ghcr.io/zaproxy/zap2docker-stable:latest
+        run: docker pull zaproxy/zap-stable:latest
 
-      # 3) Start ZAP in the background with your script mounted
+      # 3) Start ZAP as a background daemon, mounting your script
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
             -p 8080:8080 \
             -v $PWD/zap-scripts:/zap/scripts:ro \
-            ghcr.io/zaproxy/zap2docker-stable:latest \
+            zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 4) Wait for ZAP to be up
+      # 4) Wait until ZAP’s HTTP API is up
       - name: Wait for ZAP
         run: |
           for i in {1..12}; do
-            curl --fail http://localhost:8080 || sleep 5
+            curl --fail http://localhost:8080 && break
+            sleep 5
           done
 
       # 5) Install Node.js & Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
       - name: Install Newman
         run: npm install -g newman
 
-      # 6) Run your Postman collection (with globals) through ZAP
+      # 6) Replay your Postman collection (with globals) through ZAP
       - name: Run Postman via ZAP proxy
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json \
             --proxy http://127.0.0.1:8080
 
-      # 7) Perform a full active scan in the same ZAP container
+      # 7) Kick off a full active scan in the same ZAP container
       - name: Run ZAP active scan
         run: |
-          ZAP_CID=$(docker ps --filter "name=zap" -q)
+          ZAP_CID=$(docker ps --filter name=zap -q)
           docker exec $ZAP_CID zap-full-scan.py \
             -t https://partners.waffarx.com \
             -z "script=add-signature;type=httpsender;engine=ECMAScript;file=/zap/scripts/add-signature.js" \
             -r zap-active-report.html
 
-      # 8) Tear down the ZAP container
+      # 8) Tear down ZAP
       - name: Stop ZAP
         run: docker stop zap
 
-      # 9) Upload the HTML report
+      # 9) Upload the HTML report so you can download it
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
