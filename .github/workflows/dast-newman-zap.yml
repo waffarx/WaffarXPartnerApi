@@ -1,4 +1,3 @@
-# .github/workflows/dast-newman-zap.yml
 name: "DAST: Newman + ZAP Proxy"
 
 on:
@@ -9,15 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out your code, Postman files, and ZAP script
+      # 1) Check out everything
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2) Pull the official ZAP stable image from Docker Hub
+      # 2) Pull the official ZAP stable image
       - name: Pull OWASP ZAP image
         run: docker pull zaproxy/zap-stable:latest
 
-      # 3) Start ZAP as a background daemon, mounting your script
+      # 3) Start ZAP in the background with your script mounted
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
@@ -27,7 +26,7 @@ jobs:
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 4) Wait until ZAP’s HTTP API is up
+      # 4) Wait until ZAP’s HTTP API is available
       - name: Wait for ZAP
         run: |
           for i in {1..12}; do
@@ -43,14 +42,16 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      # 6) Replay your Postman collection (with globals) through ZAP
+      # 6) Replay your Postman collection through ZAP by using HTTP_PROXY
       - name: Run Postman via ZAP proxy
+        env:
+          HTTP_PROXY: http://127.0.0.1:8080
+          HTTPS_PROXY: http://127.0.0.1:8080
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
-            --globals postman/workspace.postman_globals.json \
-            --proxy http://127.0.0.1:8080
+            --globals postman/workspace.postman_globals.json
 
-      # 7) Kick off a full active scan in the same ZAP container
+      # 7) Perform a full active scan in the same ZAP container
       - name: Run ZAP active scan
         run: |
           ZAP_CID=$(docker ps --filter name=zap -q)
@@ -59,11 +60,11 @@ jobs:
             -z "script=add-signature;type=httpsender;engine=ECMAScript;file=/zap/scripts/add-signature.js" \
             -r zap-active-report.html
 
-      # 8) Tear down ZAP
+      # 8) Shut down the ZAP container
       - name: Stop ZAP
         run: docker stop zap
 
-      # 9) Upload the HTML report so you can download it
+      # 9) Upload the HTML report
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
