@@ -1,9 +1,9 @@
 rules:
-  # SQL‐injection checks in C#
+  # Detect SQL‐injection sinks in C#
   - id: p/ci/csharp.lang.security.injection.sql-injection
 
-  # XSS checks in C#
+  # Detect XSS injection sinks in C#
   - id: p/ci/csharp.lang.security.injection.xss
 
-  # Insecure deserialization
+  # Detect insecure deserialization in C#
   - id: p/ci/csharp.lang.security.injection.insecure-deserialization
