@@ -1,35 +1,33 @@
-name: CodeQL Static Analysis
+name: "CodeQL Static Analysis"
 
-# 1️⃣ When to run
 on:
   push:
-    branches: [ main ]        # or your default branch
+    branches: [ main ]        # or your default branch name
   pull_request:
-    branches: [ main ]        # analyze PRs targeting main
+    branches: [ main ]
+  workflow_dispatch:          # allow manual runs
 
 jobs:
-  codeql:
+  analyze:
     name: Analyze with CodeQL
     runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ "csharp" ]
 
     steps:
-      # ✔️ Step 1: get your code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # ✔️ Step 2: init CodeQL for C#
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v2
+        uses: github/codeql-action/init@v3
         with:
-          languages: csharp
+          languages: ${{ matrix.language }}
 
-      # ✔️ Step 3: build your solution
-      - name: Build .NET solution
-        uses: actions/setup-dotnet@v3
-        with:
-          dotnet-version: '8.0.x'
-      - run: dotnet build --configuration Release
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+        # autobuild will detect and build your .NET solution automatically
 
-      # ✔️ Step 4: run the analysis
       - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v2
+        uses: github/codeql-action/analyze@v3
