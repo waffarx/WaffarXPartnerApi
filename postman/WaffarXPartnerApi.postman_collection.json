@@ -1,0 +1,771 @@
+{
+	"info": {
+		"_postman_id": "80964bbf-ce04-4df9-af90-7e93b71d85a7",
+		"name": "WaffarXPartnerApi",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "40122954",
+		"_collection_link": "https://waffarx-extension.postman.co/workspace/WaffarX~ae331584-16ab-454f-bfda-66f99d8acb4d/collection/40122954-80964bbf-ce04-4df9-af90-7e93b71d85a7?action=share&source=collection_link&creator=40122954"
+	},
+	"item": [
+		{
+			"name": "Search for product",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"SearchText\":\"iphone16\",\"PageNumber\":1,\"pageSize\":10,\"SortByPriceDsc\":true,\"Filter\":{\"Stores\":[],\"Brand\":\"\"}}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/search",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"search"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'https://localhost:5001/api/Valu/search' \\\r\n--header 'Content-Type: application/json' \\\r\n--data '{\r\n  \"SearchText\":\"Realme 14\",\r\n  \"ClientApiId\":\"9E102E81-2EDF-4C79-8EBA-25DD2B563281\",\r\n  \"isEnglish\": true,\r\n  \"PageNumber\":\"1\",\r\n  \"ItemCount\":\"30\",\r\n   \"Filter\": {\r\n    \"Stores\":[9125, 9041],\r\n    \"MinPrice\":1,\r\n    \"MaxPrice\":10000,\r\n    \"OfferId\":\"68094be714bc80efc32cefb6\"\r\n   }\r\n}\r\n\r\n'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get stores",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PageNumber\":1,\"PageSize\":20}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/getstores",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getstores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get store details",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{Server}}/valu/getstoredetails/391eb28b-189e-4d63-8905-b223d283fd39",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getstoredetails",
+						"391eb28b-189e-4d63-8905-b223d283fd39"
+					]
+				},
+				"description": "Generated from cURL: curl --location 'https://localhost:5001/api/Valu/search' \\\r\n--header 'Content-Type: application/json' \\\r\n--data '{\r\n  \"SearchText\":\"Realme 14\",\r\n  \"ClientApiId\":\"9E102E81-2EDF-4C79-8EBA-25DD2B563281\",\r\n  \"isEnglish\": true,\r\n  \"PageNumber\":\"1\",\r\n  \"ItemCount\":\"30\",\r\n   \"Filter\": {\r\n    \"Stores\":[9125, 9041],\r\n    \"MinPrice\":1,\r\n    \"MaxPrice\":10000,\r\n    \"OfferId\":\"68094be714bc80efc32cefb6\"\r\n   }\r\n}\r\n\r\n'"
+			},
+			"response": []
+		},
+		{
+			"name": "Get featured products",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"StoreId\":\"\",\"PageNumber\":1,\"PageSize\":10}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/getfeaturedproducts",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getfeaturedproducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get product",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{Server}}/valu/product/680f8acb14c99ae18d7931aa",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"product",
+						"680f8acb14c99ae18d7931aa"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Shopping Trip",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{Server}}/valu/shoppingtrip/productsearch/b694f32b-84c0-4dcc-8560-f28c2b8f2ad1/67f1fdaba5d15ba872298edc",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"shoppingtrip",
+						"productsearch",
+						"b694f32b-84c0-4dcc-8560-f28c2b8f2ad1",
+						"67f1fdaba5d15ba872298edc"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store search",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"StoreId\":\"B694F32B-84C0-4DCC-8560-F28C2B8F2AD1\",\"PageNumber\":1,\"PageSize\":50,\"MinPrice\":null,\"MaxPrice\":null,\"Category\":\"\",\"Brand\":\"E-Train\",\"SortByPriceDsc\":false}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/storesearch",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"storesearch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get store categories",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{Server}}/valu/getstorecategories/dfba913a-a1db-4da6-987e-839a3b8ffe17",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getstorecategories",
+						"dfba913a-a1db-4da6-987e-839a3b8ffe17"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get stores with products",
+			"request": {
+				"auth": {
+					"type": "noauth"
+				},
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PageNumber\":1,\"PageSize\":10,\"ProductsCount\":5}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/getstoreswithproducts",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getstoreswithproducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get offers products",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PageNumber\":\"1\",\"PageSize\":\"20\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/getoffersproducts",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getoffersproducts"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Get offer stores",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"PageNumber\":\"1\",\"PageSize\":\"20\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/getofferstores",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"getofferstores"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store brand search",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"SearchText\":\"de\",\"StoreId\":\"B694F32B-84C0-4DCC-8560-F28C2B8F2AD1\"}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/storebrandsearch",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"storebrandsearch"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Store search with filters",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Accept-Language",
+						"value": "en",
+						"type": "text"
+					},
+					{
+						"key": "wxc-id",
+						"value": "9E102E81-2EDF-4C79-8EBA-25DD2B563281",
+						"type": "text"
+					},
+					{
+						"key": "wxc-date",
+						"value": "{{wxc-date}}",
+						"type": "text"
+					},
+					{
+						"key": "wxc-auth",
+						"value": "{{wxc-auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\"StoreId\":\"B694F32B-84C0-4DCC-8560-F28C2B8F2AD1\",\"PageNumber\":1,\"PageSize\":50,\"SortByPriceDsc\":false}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{Server}}/valu/storesearchwithfilters",
+					"host": [
+						"{{Server}}"
+					],
+					"path": [
+						"valu",
+						"storesearchwithfilters"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					"const CryptoJS = require(\"crypto-js\")",
+					"const bodyContent = pm.request.body.raw ? pm.request.body.raw : \"\";",
+					"const data = bodyContent.toLocaleLowerCase().trim();",
+					"const hashedpayloadstring = CryptoJS.SHA256(data).toString();",
+					"",
+					"const dateTime = `${new Date().toISOString().split(\".\")[0]}Z`; // YYYY-mm-ddTHH:mm:ss.SSS",
+					"// const dateTime = '2025-05-01T12:34:56Z'",
+					"const formattedDateTime = dateTime.replaceAll(\"-\", \"\").replaceAll(\":\", \"\");",
+					"",
+					"const method = pm.request.method.toLocaleLowerCase();",
+					"const actionName = `/api/${pm.request.url.toString().split(\"/\").slice(1).join(\"/\").toLocaleLowerCase()}`;",
+					"const clientKey = \"Bv0fMtFoUVeRm4OElR57CVCGS4dtbNgJAVdZfwc+ct4kmcY5PzqswCbOm9gH3yi59IaiZPfT4V7LC3xOaDk+ZQ==\";",
+					"",
+					"console.log(pm.request.url.toString().split(\"/\"))",
+					"",
+					"const stringToSign = data ? `${method}-${actionName}-${clientKey}-${formattedDateTime}-${hashedpayloadstring}` : `${method}-${actionName}-${clientKey}-${formattedDateTime}`;",
+					"const secretKey = CryptoJS.enc.Utf8.parse(\"n6rntfyk0amdu7fjzj5u02xpp8adgv4c9dfngiw01z93v7mi31lq5qg8nzf7yjbopb4wnz5vyyzj82s9ld9evbtg4hrvm3z3sw9it41e3sgfj1k3dn7rrgx6vggd3pxkby86khxkjdcz1kjwz5r4yzvnnxeivsf9th6g5k1ou0vjck1jbcus50hfh7gp3utqy99oh1a9k2nz0xajbpr7rhz2mc3cdqjxskpyo93lmh69vraej4d5dd9h6cic8pi8e!@\");",
+					"const payloadHmac = CryptoJS.HmacSHA256(stringToSign, secretKey);",
+					"const SignedPayload = payloadHmac.toString();",
+					"",
+					"pm.globals.set(\"wxc-date\", dateTime);",
+					"pm.globals.set(\"wxc-auth\", SignedPayload);",
+					"",
+					"console.log(SignedPayload, stringToSign)"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "Server",
+			"value": "https://partners.waffarx.com/api",
+			"type": "string"
+		},
+		{
+			"key": "localhost",
+			"value": "https://localhost:7252/api",
+			"type": "string"
+		}
+	]
+}

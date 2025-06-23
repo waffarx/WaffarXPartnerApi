@@ -1,0 +1,69 @@
+{
+	"id": "b3ff1274-1a94-4521-85ce-ae409143ea85",
+	"values": [
+		{
+			"key": "localhost",
+			"value": "https://localhost:5001/api",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "Server",
+			"value": "https://dev-webapi.waffarx.com/api",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "CountryId",
+			"value": "67",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "Language",
+			"value": "en-US",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "InternalServer\n",
+			"value": "10.0.0.6",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "CIBUser",
+			"value": "5273c45e-2782-412e-8a7b-569fb7fc684d",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "NormalUser",
+			"value": "69add166-84fe-40dc-8e0f-6747c20dd36e",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "UnVerified User",
+			"value": "7516bc35e7d842e09afc46d2ac9411c7",
+			"type": "default",
+			"enabled": true
+		},
+		{
+			"key": "wxc-date",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		},
+		{
+			"key": "wxc-auth",
+			"value": "",
+			"type": "any",
+			"enabled": true
+		}
+	],
+	"name": "Globals",
+	"_postman_variable_scope": "globals",
+	"_postman_exported_at": "2025-06-23T22:03:44.510Z",
+	"_postman_exported_using": "Postman/11.50.1"
+}
