@@ -1,5 +1,6 @@
+# Move "rules:" all the way to the left, no spaces before it
 rules:
-  # Detect SQL‐injection sinks in C#
+  # Detect SQL-injection sinks in C#
   - id: p/ci/csharp.lang.security.injection.sql-injection
 
   # Detect XSS injection sinks in C#
