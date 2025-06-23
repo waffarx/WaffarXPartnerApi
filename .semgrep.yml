@@ -1,5 +1,9 @@
 rules:
-  - id: csharp.sql-injection
-  - id: csharp.xss
-  - id: csharp.insecure-deserialization
-  # …add any other C# rules you need from https://semgrep.dev/explore?lang=csharp
+  # SQL‐injection checks in C#
+  - id: p/ci/csharp.lang.security.injection.sql-injection
+
+  # XSS checks in C#
+  - id: p/ci/csharp.lang.security.injection.xss
+
+  # Insecure deserialization
+  - id: p/ci/csharp.lang.security.injection.insecure-deserialization

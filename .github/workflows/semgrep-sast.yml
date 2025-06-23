@@ -1,29 +1,30 @@
-name: Semgrep SAST
+name: “Semgrep SAST”
 
 on:
-  workflow_dispatch:  # ← only manual runs
+  workflow_dispatch:
 
 jobs:
   semgrep:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
+      - name: Check out code
         uses: actions/checkout@v3
 
-      - name: Setup Python 3.x
+      - name: Set up Python 3.x
         uses: actions/setup-python@v4
         with:
-          python-version: '3.x'       # ← this 'with:' must be indented under the 'uses' block
+          python-version: '3.x'
 
       - name: Install Semgrep
         run: pip install semgrep
 
       - name: Run Semgrep & emit SARIF
         run: |
-          semgrep --config .semgrep.yml \
-                  --sarif semgrep-report.sarif \
-                  .
+          semgrep \
+            --config .semgrep.yml \
+            --sarif semgrep-report.sarif \
+            .
 
       - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v2
