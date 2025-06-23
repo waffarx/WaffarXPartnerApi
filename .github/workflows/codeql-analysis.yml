@@ -1,0 +1,31 @@
+name: “CodeQL Static Analysis”
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    # Analyze PRs targeting main
+    branches: [ main ]
+
+jobs:
+  analyze:
+    name: Analyze (CodeQL)
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: csharp
+
+    - name: Build solution
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x'
+    - run: dotnet build --configuration Release
+
+    - name: Perform CodeQL analysis
+      uses: github/codeql-action/analyze@v2

@@ -18,6 +18,7 @@ public class ValuController : ControllerBase
 {
     private readonly IValuService _valuService;
 
+    /// <summary>
     public ValuController(IValuService valuService)
     {
         _valuService = valuService;
