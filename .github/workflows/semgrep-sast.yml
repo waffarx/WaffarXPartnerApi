@@ -1,44 +1,30 @@
-name: "Semgrep SAST"
+name: Semgrep SAST
 
 on:
-  push:
-    branches: [ main ]          # or 'master'
-  pull_request:
-    branches: [ main ]
+#  push:
+    #branches: [ main ]
+#  pull_request:
+#    branches: [ main ]
   workflow_dispatch:
 
 jobs:
   semgrep:
-    name: Run Semgrep Scan
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Setup Python 3.x
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.x'
+      - uses: actions/setup-python@v4
+        with: python-version: '3.x'
 
-      - name: Install Semgrep
-        run: pip install semgrep
+      - run: pip install semgrep
 
-      - name: Run Semgrep static analysis
+      - name: Run Semgrep & emit SARIF
         run: |
-          semgrep \
-            --config .semgrep.yml \
-            --sarif semgrep-report.sarif \
-            --report semgrep-report.html \
-            .
+          semgrep --config .semgrep.yml \
+                  --sarif semgrep-report.sarif \
+                  .
 
-      - name: Upload Semgrep SARIF to GitHub
+      - name: Upload SARIF to GitHub
         uses: github/codeql-action/upload-sarif@v2
         with:
           sarif_file: semgrep-report.sarif
-
-      - name: Publish HTML report artifact
-        uses: actions/upload-artifact@v4    # ← updated to v4
-        with:
-          name: semgrep-html-report
-          path: semgrep-report.html
