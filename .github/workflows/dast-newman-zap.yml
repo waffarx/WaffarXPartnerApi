@@ -1,4 +1,3 @@
-# .github/workflows/dast-newman-zap.yml
 name: "DAST: Newman + ZAP Proxy"
 
 on:
@@ -8,53 +7,59 @@ jobs:
   dast-proxy:
     runs-on: ubuntu-latest
 
+    services:
+      zap:
+        image: ghcr.io/zaproxy/zap2docker-stable:latest
+        ports: ["8080:8080"]
+        options: >-
+          --health-cmd="curl -s http://localhost:8080" 
+          --health-interval=5s 
+          --health-retries=12 
+        command: >
+          zap.sh -daemon -host 0.0.0.0 -port 8080 
+                 -config api.disablekey=true
+        # Mount your signature script into the service container
+        volumes:
+          - ./zap-scripts:/zap/scripts:ro
+
     steps:
+      # 1) Check out your code, Postman collection/globals, and script
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Pull OWASP ZAP Docker image
-        run: docker pull zaproxy/zap2docker-stable:2.14.0
-
-      - name: Start ZAP daemon
+      # 2) Wait for ZAP to be online
+      - name: Wait for ZAP service
         run: |
-          docker run -d --name zap \
-            -p 8080:8080 \
-            -v $PWD/zap-scripts:/zap/scripts:ro \
-            zaproxy/zap2docker-stable:2.14.0 \
-            zap.sh -daemon -host 0.0.0.0 -port 8080 \
-                   -config api.disablekey=true
-
-      - name: Wait for ZAP to start
-        run: |
-          for i in {1..10}; do
-            curl --fail http://localhost:8080 || sleep 3
+          for i in {1..12}; do
+            curl --fail http://127.0.0.1:8080 || sleep 5
           done
 
+      # 3) Install Node.js & Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'
-
+          node-version: "18"
       - name: Install Newman
         run: npm install -g newman
 
+      # 4) Drive your Postman collection through the ZAP proxy
       - name: Run Postman collection via ZAP proxy
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json \
             --proxy http://127.0.0.1:8080
 
-      - name: Run ZAP active scan
+      # 5) Perform a full active scan in the ZAP container
+      - name: Run ZAP full active scan
         run: |
-          ZAP_CID=$(docker ps --filter ancestor=zaproxy/zap2docker-stable:2.14.0 -q)
+          # find the service container ID by image
+          ZAP_CID=$(docker ps --filter "ancestor=ghcr.io/zaproxy/zap2docker-stable:latest" -q)
           docker exec $ZAP_CID zap-full-scan.py \
             -t https://partners.waffarx.com \
             -z "script=add-signature;type=httpsender;engine=ECMAScript;file=/zap/scripts/add-signature.js" \
             -r zap-active-report.html
 
-      - name: Stop ZAP
-        run: docker stop zap
-
+      # 6) Upload the HTML report
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
