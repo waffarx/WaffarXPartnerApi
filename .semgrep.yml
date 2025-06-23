@@ -1,0 +1,5 @@
+rules:
+  - id: csharp.sql-injection
+  - id: csharp.xss
+  - id: csharp.insecure-deserialization
+  # …add any other C# rules you need from https://semgrep.dev/explore?lang=csharp
