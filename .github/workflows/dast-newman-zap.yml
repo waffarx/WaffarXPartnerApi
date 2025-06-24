@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 10"
+name: "DAST: Newman + ZAP Proxy 11"
 
 on:
   workflow_dispatch:
@@ -24,6 +24,7 @@ jobs:
             zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true \
+                   -config connection.timeoutInSecs=60 \
                    -script /zap/scripts/add-signature.js
 
       - name: Wait for ZAP to be ready
@@ -50,19 +51,24 @@ jobs:
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      - name: Run ZAP full active scan
+      - name: Install zap-cli in ZAP container
+        run: docker exec zap pip install zapcli
+
+      - name: Run ZAP active scan via API
         run: |
-          ZAP_CID=$(docker ps --filter "name=zap" -q)
-          for i in {1..12}; do
-            docker exec $ZAP_CID curl --silent --fail http://localhost:8080 && break
-            sleep 5
-          done
-          docker exec $ZAP_CID zap-full-scan.py \
-            -t https://partners.waffarx.com \
-            -z "-config api.disablekey=true" \
-            -d \
-            -m 5 \
-            -r /zap/wrk/zap-active-report.html
+          # Wait for ZAP API to be fully ready
+          docker exec zap curl --silent --output /dev/null http://localhost:8080
+          
+          # Run active scan
+          docker exec zap zap-cli --zap-url http://localhost:8080 active-scan \
+            --scanners all \
+            --recursive \
+            https://partners.waffarx.com
+          
+          # Generate HTML report
+          docker exec zap zap-cli --zap-url http://localhost:8080 report \
+            -o /zap/wrk/zap-active-report.html \
+            -f html
 
       - name: Stop ZAP
         if: always()
