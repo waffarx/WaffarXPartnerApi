@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 12"
+name: "DAST: Newman + ZAP Proxy 13"
 
 on:
   workflow_dispatch:
@@ -51,24 +51,28 @@ jobs:
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      - name: Install zap-cli using virtual environment
+      - name: Install zap-cli in ZAP container
         run: |
-          docker exec zap python3 -m venv /zap/venv
-          docker exec zap /zap/venv/bin/pip install zapcli
+          # Workaround for Debian's externally managed environment
+          docker exec zap pip install --break-system-packages zapcli || \
+          docker exec zap pip install --user zapcli
 
       - name: Run ZAP active scan via API
         run: |
           # Wait for ZAP API to be fully ready
           docker exec zap curl --silent --output /dev/null http://localhost:8080
           
-          # Run active scan using virtual environment
-          docker exec zap /zap/venv/bin/zap-cli --zap-url http://localhost:8080 active-scan \
+          # Find zap-cli installation path
+          ZAP_CLI_PATH=$(docker exec zap sh -c "which zap-cli || echo '/root/.local/bin/zap-cli'")
+          
+          # Run active scan
+          docker exec zap $ZAP_CLI_PATH --zap-url http://localhost:8080 active-scan \
             --scanners all \
             --recursive \
             https://partners.waffarx.com
           
           # Generate HTML report
-          docker exec zap /zap/venv/bin/zap-cli --zap-url http://localhost:8080 report \
+          docker exec zap $ZAP_CLI_PATH --zap-url http://localhost:8080 report \
             -o /zap/wrk/zap-active-report.html \
             -f html
 
