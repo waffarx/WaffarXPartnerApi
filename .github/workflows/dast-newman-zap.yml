@@ -1,4 +1,4 @@
-name: DAST: Newman + ZAP Proxy 6
+name: "DAST: Newman + ZAP Proxy 6"
 on:
   workflow_dispatch:
 
