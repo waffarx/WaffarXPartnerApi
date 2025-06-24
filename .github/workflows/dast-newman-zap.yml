@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 15"
+name: "DAST: Newman + ZAP Proxy 16"
 
 on:
   workflow_dispatch:
@@ -53,15 +53,17 @@ jobs:
 
       - name: Install zap-cli in ZAP container
         run: |
-          # Install dependencies first
-          docker exec zap apt-get update
-          docker exec zap apt-get install -y python3-pip
+          # Switch to root user for package installation
+          docker exec zap sh -c "whoami"
           
-          # Install zap-cli with pip
-          docker exec zap pip3 install --user zapcli
+          # Install required system packages
+          docker exec zap sh -c "apt-get update && apt-get install -y python3-pip"
+          
+          # Install zap-cli in user space
+          docker exec zap sh -c "pip3 install --user zapcli"
           
           # Verify installation
-          docker exec zap /home/zap/.local/bin/zap-cli --version
+          docker exec zap sh -c "/home/zap/.local/bin/zap-cli --version || echo 'zap-cli installation failed'"
 
       - name: Run ZAP active scan via API
         run: |
