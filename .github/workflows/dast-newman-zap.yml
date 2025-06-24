@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 23"
+name: "DAST: Newman + ZAP Proxy 24"
 
 on:
   workflow_dispatch:
@@ -13,25 +13,24 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Pull ZAP Docker image
-        run: |
-          docker pull zaproxy/zap-stable:latest
-          echo "ZAP Docker image pulled successfully"
+        run: docker pull zaproxy/zap-stable:latest
 
       - name: Start ZAP daemon in Docker
         run: |
           mkdir -p zap-reports
+          chmod 777 zap-reports  # Ensure write permissions
           docker run -d --name zap \
             -p 8080:8080 \
             -v "${{ github.workspace }}/postman/add-signature.js:/zap/scripts/add-signature.js:ro" \
             -v "${{ github.workspace }}/zap-reports:/zap/wrk" \
             --memory="2g" \
+            --user root  # Run as root to avoid permission issues
             zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true \
                    -config connection.timeoutInSecs=120 \
                    -config scanner.threadPerHost=10 \
                    -script /zap/scripts/add-signature.js
-          echo "ZAP container started successfully"
 
       - name: Wait for ZAP to be ready
         run: |
@@ -50,9 +49,7 @@ jobs:
           node-version: '18'
 
       - name: Install Newman
-        run: |
-          npm install -g newman
-          echo "Newman installed successfully"
+        run: npm install -g newman
 
       - name: Run Postman collection via ZAP proxy
         env:
@@ -62,46 +59,31 @@ jobs:
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
-          echo "Postman collection executed successfully"
 
       - name: Prepare ZAP for scan
         run: |
-          echo "Preparing ZAP for scan..."
+          # Install required tools
+          docker exec zap apt-get update
+          docker exec zap apt-get install -y curl jq
           
-          # Install required tools with detailed logging
-          docker exec -u root zap sh -c "apt-get update" || echo "apt-get update failed"
-          docker exec -u root zap sh -c "apt-get install -y curl jq" || echo "Package installation failed"
-          
-          # Verify tools installation
-          docker exec zap curl --version || echo "curl not installed"
-          docker exec zap jq --version || echo "jq not installed"
-          
-          # Increase ZAP timeout settings
-          docker exec zap curl -s "http://localhost:8080/JSON/core/action/setOptionTimeoutInSecs/?apikey=&Integer=120" \
-            && echo "Timeout set to 120 seconds" \
-            || echo "Failed to set timeout"
-          
-          docker exec zap curl -s "http://localhost:8080/JSON/ascan/action/setOptionScanTimeoutInMins/?apikey=&Integer=50" \
-            && echo "Scan timeout set to 50 minutes" \
-            || echo "Failed to set scan timeout"
-          
-          echo "ZAP preparation completed"
+          # Set ZAP timeouts
+          docker exec zap curl -s "http://localhost:8080/JSON/core/action/setOptionTimeoutInSecs/?apikey=&Integer=120"
+          docker exec zap curl -s "http://localhost:8080/JSON/ascan/action/setOptionScanTimeoutInMins/?apikey=&Integer=50"
 
       - name: Run ZAP active scan via API
         run: |
           echo "Starting active scan..."
           
-          # Start active scan with detailed output
+          # Start scan
           scan_start=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/action/scan/?apikey=&url=https://partners.waffarx.com&recurse=true"')
           echo "Scan start response: $scan_start"
           
-          # Monitor scan progress
+          # Monitor progress
           start_time=$(date +%s)
-          timeout=$((60 * 50))  # 50 minutes timeout
+          timeout=$((60 * 50))
           last_status=0
           
           while true; do
-            # Check total elapsed time
             current_time=$(date +%s)
             elapsed=$((current_time - start_time))
             
@@ -110,7 +92,6 @@ jobs:
               break
             fi
             
-            # Get scan status with error handling
             status_output=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey="')
             status=$(echo "$status_output" | jq -r '.status' 2>/dev/null || echo "error")
             
@@ -123,7 +104,6 @@ jobs:
               continue
             fi
             
-            # Only log when status changes
             if [ "$status" != "$last_status" ]; then
               echo "Scan progress: $status%"
               last_status=$status
@@ -132,21 +112,29 @@ jobs:
             sleep 30
           done
           
-          # Generate HTML report
+          # Generate report with retries
           echo "Generating scan report..."
-          report_output=$(docker exec zap sh -c 'curl -s "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html 2>&1')
-          echo "Report generation: $report_output"
-          docker exec zap ls -l /zap/wrk || echo "Report directory not found"
+          for i in {1..3}; do
+            report_output=$(docker exec zap sh -c 'curl -s "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html 2>&1')
+            exit_code=$?
+            
+            if [ $exit_code -eq 0 ]; then
+              echo "Report generated successfully"
+              break
+            else
+              echo "Report generation attempt $i failed: $report_output"
+              sleep 5
+            fi
+          done
+          
+          # Final verification
+          docker exec zap sh -c '[ -f /zap/wrk/zap-active-report.html ] && echo "Report exists" || echo "Report missing"'
 
       - name: Stop ZAP
         if: always()
         run: |
-          if docker container inspect zap > /dev/null 2>&1; then
-            docker stop zap || echo "Failed to stop ZAP container"
-            echo "ZAP stopped successfully"
-          else
-            echo "ZAP container does not exist, skipping stop."
-          fi
+          docker stop zap || echo "Container stop failed"
+          docker rm zap || echo "Container removal failed"
 
       - name: Upload ZAP Active Report
         if: always()
@@ -155,11 +143,10 @@ jobs:
           name: zap-active-report
           path: zap-reports/zap-active-report.html
 
-      - name: Capture ZAP logs
+      - name: Upload diagnostic logs
         if: always()
-        run: |
-          if docker container inspect zap > /dev/null 2>&1; then
-            docker logs zap > zap-logs.txt 2>&1 || echo "Failed to capture ZAP logs"
-          else
-            echo "ZAP container not available for logs"
-          fi
+        uses: actions/upload-artifact@v4
+        with:
+          name: zap-diagnostic-logs
+          path: |
+            zap-reports/*
