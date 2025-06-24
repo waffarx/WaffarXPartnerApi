@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy"
+name: "DAST: Newman + ZAP Proxy 2"
 
 on:
   workflow_dispatch:
@@ -8,24 +8,30 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Pull in your code + Postman collection & globals
+      # 1) Checkout your repo (code, postman/, zap-scripts/)
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2) Pull the Docker Hub “stable” ZAP image
+      # 2) Create a host folder for ZAP’s reports
+      - name: Prepare report directory
+        run: mkdir -p zap-reports
+
+      # 3) Pull the official ZAP stable image
       - name: Pull OWASP ZAP image
         run: docker pull zaproxy/zap-stable:latest
 
-      # 3) Launch ZAP as a background daemon (no scripts mounted)
+      # 4) Start ZAP daemon, mounting your script + reports dir
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
             -p 8080:8080 \
+            -v $PWD/zap-scripts:/zap/scripts:ro \
+            -v $PWD/zap-reports:/zap/wrk \
             zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 4) Wait for ZAP to be ready
+      # 5) Wait until ZAP’s API is available
       - name: Wait for ZAP
         run: |
           for i in {1..12}; do
@@ -33,26 +39,25 @@ jobs:
             sleep 5
           done
 
-      # 5) Install Node & Newman
+      # 6) Install Node.js & Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: "18"
+          node-version: '18'
       - name: Install Newman
         run: npm install -g newman
 
-      # 6) Run your signed Postman collection through ZAP proxy
-      #    (Postman pre-request scripts in the collection already add wxc-date/wxc-auth)
+      # 7) Replay your signed Postman collection through ZAP
       - name: Run Postman via ZAP proxy
         env:
           HTTP_PROXY: http://127.0.0.1:8080
           HTTPS_PROXY: http://127.0.0.1:8080
-          NODE_TLS_REJECT_UNAUTHORIZED: "0"
+          NODE_TLS_REJECT_UNAUTHORIZED: '0'
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      # 7) Perform a full active scan in the same ZAP container
+      # 8) Perform a full active scan (writes zap-active-report.html into /zap/wrk)
       - name: Run ZAP active scan
         run: |
           ZAP_CID=$(docker ps --filter name=zap -q)
@@ -60,13 +65,13 @@ jobs:
             -t https://partners.waffarx.com \
             -r zap-active-report.html
 
-      # 8) Tear down ZAP
+      # 9) Stop ZAP
       - name: Stop ZAP
         run: docker stop zap
 
-      # 9) Upload the HTML report
+      # 🔟 Upload the HTML report from your host zap-reports folder
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
           name: zap-active-report
-          path: zap-active-report.html
+          path: zap-reports/zap-active-report.html
