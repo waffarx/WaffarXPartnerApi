@@ -718,7 +718,6 @@
 				"type": "text/javascript",
 				"packages": {},
 				"exec": [
-					"const CryptoJS = require(\"crypto-js\")",
 					"const bodyContent = pm.request.body.raw ? pm.request.body.raw : \"\";",
 					"const data = bodyContent.toLocaleLowerCase().trim();",
 					"const hashedpayloadstring = CryptoJS.SHA256(data).toString();",
