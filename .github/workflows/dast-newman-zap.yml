@@ -8,7 +8,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out everything
+      # 1) Check out your code, Postman files, and ZAP script
       - name: Checkout repo
         uses: actions/checkout@v3
 
@@ -16,7 +16,7 @@ jobs:
       - name: Pull OWASP ZAP image
         run: docker pull zaproxy/zap-stable:latest
 
-      # 3) Start ZAP in the background with your script mounted
+      # 3) Start ZAP in the background with your signature script mounted
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
@@ -26,7 +26,7 @@ jobs:
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 4) Wait until ZAP’s HTTP API is available
+      # 4) Wait until ZAP’s API is responding
       - name: Wait for ZAP
         run: |
           for i in {1..12}; do
@@ -42,15 +42,15 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      # 6) Replay your Postman collection through ZAP by using HTTP_PROXY
+      # 6) Replay your Postman collection through ZAP proxy (skip TLS validation)
       - name: Run Postman via ZAP proxy
         env:
           HTTP_PROXY: http://127.0.0.1:8080
           HTTPS_PROXY: http://127.0.0.1:8080
+          NODE_TLS_REJECT_UNAUTHORIZED: '0'
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
-            --insecure
 
       # 7) Perform a full active scan in the same ZAP container
       - name: Run ZAP active scan
@@ -61,11 +61,11 @@ jobs:
             -z "script=add-signature;type=httpsender;engine=ECMAScript;file=/zap/scripts/add-signature.js" \
             -r zap-active-report.html
 
-      # 8) Shut down the ZAP container
+      # 8) Tear down the ZAP container
       - name: Stop ZAP
         run: docker stop zap
 
-      # 9) Upload the HTML report
+      # 9) Upload the resulting HTML report
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
