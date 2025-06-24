@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 22"
+name: "DAST: Newman + ZAP Proxy 23"
 
 on:
   workflow_dispatch:
@@ -6,45 +6,54 @@ on:
 jobs:
   dast-proxy:
     runs-on: ubuntu-latest
-
-    services:
-      zap:
-        image: zaproxy/zap-stable:latest
-        ports: ["8080:8080"]
-        options: >-
-          --health-cmd='curl -s http://localhost:8080 || exit 1'
-          --health-interval=10s
-          --health-retries=12
-        volumes:
-          - ./postman/add-signature.js:/zap/scripts/add-signature.js:ro
-          - ${{ github.workspace }}/zap-reports:/zap/wrk
+    timeout-minutes: 60
 
     steps:
-      # 1) Checkout code + Postman assets + script
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # 2) Ensure report folder exists on host
-      - name: Prepare report directory
-        run: mkdir -p zap-reports
+      - name: Pull ZAP Docker image
+        run: |
+          docker pull zaproxy/zap-stable:latest
+          echo "ZAP Docker image pulled successfully"
 
-      # 3) Wait for ZAP’s API to become ready
+      - name: Start ZAP daemon in Docker
+        run: |
+          mkdir -p zap-reports
+          docker run -d --name zap \
+            -p 8080:8080 \
+            -v "${{ github.workspace }}/postman/add-signature.js:/zap/scripts/add-signature.js:ro" \
+            -v "${{ github.workspace }}/zap-reports:/zap/wrk" \
+            --memory="2g" \
+            zaproxy/zap-stable:latest \
+            zap.sh -daemon -host 0.0.0.0 -port 8080 \
+                   -config api.disablekey=true \
+                   -config connection.timeoutInSecs=120 \
+                   -config scanner.threadPerHost=10 \
+                   -script /zap/scripts/add-signature.js
+          echo "ZAP container started successfully"
+
       - name: Wait for ZAP to be ready
         run: |
           for i in {1..24}; do
-            curl --silent --fail http://127.0.0.1:8080 && break
+            if curl --silent --fail http://127.0.0.1:8080; then
+              echo "ZAP is ready"
+              break
+            fi
+            echo "Waiting for ZAP to start (attempt $i/24)..."
             sleep 5
           done
 
-      # 4) Install Node.js and Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
-      - name: Install Newman
-        run: npm install -g newman
 
-      # 5) Run your Postman collection through the ZAP proxy
+      - name: Install Newman
+        run: |
+          npm install -g newman
+          echo "Newman installed successfully"
+
       - name: Run Postman collection via ZAP proxy
         env:
           HTTP_PROXY: http://127.0.0.1:8080
@@ -53,32 +62,104 @@ jobs:
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
+          echo "Postman collection executed successfully"
 
-      # 6) Kick off a full active scan inside the ZAP container
+      - name: Prepare ZAP for scan
+        run: |
+          echo "Preparing ZAP for scan..."
+          
+          # Install required tools with detailed logging
+          docker exec -u root zap sh -c "apt-get update" || echo "apt-get update failed"
+          docker exec -u root zap sh -c "apt-get install -y curl jq" || echo "Package installation failed"
+          
+          # Verify tools installation
+          docker exec zap curl --version || echo "curl not installed"
+          docker exec zap jq --version || echo "jq not installed"
+          
+          # Increase ZAP timeout settings
+          docker exec zap curl -s "http://localhost:8080/JSON/core/action/setOptionTimeoutInSecs/?apikey=&Integer=120" \
+            && echo "Timeout set to 120 seconds" \
+            || echo "Failed to set timeout"
+          
+          docker exec zap curl -s "http://localhost:8080/JSON/ascan/action/setOptionScanTimeoutInMins/?apikey=&Integer=50" \
+            && echo "Scan timeout set to 50 minutes" \
+            || echo "Failed to set scan timeout"
+          
+          echo "ZAP preparation completed"
+
       - name: Run ZAP active scan via API
         run: |
-          ZAP_CID=$(docker ps --filter "ancestor=zaproxy/zap-stable" -q)
-          # wait again just in case
-          for i in {1..12}; do
-            docker exec $ZAP_CID curl --silent --fail http://localhost:8080 && break
-            sleep 5
+          echo "Starting active scan..."
+          
+          # Start active scan with detailed output
+          scan_start=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/action/scan/?apikey=&url=https://partners.waffarx.com&recurse=true"')
+          echo "Scan start response: $scan_start"
+          
+          # Monitor scan progress
+          start_time=$(date +%s)
+          timeout=$((60 * 50))  # 50 minutes timeout
+          last_status=0
+          
+          while true; do
+            # Check total elapsed time
+            current_time=$(date +%s)
+            elapsed=$((current_time - start_time))
+            
+            if [ $elapsed -ge $timeout ]; then
+              echo "Scan timed out after 50 minutes"
+              break
+            fi
+            
+            # Get scan status with error handling
+            status_output=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey="')
+            status=$(echo "$status_output" | jq -r '.status' 2>/dev/null || echo "error")
+            
+            if [[ "$status" == "100" ]]; then
+              echo "Scan completed successfully"
+              break
+            elif [[ "$status" == "error" ]]; then
+              echo "Error retrieving scan status: $status_output"
+              sleep 10
+              continue
+            fi
+            
+            # Only log when status changes
+            if [ "$status" != "$last_status" ]; then
+              echo "Scan progress: $status%"
+              last_status=$status
+            fi
+            
+            sleep 30
           done
-          docker exec $ZAP_CID zap-full-scan.py \
-            -t https://partners.waffarx.com \
-            -z "-config api.disablekey=true" \
-            -d \
-            -m 5 \
-            -r /zap/wrk/zap-active-report.html \
-            -I
+          
+          # Generate HTML report
+          echo "Generating scan report..."
+          report_output=$(docker exec zap sh -c 'curl -s "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html 2>&1')
+          echo "Report generation: $report_output"
+          docker exec zap ls -l /zap/wrk || echo "Report directory not found"
 
-      # 7) Always stop ZAP when we’re done (or on failure)
       - name: Stop ZAP
         if: always()
-        run: docker stop zap || true
+        run: |
+          if docker container inspect zap > /dev/null 2>&1; then
+            docker stop zap || echo "Failed to stop ZAP container"
+            echo "ZAP stopped successfully"
+          else
+            echo "ZAP container does not exist, skipping stop."
+          fi
 
-      # 8) Upload the HTML report
       - name: Upload ZAP Active Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: zap-active-report
           path: zap-reports/zap-active-report.html
+
+      - name: Capture ZAP logs
+        if: always()
+        run: |
+          if docker container inspect zap > /dev/null 2>&1; then
+            docker logs zap > zap-logs.txt 2>&1 || echo "Failed to capture ZAP logs"
+          else
+            echo "ZAP container not available for logs"
+          fi
