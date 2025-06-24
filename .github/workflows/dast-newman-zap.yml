@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 17"
+name: "DAST: Newman + ZAP Proxy 18"
 
 on:
   workflow_dispatch:
@@ -56,23 +56,24 @@ jobs:
           # Wait for ZAP API to be fully ready
           sleep 30
           
-          # Install required tools in container
-          docker exec zap apt-get update
-          docker exec zap apt-get install -y curl jq
+          # Install required tools as root
+          docker exec -u root zap sh -c "apt-get update && apt-get install -y curl jq"
           
           # Run active scan using ZAP API directly
-          docker exec zap curl "http://localhost:8080/JSON/ascan/action/scan/?apikey=&url=https://partners.waffarx.com&recurse=true&scanPolicyName=&method=&postData=&contextId="
+          docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/action/scan/?apikey=&url=https://partners.waffarx.com&recurse=true"'
           
           # Wait for scan to complete
           while true; do
-            status=$(docker exec zap curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey=" | jq -r .status)
-            [[ "$status" == "100" ]] && break
+            status=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey=" | jq -r .status')
+            if [[ "$status" == "100" ]]; then
+              break
+            fi
             echo "Scan progress: $status%"
             sleep 10
           done
           
           # Generate HTML report
-          docker exec zap curl "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html
+          docker exec zap sh -c 'curl -s "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html'
 
       - name: Stop ZAP
         if: always()
