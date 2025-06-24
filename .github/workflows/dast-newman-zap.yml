@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 13"
+name: "DAST: Newman + ZAP Proxy 14"
 
 on:
   workflow_dispatch:
@@ -56,25 +56,25 @@ jobs:
           # Workaround for Debian's externally managed environment
           docker exec zap pip install --break-system-packages zapcli || \
           docker exec zap pip install --user zapcli
+          
+          # Add zap-cli to PATH
+          docker exec zap sh -c 'echo "export PATH=\$PATH:/home/zap/.local/bin" >> ~/.bashrc'
 
       - name: Run ZAP active scan via API
         run: |
           # Wait for ZAP API to be fully ready
           docker exec zap curl --silent --output /dev/null http://localhost:8080
           
-          # Find zap-cli installation path
-          ZAP_CLI_PATH=$(docker exec zap sh -c "which zap-cli || echo '/root/.local/bin/zap-cli'")
-          
-          # Run active scan
-          docker exec zap $ZAP_CLI_PATH --zap-url http://localhost:8080 active-scan \
+          # Run active scan as zap user
+          docker exec -u zap zap sh -c "zap-cli --zap-url http://localhost:8080 active-scan \
             --scanners all \
             --recursive \
-            https://partners.waffarx.com
+            https://partners.waffarx.com"
           
           # Generate HTML report
-          docker exec zap $ZAP_CLI_PATH --zap-url http://localhost:8080 report \
+          docker exec -u zap zap sh -c "zap-cli --zap-url http://localhost:8080 report \
             -o /zap/wrk/zap-active-report.html \
-            -f html
+            -f html"
 
       - name: Stop ZAP
         if: always()
