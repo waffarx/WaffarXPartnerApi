@@ -1,51 +1,6 @@
-name: "CodeQL Advanced Static Analysis"
-
-on:
-  push:
-#    branches: [ main ]
-#  pull_request:
-#    branches: [ main ]
-  workflow_dispatch:
-
-jobs:
-  analyze:
-    name: Analyze with CodeQL
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: [ "csharp" ]
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-        with:
-          fetch-depth: 2  # Needed for accurate diff analysis
-
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: ${{ matrix.language }}
-          queries: +security-extended,security-and-quality  # Enhanced query suites
-          config-file: ./.github/codeql/codeql-config.yml  # Custom config path
-
-      - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
-
-      - name: Perform CodeQL analysis
-        uses: github/codeql-action/analyze@v3
-        with:
-          category: "/language:${{ matrix.language }}"
-          upload: true
-          
-      - name: Advanced C# Analysis
-        if: matrix.language == 'csharp'
-        run: |
-          # Install additional analyzers
-          dotnet tool install --global SecurityCodeScan.VS2019
-          
-          # Run specialized security scanners
-          dotnet build /p:SecurityCodeScanConfiguration=All
-          dotnet sonarscanner begin /k:"Your_Project_Key" /d:sonar.login=${{ secrets.SONAR_TOKEN }}
-          dotnet build
-          dotnet sonarscanner end /d:sonar.login=${{ secrets.SONAR_TOKEN }}
+disable-default-queries: false
+queries:
+  - uses: ./.github/codeql/custom-queries
+paths-ignore:
+  - '**/test/**'
+  - '**/generated/**'
