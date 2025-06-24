@@ -53,28 +53,27 @@ jobs:
 
       - name: Install zap-cli in ZAP container
         run: |
-          # Workaround for Debian's externally managed environment
-          docker exec zap pip install --break-system-packages zapcli || \
+          # Install zap-cli in user space
           docker exec zap pip install --user zapcli
           
-          # Add zap-cli to PATH
-          docker exec zap sh -c 'echo "export PATH=\$PATH:/home/zap/.local/bin" >> ~/.bashrc'
+          # Verify installation
+          docker exec zap sh -c '/home/zap/.local/bin/zap-cli --version || echo "zap-cli not found"'
 
       - name: Run ZAP active scan via API
         run: |
           # Wait for ZAP API to be fully ready
           docker exec zap curl --silent --output /dev/null http://localhost:8080
           
-          # Run active scan as zap user
-          docker exec -u zap zap sh -c "zap-cli --zap-url http://localhost:8080 active-scan \
+          # Run active scan with full path to zap-cli
+          docker exec -u zap zap /home/zap/.local/bin/zap-cli --zap-url http://localhost:8080 active-scan \
             --scanners all \
             --recursive \
-            https://partners.waffarx.com"
+            https://partners.waffarx.com
           
           # Generate HTML report
-          docker exec -u zap zap sh -c "zap-cli --zap-url http://localhost:8080 report \
+          docker exec -u zap zap /home/zap/.local/bin/zap-cli --zap-url http://localhost:8080 report \
             -o /zap/wrk/zap-active-report.html \
-            -f html"
+            -f html
 
       - name: Stop ZAP
         if: always()
