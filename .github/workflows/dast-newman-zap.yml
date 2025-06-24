@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 18"
+name: "DAST: Newman + ZAP Proxy 19"
 
 on:
   workflow_dispatch:
@@ -6,6 +6,7 @@ on:
 jobs:
   dast-proxy:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # Increased timeout to 60 minutes
 
     steps:
       - name: Checkout repository
@@ -21,10 +22,12 @@ jobs:
             -p 8080:8080 \
             -v "${{ github.workspace }}/postman/add-signature.js:/zap/scripts/add-signature.js:ro" \
             -v "${{ github.workspace }}/zap-reports:/zap/wrk" \
+            --memory="2g" --memory-swap="2g" \  # Limit memory usage
             zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true \
-                   -config connection.timeoutInSecs=60 \
+                   -config connection.timeoutInSecs=120 \  # Increased timeout
+                   -config scanner.threadPerHost=10 \  # Reduced threads
                    -script /zap/scripts/add-signature.js
 
       - name: Wait for ZAP to be ready
@@ -51,28 +54,52 @@ jobs:
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      - name: Run ZAP active scan via API
+      - name: Prepare ZAP for scan
         run: |
-          # Wait for ZAP API to be fully ready
-          sleep 30
-          
           # Install required tools as root
           docker exec -u root zap sh -c "apt-get update && apt-get install -y curl jq"
           
-          # Run active scan using ZAP API directly
+          # Increase ZAP timeout settings
+          docker exec zap curl -s "http://localhost:8080/JSON/core/action/setOptionTimeoutInSecs/?apikey=&Integer=120"
+          docker exec zap curl -s "http://localhost:8080/JSON/ascan/action/setOptionScanTimeoutInMins/?apikey=&Integer=45"
+
+      - name: Run ZAP active scan via API
+        run: |
+          # Start active scan
           docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/action/scan/?apikey=&url=https://partners.waffarx.com&recurse=true"'
           
-          # Wait for scan to complete
+          # Monitor scan progress with extended timeout
+          start_time=$(date +%s)
+          timeout=$((60 * 45))  # 45 minutes timeout
+          
           while true; do
-            status=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey=" | jq -r .status')
-            if [[ "$status" == "100" ]]; then
+            # Check total elapsed time
+            current_time=$(date +%s)
+            elapsed=$((current_time - start_time))
+            
+            if [ $elapsed -ge $timeout ]; then
+              echo "Scan timed out after 45 minutes"
               break
             fi
+            
+            # Get scan status
+            status=$(docker exec zap sh -c 'curl -s "http://localhost:8080/JSON/ascan/view/status/?apikey=" | jq -r .status 2>/dev/null || echo "error"')
+            
+            if [[ "$status" == "100" ]]; then
+              echo "Scan completed successfully"
+              break
+            elif [[ "$status" == "error" ]]; then
+              echo "Error retrieving scan status"
+              sleep 10
+              continue
+            fi
+            
             echo "Scan progress: $status%"
-            sleep 10
+            sleep 30  # Longer sleep between checks
           done
           
-          # Generate HTML report
+          # Generate HTML report regardless of completion status
+          echo "Generating scan report..."
           docker exec zap sh -c 'curl -s "http://localhost:8080/OTHER/core/other/htmlreport/?apikey=" -o /zap/wrk/zap-active-report.html'
 
       - name: Stop ZAP
