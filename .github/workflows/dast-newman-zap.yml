@@ -50,6 +50,7 @@ jobs:
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
+            --insecure
 
       # 7) Perform a full active scan in the same ZAP container
       - name: Run ZAP active scan
