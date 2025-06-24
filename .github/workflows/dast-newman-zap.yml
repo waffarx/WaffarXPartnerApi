@@ -1,4 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 19"
+name: "DAST: Newman + ZAP Proxy 20"
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
 jobs:
   dast-proxy:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Increased timeout to 60 minutes
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -22,12 +22,12 @@ jobs:
             -p 8080:8080 \
             -v "${{ github.workspace }}/postman/add-signature.js:/zap/scripts/add-signature.js:ro" \
             -v "${{ github.workspace }}/zap-reports:/zap/wrk" \
-            --memory="2g" --memory-swap="2g" \  # Limit memory usage
+            --memory="2g" \
             zaproxy/zap-stable:latest \
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true \
-                   -config connection.timeoutInSecs=120 \  # Increased timeout
-                   -config scanner.threadPerHost=10 \  # Reduced threads
+                   -config connection.timeoutInSecs=120 \
+                   -config scanner.threadPerHost=10 \
                    -script /zap/scripts/add-signature.js
 
       - name: Wait for ZAP to be ready
@@ -95,7 +95,7 @@ jobs:
             fi
             
             echo "Scan progress: $status%"
-            sleep 30  # Longer sleep between checks
+            sleep 30
           done
           
           # Generate HTML report regardless of completion status
@@ -104,7 +104,12 @@ jobs:
 
       - name: Stop ZAP
         if: always()
-        run: docker stop zap
+        run: |
+          if docker container inspect zap > /dev/null 2>&1; then
+            docker stop zap
+          else
+            echo "ZAP container does not exist, skipping stop."
+          fi
 
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
