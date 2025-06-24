@@ -1,5 +1,4 @@
-# .github/workflows/dast-newman-zap.yml
-name: "DAST: Newman + ZAP Proxy 3"
+name: "DAST: Newman + ZAP Proxy 5"
 
 on:
   workflow_dispatch:
@@ -9,15 +8,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Check out your code (including postman/ and zap-scripts/)
+      # 1) Check out your repo (code, postman/, zap-scripts/)
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2) Prepare a folder on the host for ZAP to write its report
+      # 2) Prepare a host folder for ZAP to write its report
       - name: Prepare report directory
         run: mkdir -p zap-reports
 
-      # 3) Pull the official ZAP stable image from Docker Hub
+      # 3) Pull the official ZAP stable image
       - name: Pull OWASP ZAP image
         run: docker pull zaproxy/zap-stable:latest
 
@@ -32,8 +31,8 @@ jobs:
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 5) Wait for ZAP’s API to become available
-      - name: Wait for ZAP
+      # 5) Wait for ZAP’s API on the host to become available
+      - name: Wait for ZAP (host)
         run: |
           for i in {1..12}; do
             curl --fail http://localhost:8080 && break
@@ -58,23 +57,28 @@ jobs:
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      # 8) Perform a full active scan in the same ZAP container,
-      #    with debug output (-d) to avoid GitHub’s 10-minute timeout,
-      #    and spider capped to 5 minutes (-m 5)
+      # 8) Perform a full active scan inside the ZAP container
       - name: Run ZAP active scan
         run: |
           ZAP_CID=$(docker ps --filter name=zap -q)
-          docker exec $ZAP_CID zap-full-scan.py \
-            -t https://partners.waffarx.com \
-            -d \
-            -m 5 \
-            -r zap-active-report.html
+          
+          # Wait for ZAP’s API inside the container
+          for i in {1..12}; do
+            docker exec $ZAP_CID curl --fail http://localhost:8080 || sleep 5
+          done
 
-      # 9) Stop and remove the ZAP container
+          # Execute full scan, outputting report to the mounted /zap/wrk
+          docker exec $ZAP_CID zap-full-scan.py \
+            -t https://partners.waffarx.com/health \
+            -d \                           # debug output to avoid idle timeout
+            -m 5 \                         # cap spider at 5 minutes
+            -r zap-active-report.html     # writes into /zap/wrk
+
+      # 9) Stop the ZAP container
       - name: Stop ZAP
         run: docker stop zap
 
-      # 🔟 Upload the generated HTML report as an artifact
+      # 10) Upload the HTML report from zap-reports/
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
