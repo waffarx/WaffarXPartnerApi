@@ -1,4 +1,5 @@
-name: "DAST: Newman + ZAP Proxy 2"
+# .github/workflows/dast-newman-zap.yml
+name: "DAST: Newman + ZAP Proxy 3"
 
 on:
   workflow_dispatch:
@@ -8,19 +9,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1) Checkout your repo (code, postman/, zap-scripts/)
+      # 1) Check out your code (including postman/ and zap-scripts/)
       - name: Checkout repo
         uses: actions/checkout@v3
 
-      # 2) Create a host folder for ZAP’s reports
+      # 2) Prepare a folder on the host for ZAP to write its report
       - name: Prepare report directory
         run: mkdir -p zap-reports
 
-      # 3) Pull the official ZAP stable image
+      # 3) Pull the official ZAP stable image from Docker Hub
       - name: Pull OWASP ZAP image
         run: docker pull zaproxy/zap-stable:latest
 
-      # 4) Start ZAP daemon, mounting your script + reports dir
+      # 4) Start ZAP in daemon mode, mounting your scripts and report dir
       - name: Start ZAP daemon
         run: |
           docker run -d --name zap \
@@ -31,7 +32,7 @@ jobs:
             zap.sh -daemon -host 0.0.0.0 -port 8080 \
                    -config api.disablekey=true
 
-      # 5) Wait until ZAP’s API is available
+      # 5) Wait for ZAP’s API to become available
       - name: Wait for ZAP
         run: |
           for i in {1..12}; do
@@ -47,7 +48,7 @@ jobs:
       - name: Install Newman
         run: npm install -g newman
 
-      # 7) Replay your signed Postman collection through ZAP
+      # 7) Replay your signed Postman collection through the ZAP proxy
       - name: Run Postman via ZAP proxy
         env:
           HTTP_PROXY: http://127.0.0.1:8080
@@ -57,19 +58,23 @@ jobs:
           newman run postman/WaffarXPartnerApi.postman_collection.json \
             --globals postman/workspace.postman_globals.json
 
-      # 8) Perform a full active scan (writes zap-active-report.html into /zap/wrk)
+      # 8) Perform a full active scan in the same ZAP container,
+      #    with debug output (-d) to avoid GitHub’s 10-minute timeout,
+      #    and spider capped to 5 minutes (-m 5)
       - name: Run ZAP active scan
         run: |
           ZAP_CID=$(docker ps --filter name=zap -q)
           docker exec $ZAP_CID zap-full-scan.py \
             -t https://partners.waffarx.com \
+            -d \
+            -m 5 \
             -r zap-active-report.html
 
-      # 9) Stop ZAP
+      # 9) Stop and remove the ZAP container
       - name: Stop ZAP
         run: docker stop zap
 
-      # 🔟 Upload the HTML report from your host zap-reports folder
+      # 🔟 Upload the generated HTML report as an artifact
       - name: Upload ZAP Active Report
         uses: actions/upload-artifact@v4
         with:
