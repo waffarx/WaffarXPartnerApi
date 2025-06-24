@@ -1,5 +1,4 @@
-name: "DAST: Newman + ZAP Proxy 5"
-
+name: DAST: Newman + ZAP Proxy 6
 on:
   workflow_dispatch:
 
@@ -7,79 +6,66 @@ jobs:
   dast-proxy:
     runs-on: ubuntu-latest
 
-    steps:
-      # 1) Check out your repo (code, postman/, zap-scripts/)
-      - name: Checkout repo
-        uses: actions/checkout@v3
+    services:
+      zap:
+        image: owasp/zap2docker-stable
+        ports: ["8080:8080"]
+        options: >-
+          --health-cmd='curl -s http://localhost:8080 || exit 1'
+          --health-interval=10s
+          --health-retries=12
+        volumes:
+          - ./postman/add-signature.js:/zap/scripts/add-signature.js
+        command: >
+          zap.sh -daemon -host 0.0.0.0 -port 8080 -config api.disablekey=true
+          -script /zap/scripts/add-signature.js
 
-      # 2) Prepare a host folder for ZAP to write its report
+    steps:
       - name: Prepare report directory
         run: mkdir -p zap-reports
 
-      # 3) Pull the official ZAP stable image
-      - name: Pull OWASP ZAP image
-        run: docker pull zaproxy/zap-stable:latest
+      - name: Checkout repository
+        uses: actions/checkout@v3
 
-      # 4) Start ZAP in daemon mode, mounting your scripts and report dir
-      - name: Start ZAP daemon
+      - name: Wait for ZAP to start
         run: |
-          docker run -d --name zap \
-            -p 8080:8080 \
-            -v $PWD/zap-scripts:/zap/scripts:ro \
-            -v $PWD/zap-reports:/zap/wrk \
-            zaproxy/zap-stable:latest \
-            zap.sh -daemon -host 0.0.0.0 -port 8080 \
-                   -config api.disablekey=true
-
-      # 5) Wait for ZAP’s API on the host to become available
-      - name: Wait for ZAP (host)
-        run: |
-          for i in {1..12}; do
-            curl --fail http://localhost:8080 && break
+          for i in {1..24}; do
+            curl --silent --fail http://127.0.0.1:8080 && break
             sleep 5
           done
 
-      # 6) Install Node.js & Newman
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
+
       - name: Install Newman
         run: npm install -g newman
 
-      # 7) Replay your signed Postman collection through the ZAP proxy
       - name: Run Postman via ZAP proxy
-        env:
-          HTTP_PROXY: http://127.0.0.1:8080
-          HTTPS_PROXY: http://127.0.0.1:8080
-          NODE_TLS_REJECT_UNAUTHORIZED: '0'
         run: |
           newman run postman/WaffarXPartnerApi.postman_collection.json \
-            --globals postman/workspace.postman_globals.json
+            --globals postman/workspace.postman_globals.json \
+            --proxy http://127.0.0.1:8080
 
-      # 8) Perform a full active scan inside the ZAP container
       - name: Run ZAP active scan
         run: |
-          ZAP_CID=$(docker ps --filter name=zap -q)
-          
-          # Wait for ZAP’s API inside the container
+          ZAP_CID=$(docker ps --filter "ancestor=owasp/zap2docker-stable" -q)
           for i in {1..12}; do
-            docker exec $ZAP_CID curl --fail http://localhost:8080 || sleep 5
+            docker exec $ZAP_CID curl --fail http://localhost:8080 && break
+            sleep 5
           done
-
-          # Execute full scan, outputting report to the mounted /zap/wrk
           docker exec $ZAP_CID zap-full-scan.py \
-            -t https://partners.waffarx.com/health \
-            -d \                           # debug output to avoid idle timeout
-            -m 5 \                         # cap spider at 5 minutes
-            -r zap-active-report.html     # writes into /zap/wrk
+            -t https://partners.waffarx.com \
+            -z "-config api.disablekey=true" \
+            -d \
+            -m 5 \
+            -r /zap/wrk/zap-reports/zap-active-report.html
 
-      # 9) Stop the ZAP container
       - name: Stop ZAP
-        run: docker stop zap
+        run: docker stop $ZAP_CID
 
-      # 10) Upload the HTML report from zap-reports/
-      - name: Upload ZAP Active Report
+      - name: Upload ZAP HTML report
         uses: actions/upload-artifact@v4
         with:
           name: zap-active-report
